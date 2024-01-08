@@ -137,7 +137,7 @@ if ($controls->is_action('test') || $controls->is_action('save') || $controls->i
         $email['editor'] = $editor_type;
         $email['private'] = $controls->data['private'];
         $email['message_text'] = $controls->data['message_text'];
-        if ($controls->is_action('send')) {
+        if ($controls->is_action('send') || $controls->is_action('save')) {
             $email['send_on'] = time();
         } else {
             // Patch, empty on continuation
@@ -319,7 +319,7 @@ if ($email['status'] != 'sent') {
 
     <div id="tnp-body">
         <?php $controls->show() ?>
-        
+
         <form method="post" action="" id="newsletter-form">
             <?php $controls->init(['cookie_name' => 'newsletter_emails_edit_tab']); ?>
             <?php $controls->hidden('updated') ?>
@@ -519,7 +519,7 @@ if ($email['status'] != 'sent') {
                                 <?php $controls->text('options_sender_name', 40); ?>
                                 <p class="description">
                                     Original: <?php echo esc_html(Newsletter::instance()->get_sender_name()) ?>
-                                </p> 
+                                </p>
                             </td>
                         </tr>
                     </table>
@@ -537,7 +537,7 @@ if ($email['status'] != 'sent') {
                         </tr>
                         <tr>
                             <th style="vertical-align: top">
-                                This is the textual version of your newsletter. 
+                                This is the textual version of your newsletter.
                                 If you empty it, only an HTML version will be sent but is an anti-spam best practice to include a text only version.
                             </th>
                             <td>

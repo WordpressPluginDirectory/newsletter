@@ -342,7 +342,6 @@ class NewsletterComposer {
             // Preset version 1 haven't global options
             $composer = [];
             $options = TNP_Composer::get_global_style_defaults();
-            //var_dump($options);
             foreach ($options as $k => $v) {
                 if (strpos($k, 'options_composer_') === 0) {
                     $composer[substr($k, 17)] = $v;

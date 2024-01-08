@@ -272,7 +272,8 @@ class NewsletterControls {
         'SS' => 'South Sudan',
         'EU' => 'Europe (generic)',
         'A1' => 'Anonymous IP',
-        'A2' => 'Satellite IP'
+        'A2' => 'Satellite IP',
+        'XK' => 'Kosovo'
     );
 
     /**

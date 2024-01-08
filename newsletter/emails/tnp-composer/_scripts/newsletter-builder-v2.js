@@ -33,13 +33,13 @@ jQuery.fn.perform_block_edit = function () {
         target = jQuery(this).parent().find('.edit-block');
 
         // The row container which is a global variable and used later after the options save
-        container = jQuery(this).closest("table");
+        tnp_container = jQuery(this).closest("table");
 
-        if (container.hasClass('tnpc-row-block')) {
+        if (tnp_container.hasClass('tnpc-row-block')) {
 
             tnpc_show_block_options();
 
-            var options = container.find(".tnpc-block-content").attr("data-json");
+            var options = tnp_container.find(".tnpc-block-content").attr("data-json");
 
             // Compatibility
             if (!options) {
@@ -48,7 +48,7 @@ jQuery.fn.perform_block_edit = function () {
 
             var data = {
                 action: "tnpc_options",
-                id: container.data("id"),
+                id: tnp_container.data("id"),
                 context_type: tnp_context_type,
                 options: options
             };
@@ -57,7 +57,6 @@ jQuery.fn.perform_block_edit = function () {
 
             builderAreaHelper.lock();
             jQuery("#tnpc-block-options-form").load(ajaxurl, data, function () {
-                //console.log('Block form options loaded');
                 start_options = jQuery("#tnpc-block-options-form").serializeArray();
                 tnpc_add_global_options(start_options);
                 builderAreaHelper.unlock();
@@ -111,7 +110,7 @@ jQuery.fn.perform_clone = function () {
 };
 
 let start_options = null;
-let container = null;
+let tnp_container = null;
 
 jQuery(function () {
 
@@ -166,12 +165,10 @@ function BuilderAreaHelper() {
     _overlayEl.style.height = '100%';
 
     this.lock = function () {
-        console.log('Lock builder area');
         _builderAreaEl.appendChild(_overlayEl);
     }
 
     this.unlock = function () {
-        console.log('Unlock builder area');
         _builderAreaEl.removeChild(_overlayEl);
     }
 
@@ -305,7 +302,7 @@ function start_composer() {
     jQuery('#tnpc-block-options-form').change(function (event) {
         var data = jQuery("#tnpc-block-options-form").serializeArray();
 
-        var _container = container;
+        var _container = tnp_container;
         var _target = target;
 
         tnpc_add_global_options(data);

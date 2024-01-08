@@ -729,6 +729,8 @@ class NewsletterModule extends NewsletterModuleBase {
     function replace($text, $user = null, $email = null, $referrer = null) {
         global $wpdb;
 
+        if (empty($text)) return $text;
+
         if (strpos($text, '<p') !== false) {
             $esc_html = true;
         } else {

@@ -10,7 +10,7 @@
  * @property string $from_name
  */
 class TNP_Mailer_Message {
-
+    var $ch; // Transient variable for mailers with turbo send option
     var $to = '';
     var $to_name = '';
     var $headers = [];
@@ -22,7 +22,6 @@ class TNP_Mailer_Message {
     var $body_text = '';
     var $from = '';
     var $from_name = '';
-
 }
 
 /**
@@ -242,6 +241,11 @@ class NewsletterDefaultMailer extends NewsletterMailer {
         return (int) Newsletter::instance()->options['scheduler_max'];
     }
 
+    /**
+     *
+     * @param PHPMailer $mailer
+     * @return
+     */
     function fix_mailer($mailer) {
         // If there is not a current message, wp_mail() was not called by us
         if (is_null($this->current_message)) {
@@ -267,6 +271,8 @@ class NewsletterDefaultMailer extends NewsletterMailer {
         if (!empty($this->current_message->body) && !empty($this->current_message->body_text)) {
             $mailer->AltBody = $this->current_message->body_text;
         }
+
+        $mailer->XMailer = false;
     }
 
     /**

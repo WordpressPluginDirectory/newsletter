@@ -39,11 +39,15 @@ class NewsletterLogger {
             $this->level = self::NONE;
         }
 
+        if (is_multisite()) {
+
+        }
+
         $this->file = NEWSLETTER_LOG_DIR . '/' . $module . '-' . date('Y-m') . '-' . $secret . '.txt';
     }
 
     /**
-     * 
+     *
      * @param string|WP_Error|array|stdClass $text
      * @param int $level
      */

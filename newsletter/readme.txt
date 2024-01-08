@@ -1,7 +1,7 @@
 === Newsletter - Send awesome emails from WordPress ===
 Tags: newsletter, email marketing, welcome email, signup forms, lead generation, marketing automation
-Tested up to: 6.4.1
-Stable tag: 8.0.6
+Tested up to: 6.4.2
+Stable tag: 8.0.7
 Contributors: satollo,webagile,michael-travan
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -125,6 +125,13 @@ Thank you, The Newsletter Team
 3. The Reports extension
 
 == Changelog ==
+
+= 8.0.7 =
+
+* On "Footer" block the unsubscribe mode can be selected (single or double step)
+* Minor fixes
+* Removed the PHPMailer signature to reduce the spam rate
+* Security fix on wizard
 
 = 8.0.6 =
 
