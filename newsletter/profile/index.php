@@ -15,7 +15,7 @@ if ($controls->is_action()) {
             }
         }
         $this->save_options($controls->data, '', $language);
-        $controls->add_message_saved();
+        $controls->add_toast_saved();
     }
 } else {
     $controls->data = $this->get_options('', $language);
@@ -51,7 +51,6 @@ foreach (['text'] as $key) {
                     <li><a href="#tabs-general"><?php _e('General', 'newsletter') ?></a></li>
                     <li><a href="#tabs-fields"><?php _e('Form', 'newsletter') ?></a></li>
                     <li><a href="#tabs-labels"><?php _e('Messages and labels', 'newsletter') ?></a></li>
-                    <li><a href="#tabs-export"><?php _e('Subscriber data export', 'newsletter') ?></a></li>
                     <?php if (NEWSLETTER_DEBUG) { ?>
                         <li><a href="#tabs-debug">Debug</a></li>
                     <?php } ?>
@@ -237,25 +236,6 @@ foreach (['text'] as $key) {
                     </table>
                 </div>
 
-                <div id="tabs-export">
-
-                    <?php $this->language_notice() ?>
-                    <?php if (!$language) { ?>
-
-                        <table class="form-table">
-
-                            <tr>
-                                <th>
-                                    <?php _e('Log of sent newsletters', 'newsletter') ?>
-                                </th>
-                                <td>
-                                    <?php $controls->yesno('export_newsletters'); ?>
-                                </td>
-                            </tr>
-                        </table>
-                    <?php } ?>
-                </div>
-
                 <?php if (NEWSLETTER_DEBUG) { ?>
                     <div id="tabs-debug">
                         <pre><?php echo esc_html(json_encode($this->get_db_options('', $language), JSON_PRETTY_PRINT)) ?></pre>
@@ -269,11 +249,8 @@ foreach (['text'] as $key) {
 
         </form>
 
-
-
-
     </div>
 
-    <?php include NEWSLETTER_DIR . '/tnp-footer.php'; ?>
+    <?php include NEWSLETTER_ADMIN_FOOTER ?>
 
 </div>

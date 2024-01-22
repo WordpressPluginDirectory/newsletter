@@ -1,5 +1,4 @@
 <?php
-
 /* @var $fields NewsletterFields */
 ?>
 
@@ -9,12 +8,6 @@
 <?php $fields->text_on_off('profile', __('Subscriber profile link', 'newsletter')) ?>
 
 <?php $fields->text_on_off('unsubscribe', __('Unsubscribe link', 'newsletter')) ?>
-
-<?php
-$fields->select('unsubscribe_mode', __('Unsubscribe mode', 'newsletter'), [
-    'single' => __('Signle step', 'newsletter'),
-    'double' => __('Double step', 'newsletter')])
-?>
 
 <?php
 $fields->font('font', __('Text', 'newsletter'), [

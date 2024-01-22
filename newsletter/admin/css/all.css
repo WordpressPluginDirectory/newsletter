@@ -1191,7 +1191,7 @@ span.tnp-user-status {
 
 #tnp-menu ul {
     padding: 0 20px 0 0;
-    margin: 0; 
+    margin: 0;
     list-style: none;
     position: relative;
     display: inline-table;
@@ -1207,7 +1207,7 @@ span.tnp-user-status {
 #tnp-menu ul li {
     float: left;
     margin: 0 10px;
-    padding: 0; 
+    padding: 0;
     border: 0;
 }
 
@@ -1222,6 +1222,9 @@ span.tnp-user-status {
     margin-right: 5px;
 }
 
+#tnp-menu ul li.tnp-menu-secondary a {
+    font-size: .95em;
+}
 
 /* Second level */
 
@@ -1232,7 +1235,7 @@ span.tnp-user-status {
     margin: 0;
     background: var(--tnp-menu-bg);
     border-radius: 0px;
-    position: absolute;  
+    position: absolute;
     padding-top: 20px;
     padding-bottom: 15px;
     box-shadow: 0 0px 5px #ccc;
@@ -1243,7 +1246,7 @@ span.tnp-user-status {
 }
 
 #tnp-menu ul ul li {
-    float: none; 
+    float: none;
     position: relative;
     margin-left: 0;
     margin-right: 0;
@@ -1269,7 +1272,7 @@ span.tnp-user-status {
     font-size: .9rem;
     outline: 0;
     box-shadow: 0;
-}	
+}
 
 #tnp-menu ul ul li:hover a {
     color: #fff;
@@ -1335,7 +1338,7 @@ span.tnp-user-status {
 #tnp-menu .tnp-licence-button-red:hover {
     background-color: var(--tnp-red-dark) !important;
     border: none;
-}/* 
+}/*
     The head section of each administration page with title and introduction
 */
 #tnp-heading {
@@ -1348,7 +1351,7 @@ span.tnp-user-status {
     border-bottom: 1px solid #d6d6d6;
     padding-bottom: .6rem;
     background-color: #f8f8f8;
-    
+
 }
 
 /* Title */
@@ -1357,7 +1360,8 @@ span.tnp-user-status {
     font-size: 1.2rem;
     line-height: normal;
     vertical-align: middle;
-    font-weight: bold;
+    /*font-weight: bold;*/
+    font-weight: normale;
     padding: 0;
     margin: 0px;
     margin-bottom: .5rem;
@@ -1434,7 +1438,7 @@ span.tnp-user-status {
 /* For pages that need a sub menu */
 #tnp-heading .tnp-nav {
     /*background-color: var(--tnp-gray);*/
-    padding: 5px 0;
+    padding: 5px 0 0 0;
     width: fit-content;
     font-size: 0; /* To rmeove the element spacing */
     line-height: normal;
@@ -1478,7 +1482,9 @@ span.tnp-user-status {
 #tnp-heading .tnp-nav li.active a {
     /*color: var(--tnp-text) !important;*/
     color: #000 !important;
-    font-weight: bold !important;
+    font-weight: normal !important;
+    display: inline-block;
+    border-bottom: 5px solid #aaa;
 }
 
 #tnp-heading .tnp-nav-title {
@@ -1758,7 +1764,8 @@ span.tnp-user-status {
 #tnp-body .ui-tabs .ui-tabs-nav {
     padding: 0;
     margin: 0;
-    background-color: var(--tnp-blue-light);
+    /*background-color: var(--tnp-blue-light);*/
+    background-color: #ddd;
     border: 0;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
@@ -1773,18 +1780,21 @@ span.tnp-user-status {
 /* Tab labels */
 #tnp-body .ui-tabs a.ui-tabs-anchor,
 #tnp-body .ui-tabs a.ui-tabs-anchor:visited {
-    color: #fff;
+    /*color: #fff;*/
+    color:  #444;
     font-size: .9rem;
     box-shadow: none;
-    font-weight: bold;
+    font-weight: normal;
     outline: 0;
 }
 
 /* Active tab label */
 #tnp-body .ui-tabs .ui-state-active a.ui-tabs-anchor,
 #tnp-body .ui-tabs .ui-state-active a.ui-tabs-anchor:visited {
-    color: #555;
-    background-color: #fff;
+    /*color: #555;*/
+    color: #fff;
+    /*background-color: #fff;*/
+    background-color: var(--tnp-blue-light);
 }
 
 
@@ -1812,6 +1822,10 @@ span.tnp-user-status {
     font-size: 1rem;
     font-weight: bold;
     line-height: normal;
+}
+
+#tnp-body .tnp-tabs-advanced a {
+    font-style: italic;
 }
 
 

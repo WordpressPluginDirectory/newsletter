@@ -27,7 +27,7 @@ class NewsletterUnsubscription extends NewsletterModule {
     }
 
     function hook_newsletter_action($action, $user, $email) {
-        
+
         if (isset($_SERVER['HTTP_USER_AGENT'])) {
             $agent = strtolower($_SERVER['HTTP_USER_AGENT']);
             if (strpos($agent, 'yahoomailproxy') !== false) {
@@ -62,6 +62,17 @@ class NewsletterUnsubscription extends NewsletterModule {
 
         switch ($action) {
             case 'u':
+                if ($this->get_option('mode') == '1') {
+                    $this->logger->debug('Mode 1');
+                    if ($this->antibot_form_check()) {
+                        $this->unsubscribe($user, $email);
+                        $url = $this->build_message_url(null, 'unsubscribed', $user, $email);
+                        wp_redirect($url);
+                    } else {
+                        $this->request_to_antibot_form('Unsubscribe');
+                    }
+                    die();
+                }
                 $url = $this->build_message_url(null, 'unsubscribe', $user, $email);
                 wp_redirect($url);
                 die();
@@ -170,10 +181,12 @@ class NewsletterUnsubscription extends NewsletterModule {
         if ($user) {
             $text = $this->replace_url($text, 'unsubscription_confirm_url', $this->build_action_url('uc', $user, $email));
             $text = $this->replace_url($text, 'unsubscription_url', $this->build_action_url('u', $user, $email));
+            $text = $this->replace_url($text, 'unsubscribe_url', $this->build_action_url('u', $user, $email));
             $text = $this->replace_url($text, 'reactivate_url', $this->build_action_url('reactivate', $user, $email));
         } else {
             $text = $this->replace_url($text, 'unsubscription_confirm_url', $this->build_action_url('nul'));
             $text = $this->replace_url($text, 'unsubscription_url', $this->build_action_url('nul'));
+            $text = $this->replace_url($text, 'unsubscribe_url', $this->build_action_url('nul'));
         }
 
         return $text;
@@ -181,7 +194,7 @@ class NewsletterUnsubscription extends NewsletterModule {
 
     /**
      * Language and locale are already defined in this hook.
-     * 
+     *
      * @param type $text
      * @param type $key
      * @param type $user
@@ -243,7 +256,6 @@ class NewsletterUnsubscription extends NewsletterModule {
 
         return $headers;
     }
-
 }
 
 NewsletterUnsubscription::instance();

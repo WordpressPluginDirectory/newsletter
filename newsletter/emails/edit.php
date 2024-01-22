@@ -53,7 +53,7 @@ if ($controls->is_action('change-private')) {
     $data['private'] = $controls->data['private'];
     $data['id'] = $email['id'];
     $email = $this->save_email($data, ARRAY_A);
-    $controls->add_message_saved();
+    $controls->add_toast_saved();
 
     tnp_prepare_controls($email, $controls);
 }
@@ -132,7 +132,7 @@ if ($controls->is_action('test') || $controls->is_action('save') || $controls->i
             $this->logger->info('Scheduling newsletter: ' . $email_id);
         }
 
-        $email['subject'] = $controls->data['subject'];
+        //$email['subject'] = $controls->data['subject'];
         $email['track'] = $controls->data['track'];
         $email['editor'] = $editor_type;
         $email['private'] = $controls->data['private'];
@@ -263,7 +263,7 @@ if ($controls->is_action('test') || $controls->is_action('save') || $controls->i
             $controls->errors = 'Unable to save. Try to deactivate and reactivate the plugin may be the database is out of sync.';
         }
 
-        $controls->add_message_saved();
+        $controls->add_toast_saved();
     }
 }
 
@@ -313,7 +313,7 @@ if ($email['status'] != 'sent') {
     <div id="tnp-heading">
         <?php $controls->title_help('/newsletter-targeting') ?>
 
-        <h2><?php _e('Edit Newsletter', 'newsletter') ?></h2>
+        <h2><?php echo esc_html($email['subject'])?></h2>
 
     </div>
 
@@ -324,6 +324,7 @@ if ($email['status'] != 'sent') {
             <?php $controls->init(['cookie_name' => 'newsletter_emails_edit_tab']); ?>
             <?php $controls->hidden('updated') ?>
 
+            <div class="tnp-emails-header">
             <div class="tnp-submit">
 
                 <?php if ($email['status'] == 'sending' || $email['status'] == 'sent') { ?>
@@ -351,20 +352,9 @@ if ($email['status'] != 'sent') {
                         <a class="button-secondary tnp-button-cancel" href="javascript:tnp_toggle_schedule()"><?php _e("Cancel") ?></a>
                     </span>
                 <?php } ?>
-            </div>
+                    </div>
 
-            <div class="tnp-emails-header">
-
-                <div class="tnp-emails-subject">
-
-
-
-                    <?php $controls->text('subject', null, 'Subject'); ?>
-                    &nbsp;&nbsp;&nbsp;
-                    <i class="far fa-lightbulb" data-tnp-modal-target="#subject-ideas-modal" style="font-size: 24px"></i>
-                </div>
-
-                <div class="tnp-emails-status">
+                    <div class="tnp-emails-status">
 
                     <div style="display: flex; justify-content: space-between">
                         <div style="flex-grow: 1">
@@ -394,6 +384,7 @@ if ($email['status'] != 'sent') {
 
                 </div>
             </div>
+
 
             <div id="tabs">
 
@@ -599,8 +590,6 @@ if ($email['status'] != 'sent') {
 
         </form>
     </div>
-
-    <?php include NEWSLETTER_DIR . '/emails/subjects.php'; ?>
 
     <?php include NEWSLETTER_DIR . '/tnp-footer.php'; ?>
 

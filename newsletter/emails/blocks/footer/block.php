@@ -42,11 +42,7 @@ $text_style = TNP_Composer::get_text_style($options, '', $composer, ['scale' => 
 
 $links = [];
 if ($options['unsubscribe_enabled']) {
-    if ($options['unsubscribe_mode'] === 'double') {
-        $links[] = '<a inline-class="text" href="{unsubscription_url}" target="_blank">' . esc_html($options['unsubscribe']) . '</a>';
-    } else {
-        $links[] = '<a inline-class="text" href="{unsubscription_confirm_url}" target="_blank">' . esc_html($options['unsubscribe']) . '</a>';
-    }
+    $links[] = '<a inline-class="text" href="{unsubscription_url}" target="_blank">' . esc_html($options['unsubscribe']) . '</a>';
 }
 if ($options['profile_enabled']) {
     $links[] = '<a inline-class="text" href="{profile_url}" target="_blank">' . esc_html($options['profile']) . '</a>';

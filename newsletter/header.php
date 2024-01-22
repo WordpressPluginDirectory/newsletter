@@ -43,6 +43,16 @@ $system_warnings = NewsletterSystemAdmin::instance()->get_warnings_count();
                     <a href="?page=newsletter_profile_index"><?php _e('Profile page', 'newsletter') ?></a>
                 </li>
 
+                <li>
+                    <a href="?page=newsletter_unsubscription_index"><?php _e('Unsubscribe', 'newsletter') ?></a>
+                </li>
+
+                <?php newsletter_print_entries('subscribers') ?>
+
+                <li>
+                    <a href="?page=newsletter_users_statistics"><?php _e('Statistics', 'newsletter') ?></a>
+                </li>
+
                 <?php if (!class_exists('NewsletterImport')) { ?>
                     <li>
                         <a href="?page=newsletter_users_import"><?php _e('Import', 'newsletter') ?></a>
@@ -57,15 +67,7 @@ $system_warnings = NewsletterSystemAdmin::instance()->get_warnings_count();
                     <a href="?page=newsletter_users_massive"><?php _e('Maintenance', 'newsletter') ?></a>
                 </li>
 
-                <li>
-                    <a href="?page=newsletter_users_statistics"><?php _e('Statistics', 'newsletter') ?></a>
-                </li>
 
-                <li>
-                    <a href="?page=newsletter_unsubscription_index"><?php _e('Unsubscribe', 'newsletter') ?></a>
-                </li>
-
-                <?php newsletter_print_entries('subscribers') ?>
             </ul>
         </li>
         <li><a href="#"><i class="fas fa-list"></i> <?php _e('Subscription', 'newsletter') ?></a>
@@ -106,9 +108,13 @@ $system_warnings = NewsletterSystemAdmin::instance()->get_warnings_count();
                 </li>
 
                 <li>
+                    <a href="?page=newsletter_emails_presets"><?php _e('Templates', 'newsletter') ?></a>
+                </li>
+
+                <li>
                     <a href="<?php echo NewsletterStatisticsAdmin::instance()->get_index_url() ?>"><?php _e('Statistics', 'newsletter') ?></a>
                 </li>
-                
+
                 <?php newsletter_print_entries('newsletters') ?>
             </ul>
         </li>
@@ -136,7 +142,7 @@ $system_warnings = NewsletterSystemAdmin::instance()->get_warnings_count();
 
         <?php if ($is_administrator) { ?>
             <li>
-                <a href="#"> 
+                <a href="#">
                     <?php if ($system_warnings['total']) { ?>
                         <i class="fas fa-exclamation-triangle" style="color: red;"></i>
                     <?php } else { ?>

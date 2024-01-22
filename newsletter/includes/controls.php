@@ -1039,6 +1039,9 @@ class NewsletterControls {
         if (!empty($attrs['title'])) {
             echo ' title="', esc_attr($attrs['title']), '"';
         }
+        if (!empty($attrs['id'])) {
+            echo ' id="', esc_attr($attrs['id']), '"';
+        }
         if (!empty($attrs['target'])) {
             echo ' target="', esc_attr($attrs['target']), '"';
         }

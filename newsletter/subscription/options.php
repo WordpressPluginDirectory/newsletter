@@ -26,7 +26,7 @@ if ($controls->is_action()) {
         $controls->data['confirmation_url'] = trim($controls->data['confirmation_url']);
 
         $this->save_options($controls->data, '', $language);
-        $controls->add_message_saved();
+        $controls->add_toast_saved();
     }
 
     if ($controls->is_action('test-confirmation')) {
@@ -104,51 +104,24 @@ foreach (['confirmed_text', 'confirmed_message', 'confirmation_text', 'confirmat
             <?php $controls->init(); ?>
             <div id="tabs">
                 <ul>
-                    <li><a href="#tabs-general"><?php _e('General', 'newsletter') ?></a></li>
-                    <li><a href="#tabs-2"><?php _e('Subscription', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-subscription"><?php _e('Subscription', 'newsletter') ?></a></li>
                     <li><a href="#tabs-4"><?php _e('Welcome', 'newsletter') ?></a></li>
                     <li><a href="#tabs-3"><?php _e('Activation', 'newsletter') ?></a></li>
+                    <li class="tnp-tabs-advanced"><a href="#tabs-advanced"><?php _e('Advanced', 'newsletter') ?></a></li>
                     <?php if (NEWSLETTER_DEBUG) { ?>
                         <li><a href="#tabs-debug">Debug</a></li>
                     <?php } ?>
                 </ul>
 
-                <div id="tabs-general">
-
-                    <?php $this->language_notice(); ?>
-
-                    <?php if (!$language) { ?>
-                        <table class="form-table">
-
-                            <tr>
-                                <th><?php $controls->field_label(__('Opt In', 'newsletter'), '/subscription/subscription/') ?></th>
-                                <td>
-                                    <?php $controls->select('noconfirmation', array(0 => __('Double Opt In', 'newsletter'), 1 => __('Single Opt In', 'newsletter'))); ?>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th><?php $controls->field_label(__('Override Opt In', 'newsletter'), '/subscription/subscription/#advanced') ?></th>
-                                <td>
-                                    <?php $controls->yesno('optin_override'); ?>
-                                </td>
-                            </tr>
-
-                            <tr>
-                                <th><?php _e('Notifications', 'newsletter') ?></th>
-                                <td>
-                                    <?php $controls->yesno('notify'); ?>
-                                    <?php $controls->text_email('notify_email'); ?>
-                                </td>
-                            </tr>
-                        </table>
-                    <?php } ?>
-
-                </div>
-
-
-                <div id="tabs-2">
+                <div id="tabs-subscription">
                     <?php $this->language_notice(); ?>
                     <table class="form-table">
+                        <tr>
+                            <th><?php $controls->field_label(__('Opt In', 'newsletter'), '/subscription/subscription/') ?></th>
+                            <td>
+                                <?php $controls->select('noconfirmation', array(0 => __('Double Opt In', 'newsletter'), 1 => __('Single Opt In', 'newsletter'))); ?>
+                            </td>
+                        </tr>
                         <tr>
                             <th><?php _e('Subscription page', 'newsletter') ?></th>
                             <td>
@@ -286,32 +259,30 @@ foreach (['confirmed_text', 'confirmed_message', 'confirmation_text', 'confirmat
                         </tr>
                     </table>
 
-                    <!-- WELCOME/CONFIRMED EMAIL -->
-                    <table class="form-table">
-                        <tr>
-                            <th>
-                                <?php _e('Welcome email', 'newsletter') ?>
-                            </th>
-                            <td>
-                                <?php if (!$language) { ?>
-                                    <?php $controls->disabled('confirmed_disabled') ?>
-                                <?php } ?>
+                </div>
 
-                                <?php $controls->text('confirmed_subject', 70, $this->get_default_text('confirmed_subject')); ?>
-                                <br><br>
-                                <?php $controls->checkbox2('confirmed_message_custom', 'Customize', ['onchange' => 'tnp_refresh_binds()']); ?>
-                                <div data-bind="options-confirmed_message_custom">
-                                    <?php $controls->wp_editor('confirmed_message', ['editor_height' => 150], ['default' => $this->get_default_text('confirmed_message')]); ?>
-                                </div>
-                                <div data-bind="!options-confirmed_message_custom" class="tnpc-default-text">
-                                    <?php echo wp_kses_post($this->get_default_text('confirmed_message')) ?>
-                                </div>
-                                <br>
-                                <?php $controls->btn('test-confirmed', __('Test', 'newsletter'), ['secondary' => true]); ?>
-                            </td>
-                        </tr>
+                <div id="tabs-advanced">
 
-                    </table>
+                    <?php $this->language_notice(); ?>
+
+                    <?php if (!$language) { ?>
+                        <table class="form-table">
+                            <tr>
+                                <th><?php $controls->field_label(__('Override Opt In', 'newsletter'), '/subscription/subscription/#advanced') ?></th>
+                                <td>
+                                    <?php $controls->yesno('optin_override'); ?>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th><?php _e('Notifications', 'newsletter') ?></th>
+                                <td>
+                                    <?php $controls->yesno('notify'); ?>
+                                    <?php $controls->text_email('notify_email'); ?>
+                                </td>
+                            </tr>
+                        </table>
+                    <?php } ?>
                 </div>
 
                 <?php if (NEWSLETTER_DEBUG) { ?>

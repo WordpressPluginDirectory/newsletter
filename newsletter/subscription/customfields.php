@@ -50,8 +50,8 @@ $main_options = $this->get_options('customfields', '');
 
     <div id="tnp-heading">
 
-        <h2><?php _e('Subscription', 'newsletter') ?></h2>
-        <?php include __DIR__ . '/nav.php' ?>
+        <h2><?php _e('Custom fields', 'newsletter') ?></h2>
+        <?php //include __DIR__ . '/nav.php' ?>
 
 
     </div>
@@ -62,9 +62,9 @@ $main_options = $this->get_options('customfields', '');
 
             <form action="" method="post">
                 <?php $controls->init(); ?>
-                
+
                 <p>
-                    Change the <a href="?page=newsletter_subscription_form">Subscription Form</a> and the 
+                    Change the <a href="?page=newsletter_subscription_form">Subscription Form</a> and the
                     <a href="?page=newsletter_profile_index">Profile Page</a> selecting the fields to show.</p>
                 </p>
 

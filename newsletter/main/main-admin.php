@@ -20,7 +20,7 @@ class NewsletterMainAdmin extends NewsletterModuleAdmin {
         parent::__construct('main');
         add_filter('display_post_states', [$this, 'hook_display_post_states'], 10, 2);
     }
-    
+
     function wp_loaded() {
         if ($this->is_admin_page()) {
 
@@ -49,7 +49,7 @@ class NewsletterMainAdmin extends NewsletterModuleAdmin {
             }
         }
     }
-    
+
     function admin_notices() {
         if ($this->get_option('debug')) {
             echo '<div class="notice notice-warning"><p>The Newsletter plugin is in <strong>debug mode</strong>. When done change it on Newsletter <a href="admin.php?page=newsletter_main_main"><strong>main settings</strong></a>. Do not keep the debug mode active on production sites.</p></div>';
@@ -63,7 +63,6 @@ class NewsletterMainAdmin extends NewsletterModuleAdmin {
         if (current_user_can('administrator')) {
             $this->add_admin_page('welcome', __('Welcome', 'newsletter'));
             //$this->add_menu_page('main', __('Settings', 'newsletter'));
-
             // Pages not on menu
             $this->add_admin_page('design', 'Design System');
         }
@@ -71,7 +70,7 @@ class NewsletterMainAdmin extends NewsletterModuleAdmin {
 
     /**
      * Special entry for the addons management.
-     * 
+     *
      */
     function admin_after_menu() {
         if (!class_exists('NewsletterExtensions')) {
@@ -81,8 +80,16 @@ class NewsletterMainAdmin extends NewsletterModuleAdmin {
             $this->add_admin_page('extensions', __('Addons', 'newsletter'));
         }
 
-        if (!class_exists('NewsletterAutomated') && !class_exists('NewsletterAutoresponder')) {
-            $this->add_menu_page('automation', 'Automation <span class="tnp-sidemenu-badge">Pro</span>');
+//        if (!class_exists('NewsletterAutomated') && !class_exists('NewsletterAutoresponder')) {
+//            $this->add_menu_page('automation', 'Automation <span class="tnp-sidemenu-badge">Pro</span>');
+//        }
+
+        if (NEWSLETTER_DEBUG || !class_exists('NewsletterAutomated')) {
+            $this->add_menu_page('automated', 'Automated <span class="tnp-sidemenu-badge">Pro</span>');
+            $this->add_admin_page('automatedindex', 'Automated');
+            $this->add_admin_page('automatededit', 'Automated edit');
+            $this->add_admin_page('automatednewsletters', 'Automated newsletters');
+            $this->add_admin_page('automatedtemplate', 'Automated template');
         }
     }
 
@@ -99,7 +106,7 @@ class NewsletterMainAdmin extends NewsletterModuleAdmin {
         $news = $this->get_option_array('newsletter_news');
         $updated = (int) get_option('newsletter_news_updated');
         if ($updated > time() - DAY_IN_SECONDS) {
-            
+
         } else {
             // Introduce asynch...
             if (NEWSLETTER_DEBUG) {
@@ -147,5 +154,4 @@ class NewsletterMainAdmin extends NewsletterModuleAdmin {
     function getTnpExtensions() {
         return Newsletter::instance()->getTnpExtensions();
     }
-
 }

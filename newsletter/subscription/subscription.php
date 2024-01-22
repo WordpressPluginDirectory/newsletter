@@ -304,6 +304,12 @@ class NewsletterSubscription extends NewsletterModule {
             }
         }
 
+        $welcome_email = (int) $this->get_option('welcome_email');
+        switch ($welcome_email) {
+            case 1: $subscription->welcome_email_id = (int) $this->get_option('welcome_email_id');
+                break;
+            case 2: $subscription->welcome_email_id = -1;
+        }
         return $subscription;
     }
 
@@ -653,12 +659,8 @@ class NewsletterSubscription extends NewsletterModule {
             $this->logger->debug('No lists received');
         }
 
-        if ($this->get_option('welcome_email_id')) {
-            $subscription->welcome_email_id = $this->get_option('welcome_email_id');
-        }
-
         if (isset($_REQUEST['welcome_page_id'])) {
-            $subscription->welcome_page_id = (int)$_REQUEST['welcome_page_id'];
+            $subscription->welcome_page_id = (int) $_REQUEST['welcome_page_id'];
         }
 
         // Opt-in mode
@@ -903,6 +905,7 @@ class NewsletterSubscription extends NewsletterModule {
         if ($type === 'confirmed') {
 
             $email_id = $this->get_user_meta($user->id, 'welcome_email_id');
+            $this->logger->debug('Email ID: ' . $email_id);
             if ($email_id) {
                 if ($email_id == '-1') {
                     return;
@@ -912,18 +915,21 @@ class NewsletterSubscription extends NewsletterModule {
                     $r = Newsletter::instance()->send($email, [$user]);
                     return;
                 } else {
-
+                    $this->logger->debug('Email not found');
                 }
+            }
+            if (!$force && $this->options['welcome_email'] == '2') {
+                return true;
             }
         }
 
         if ($type === 'confirmation') {
-
+            if (!$force && !empty($this->options[$type . '_disabled'])) {
+                return true;
+            }
         }
 
-        if (!$force && !empty($this->options[$type . '_disabled'])) {
-            return true;
-        }
+
 
         $this->switch_language($user->language);
 
@@ -1172,15 +1178,14 @@ class NewsletterSubscription extends NewsletterModule {
         $b .= '<input type="hidden" name="nlang" value="' . esc_attr($this->language()) . '">';
 
         // Beta
-        if (isset($attrs['welcome_email_id'])) {
-            $e = $this->get_email($attrs['welcome_email_id']);
-            if ($e->type === 'welcome') {
-                $b .= '<input type="hidden" name="welcome_email_id" value="' . esc_attr($e->id . '-' . $e->token) . '">';
-            } else {
-                $b .= $this->build_field_admin_notice('The welcome email ID is not correct.');
-            }
-        }
-
+//        if (isset($attrs['welcome_email_id'])) {
+//            $e = $this->get_email($attrs['welcome_email_id']);
+//            if ($e->type === 'welcome') {
+//                $b .= '<input type="hidden" name="welcome_email_id" value="' . esc_attr($e->id . '-' . $e->token) . '">';
+//            } else {
+//                $b .= $this->build_field_admin_notice('The welcome email ID is not correct.');
+//            }
+//        }
         // Beta
         if (isset($attrs['welcome_page_id'])) {
             $page = get_post($attrs['welcome_page_id']);
@@ -1772,7 +1777,6 @@ class NewsletterSubscription extends NewsletterModule {
 
         return $text;
     }
-
 }
 
 NewsletterSubscription::instance();

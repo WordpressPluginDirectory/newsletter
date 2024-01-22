@@ -84,7 +84,9 @@ class NewsletterDefaults {
                 'notify_email' => get_option('admin_email'),
                 'multiple' => 1,
                 'notify' => 0,
-                'confirmed_tracking' => ''
+                'confirmed_tracking' => '',
+                'welcome_email' => '',
+                'welcome_email_id' => 0
             ];
         }
 
@@ -104,9 +106,11 @@ class NewsletterDefaults {
 
         if ($sub === 'unsubscription') {
             return [
+                'mode' => '1',
                 'notify' => '',
                 'notify_email' => '',
                 'unsubscribe_text_custom' => '0',
+                'unsubscribe_message_disabled' => '1',
                 'error_text_custom' => '0',
                 'reactivated_text_custom' => '0',
                 'unsubscribed_text_custom' => '0',

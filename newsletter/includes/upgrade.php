@@ -124,7 +124,7 @@ class NewsletterUpgrade {
             `city` varchar(100) NOT NULL DEFAULT '',
             `bounce_type` varchar(50) NOT NULL DEFAULT '',
             `bounce_time` int(11) NOT NULL DEFAULT '0',
-            `unsub_email_id` int(11) NOT NULL DEFAULT '0',  
+            `unsub_email_id` int(11) NOT NULL DEFAULT '0',
             `unsub_time` int(11) NOT NULL DEFAULT '0',\n";
 
         for ($i = 1; $i <= NEWSLETTER_LIST_MAX; $i++) {
@@ -163,7 +163,7 @@ class NewsletterUpgrade {
             ) $charset_collate;";
 
         $this->db_delta($sql);
-        
+
         $suppress_errors = $wpdb->suppress_errors(true);
         $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "newsletter_user_meta` DROP INDEX `user_id_key`");
         $wpdb->query("ALTER TABLE `" . $wpdb->prefix . "newsletter_user_meta` 	DROP COLUMN `key`");
@@ -190,7 +190,7 @@ class NewsletterUpgrade {
         if (!wp_next_scheduled('newsletter')) {
             wp_schedule_event(time() + 30, 'newsletter', 'newsletter');
         }
-        
+
         if ($this->old_version === '0.0.0') {
             update_option('newsletter_show_welcome', '1');
         }
@@ -213,6 +213,14 @@ class NewsletterUpgrade {
             }
 
             update_option('newsletter_backup_' . $this->old_version, $backup, false);
+        }
+
+        if ($this->old_version < '8.0.8') {
+            $opt = get_option('newsletter_subscription');
+            if (!empty($opt['confirmed_disabled'])) {
+                $opt['welcome_email'] = '2';
+                update_option('newsletter_subscription', $opt);
+            }
         }
 
         if ($this->old_version === '7.8.0' || $this->old_version === '7.8.1') {
@@ -256,7 +264,7 @@ class NewsletterUpgrade {
 
                 if ($form) {
 
-                    // Fix values 
+                    // Fix values
                     if (isset($form['name_status']) && $form['name_status'] == '1') { // Visible on profile page only
                         $form['name_status'] = 0;
                     }

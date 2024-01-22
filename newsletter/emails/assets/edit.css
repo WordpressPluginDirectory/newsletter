@@ -13,7 +13,7 @@
     vertical-align: top;
 }
 
-.tnp-emails-subject {
+.tnp-submit {
     flex-grow: 3;
 }
 
@@ -27,8 +27,8 @@
 }
 
 .tnp-emails-status {
-    flex-grow: 1; 
+    flex-grow: 1;
     background: #fffafa;
     padding: 10px 1rem;
     border-radius: 5px;
-} 
+}
