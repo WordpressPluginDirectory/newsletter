@@ -5,8 +5,6 @@
 
 defined('ABSPATH') || exit;
 
-global $wpdb;
-
 $email = $this->get_email($_GET['id']);
 
 if (!$email) {
@@ -25,7 +23,7 @@ if (!$controls->is_action()) {
         $email = $this->save_email($email);
 
         TNP_Composer::prepare_controls($controls, $email);
-        $controls->add_message_saved();
+        $controls->add_toast_saved();
     }
 }
 ?>

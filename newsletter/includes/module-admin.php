@@ -27,8 +27,9 @@ class NewsletterModuleAdmin extends NewsletterModuleBase {
     }
 
     function get_db_options($sub, $language = '') {
-        if (!$sub)
+        if (!$sub) {
             $sub = $this->module;
+        }
         return $this->get_option_array($this->get_prefix($sub, $language));
     }
 
@@ -39,8 +40,9 @@ class NewsletterModuleAdmin extends NewsletterModuleBase {
      * @return type
      */
     function get_main_options($sub = '') {
-        if (!$sub)
+        if (!$sub) {
             $sub = $this->module;
+        }
         return $this->get_option_array($this->get_prefix($sub, ''));
     }
 
@@ -67,8 +69,9 @@ class NewsletterModuleAdmin extends NewsletterModuleBase {
      * @return mixed Returns null if the option is not found
      */
     function get_option($key, $sub = '') {
-        if (!$sub)
+        if (!$sub) {
             $sub = $this->module;
+        }
         if (isset($this->cache[$sub . self::$language][$key])) {
             return $this->cache[$sub . self::$language][$key];
         }

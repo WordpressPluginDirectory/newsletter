@@ -74,7 +74,7 @@ foreach (['text'] as $key) {
                                 </div>
                                 <p class="description">
                                     Shown inside the Newsletter dedicated page. Use <code>[newsletter_profile]</code> where you want the edit form
-                                    to be inserted. Create a link with URL <code>{unsubscribe_url}</code> to give access to the cancellation page.
+                                    to be inserted. Create a link with URL <code>{unsubscription_url}</code> to give access to the cancellation page.
                                 </p>
                             </td>
                         </tr>
@@ -84,7 +84,7 @@ foreach (['text'] as $key) {
                             <td>
                                 <?php $controls->text('url', 70); ?>
                                 <p class="description">
-                                    The specified page should containt the <code>[newsletter_profile]</code> shortcode to insert the data form.
+                                    The specified page must contain the <code>[newsletter_profile]</code> shortcode.
                                 </p>
                             </td>
                         </tr>
@@ -96,7 +96,6 @@ foreach (['text'] as $key) {
                     <?php $this->language_notice() ?>
 
                     <?php if (!$language) { ?>
-
 
                         <table class="widefat" style="width: auto">
                             <thead>
@@ -117,9 +116,7 @@ foreach (['text'] as $key) {
                                         <?php $controls->checkbox2('email') ?>
                                     </td>
                                     <td>
-
                                         <input type="checkbox" checked disabled>
-
                                     </td>
                                 </tr>
                                 <tr>
@@ -157,7 +154,10 @@ foreach (['text'] as $key) {
                                 </tr>
 
                                 <tr>
-                                    <th><?php _e('Lists', 'newsletter') ?></th>
+                                    <th style="vertical-align: top">
+                                        <?php _e('Lists', 'newsletter') ?><br>
+                                        <a href="?page=newsletter_subscription_lists" target="_blank"><small><?php _e('Configure', 'newsletter') ?></small></a>
+                                    </th>
 
                                     <td>
                                         <?php $controls->lists_public() ?>
@@ -167,13 +167,13 @@ foreach (['text'] as $key) {
                                 </tr>
 
                                 <tr>
-                                    <th><?php _e('Custom fields', 'newsletter') ?></th>
+                                    <th style="vertical-align: top">
+                                        <?php _e('Custom fields', 'newsletter') ?><br>
+                                        <a href="?page=newsletter_subscription_customfields" target="_blank"><small><?php _e('Configure', 'newsletter') ?></small></a>
+                                    </th>
 
                                     <td>
                                         <?php $controls->profiles_public('profiles'); ?>
-                                        <p>
-                                            <a href="?page=newsletter_subscription_customfields" target="_blank"><?php _e('Configure', 'newsletter') ?></a>
-                                        </p>
                                     </td>
                                     <td>
                                     </td>

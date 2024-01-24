@@ -202,7 +202,6 @@ class NewsletterAddon {
     function send_test_email($email, $controls) {
         NewsletterEmailsAdmin::instance()->send_test_email($email, $controls);
     }
-
 }
 
 /**
@@ -257,6 +256,42 @@ class NewsletterMailerAddon extends NewsletterAddon {
                     require $this->dir . '/index.php';
                 }
         );
+    }
+
+    function set_warnings($controls) {
+        if (!$this->enabled) {
+            $controls->warnings[] = 'Enable to send with this service.';
+        }
+
+        $current_mailer = Newsletter::instance()->get_mailer();
+        if ($current_mailer && $this->enabled && get_class($current_mailer) != get_class($this->get_mailer())) {
+            $controls->warnings[] = 'Another delivery addon is active: ' . esc_html($current_mailer->get_description());
+        }
+
+        if ($this->enabled && class_exists('NewsletterBounce')) {
+            $controls->warnings[] = 'The Bounce addon is active and should be disabled (bounces are managed by this addon)';
+        }
+    }
+
+    function set_bounced($email) {
+        global $wpdb;
+        $logger = $this->get_logger();
+        $logger->info($email . ' bounced');
+        $wpdb->query($wpdb->prepare("update " . NEWSLETTER_USERS_TABLE . " set status=%s where email=%s limit 1", TNP_User::STATUS_BOUNCED, $email));
+    }
+
+    function set_complained($email) {
+        global $wpdb;
+        $logger = $this->get_logger();
+        $logger->info($email . ' complained');
+        $wpdb->query($wpdb->prepare("update " . NEWSLETTER_USERS_TABLE . " set status=%s where email=%s limit 1", TNP_User::STATUS_COMPLAINED, $email));
+    }
+
+    function set_unsubscribed($email) {
+        global $wpdb;
+        $logger = $this->get_logger();
+        $logger->info($email . ' unsubscribed');
+        $wpdb->query($wpdb->prepare("update " . NEWSLETTER_USERS_TABLE . " set status=%s where email=%s limit 1", TNP_User::STATUS_UNSUBSCRIBED, $email));
     }
 
     /**
@@ -333,19 +368,26 @@ class NewsletterMailerAddon extends NewsletterAddon {
         }
         return $messages;
     }
-
 }
 
 class NewsletterFormManagerAddon extends NewsletterAddon {
 
     var $menu_title = null;
     var $menu_description = null;
+    var $menu_slug = null;
+    var $index_page = null;
+    var $edit_page = null;
+    var $welcome_page = null;
     var $dir = '';
     var $forms = null; // For caching
 
-    function __construct($name, $version, $dir) {
+    function __construct($name, $version, $dir, $menu_slug = null) {
         parent::__construct($name, $version);
         $this->dir = $dir;
+        $this->menu_slug = $menu_slug;
+        if (empty($this->menu_slug)) {
+            $this->menu_slug = $this->name;
+        }
         $this->setup_options();
     }
 
@@ -353,6 +395,10 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
         parent::init();
 
         if (is_admin() && $this->is_allowed()) {
+
+            $this->index_page = 'newsletter_' . $this->menu_slug . '_index';
+            $this->edit_page = 'newsletter_' . $this->menu_slug . '_edit';
+            $this->welcome_page = 'newsletter_' . $this->menu_slug . '_welcome';
 
             // Auto add a menu entry
             if (!empty($this->menu_title) && !empty($this->dir)) {
@@ -402,28 +448,28 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
         if (!empty($form_options['lists'])) {
             $subscription->data->add_lists($form_options['lists']);
         }
-        
+
         return $subscription;
     }
 
     function hook_newsletter_menu_subscription($entries) {
-        $entries[] = ['label' => $this->menu_title, 'url' => '?page=newsletter_' . $this->name . '_index'];
+        $entries[] = ['label' => $this->menu_title, 'url' => '?page=' . $this->index_page];
         return $entries;
     }
 
     function hook_admin_menu() {
-        add_submenu_page('newsletter_main_index', $this->menu_title, '<span class="tnp-side-menu">' . $this->menu_title . '</span>', 'exist', 'newsletter_' . $this->name . '_index',
+        add_submenu_page('newsletter_main_index', $this->menu_title, '<span class="tnp-side-menu">' . $this->menu_title . '</span>', 'exist', $this->index_page,
                 function () {
                     require $this->dir . '/admin/index.php';
                 }
         );
-        add_submenu_page('admin.php', $this->menu_title, '<span class="tnp-side-menu">' . $this->menu_title . '</span>', 'exist', 'newsletter_' . $this->name . '_edit',
+        add_submenu_page('admin.php', $this->menu_title, '<span class="tnp-side-menu">' . $this->menu_title . '</span>', 'exist', $this->edit_page,
                 function () {
                     require $this->dir . '/admin/edit.php';
                 }
         );
         if (file_exists($this->dir . '/admin/welcome.php')) {
-            add_submenu_page('admin.php', $this->menu_title, '<span class="tnp-side-menu">' . $this->menu_title . '</span>', 'exist', 'newsletter_' . $this->name . '_welcome',
+            add_submenu_page('admin.php', $this->menu_title, '<span class="tnp-side-menu">' . $this->menu_title . '</span>', 'exist', $this->welcome_page,
                     function () {
                         require $this->dir . '/admin/welcome.php';
                     }
@@ -472,7 +518,6 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
     public function get_form_options($form_id) {
         return get_option('newsletter_' . $this->name . '_' . $form_id, []);
     }
-
 }
 
 class TNP_FormManager_Form {
@@ -481,5 +526,4 @@ class TNP_FormManager_Form {
     var $title = '';
     var $fields = [];
     var $connected = false;
-
 }

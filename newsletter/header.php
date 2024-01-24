@@ -92,6 +92,10 @@ $system_warnings = NewsletterSystemAdmin::instance()->get_warnings_count();
                     <a href="?page=newsletter_subscription_antispam"><?php _e('Antispam', 'newsletter') ?></a>
                 </li>
 
+                <li>
+                    <a href="?page=newsletter_unsubscription_index"><?php _e('Unsubscribe', 'newsletter') ?></a>
+                </li>
+
                 <?php newsletter_print_entries('subscription') ?>
             </ul>
         </li>

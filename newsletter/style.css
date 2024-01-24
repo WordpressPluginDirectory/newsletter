@@ -264,6 +264,11 @@ form.tnp-subscription, form.tnp-profile {
     margin: 0;
 }
 
+.tnp-subscription.tnp-subscription-posts {
+    margin-top: 2em;
+    margin-bottom: 2em;
+}
+
 @media all and (max-width: 525px) {
     .tnp-subscription-minimal.with-name input.tnp-email,
     .tnp-subscription-minimal.with-name input.tnp-name,

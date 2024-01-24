@@ -9,20 +9,15 @@ include_once NEWSLETTER_INCLUDES_DIR . '/controls.php';
 $controls = new NewsletterControls();
 
 $items = $wpdb->get_results("select * from {$wpdb->options} where option_name like 'newsletter_subscription%' order by option_name");
-echo $wpdb->last_error;
-
 ?>
 
 <div class="wrap" id="tnp-wrap">
 
-    <?php include NEWSLETTER_DIR . '/tnp-header.php'; ?>
+    <?php include NEWSLETTER_ADMIN_HEADER ?>
 
     <div id="tnp-heading">
-
         <h2><?php _e('Subscription', 'newsletter') ?></h2>
         <?php include __DIR__ . '/nav.php' ?>
-
-
     </div>
 
     <div id="tnp-body">
@@ -30,29 +25,25 @@ echo $wpdb->last_error;
         <?php $controls->show(); ?>
         <?php $controls->init(); ?>
 
-                <div id="tabs">
+        <div id="tabs">
 
-                    <ul>
-                        <?php foreach($items as $item) { ?>
-                        <li><a href="#tabs-<?php echo esc_attr($item->option_name)?>"><?php echo esc_html(substr($item->option_name, 24))?></a></li>
-                        <?php } ?>
-                    </ul>
+            <ul>
+                <?php foreach ($items as $item) { ?>
+                    <li><a href="#tabs-<?php echo esc_attr($item->option_name) ?>"><?php echo esc_html(substr($item->option_name, 24)) ?></a></li>
+                <?php } ?>
+            </ul>
 
-                    <?php foreach($items as $item) { ?>
-                    <div id="tabs-<?php echo esc_attr($item->option_name)?>">
-                        <pre style="white-space: wrap" wrap="on"><?php echo esc_html(json_encode(maybe_unserialize($item->option_value), JSON_PRETTY_PRINT))?></pre>
-                    </div>
-
-                    <?php } ?>
-
-
-
+            <?php foreach ($items as $item) { ?>
+                <div id="tabs-<?php echo esc_attr($item->option_name) ?>">
+                    <pre style="white-space: wrap" wrap="on"><?php echo esc_html(json_encode(maybe_unserialize($item->option_value), JSON_PRETTY_PRINT)) ?></pre>
                 </div>
 
+            <?php } ?>
 
+        </div>
 
     </div>
 
-    <?php include NEWSLETTER_DIR . '/tnp-footer.php'; ?>
+    <?php include NEWSLETTER_ADMIN_FOOTER ?>
 
 </div>

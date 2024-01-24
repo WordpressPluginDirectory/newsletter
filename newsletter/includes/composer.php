@@ -5,6 +5,10 @@ function tnp_register_block($dir) {
     return TNP_Composer::register_block($dir);
 }
 
+function tnp_register_template($dir) {
+    return TNP_Composer::register_template($dir);
+}
+
 /**
  * Generates and HTML button for email using the values found on $options and
  * prefixed by $prefix, with the standard syntax of NewsletterFields::button().
@@ -19,7 +23,8 @@ function tnpc_button($options, $prefix = 'button') {
 
 class TNP_Composer {
 
-    static $block_dirs = array();
+    static $block_dirs = [];
+    static $template_dirs = [];
 
     static function register_block($dir) {
         // Checks
@@ -39,6 +44,28 @@ class TNP_Composer {
         }
 
         self::$block_dirs[] = $dir;
+        return true;
+    }
+
+    static function register_template($dir) {
+        // Checks
+        $dir = realpath($dir);
+        if (!$dir) {
+            $error = new WP_Error('1', 'Seems not a valid path: ' . $dir);
+            NewsletterEmails::instance()->logger->error($error);
+            return $error;
+        }
+
+        $dir = wp_normalize_path($dir);
+        $dir = untrailingslashit($dir);
+
+        if (!file_exists($dir . '/template.json')) {
+            $error = new WP_Error('1', 'template.json missing on folder ' . $dir);
+            NewsletterEmails::instance()->logger->error($error);
+            return $error;
+        }
+
+        self::$template_dirs[] = $dir;
         return true;
     }
 
@@ -363,7 +390,7 @@ class TNP_Composer {
         if (empty($options[$prefix . '_label'])) {
             return;
         }
-        
+
         $defaults = [
             $prefix . '_url' => '#',
             $prefix . '_font_family' => $composer['button_font_family'],
@@ -579,13 +606,13 @@ class TNP_Composer {
 
     /**
      * Inspired by: https://webdesign.tutsplus.com/tutorials/creating-a-future-proof-responsive-email-without-media-queries--cms-23919
-     * 
+     *
      * Attributes:
      * - columns: number of columns [2]
      * - padding: cells padding [10]
      * - responsive: il on mobile the cell should stack up [true]
      * - width: the whole row width, it should reduced by the external row padding [600]
-     * 
+     *
      * @param string[] $items
      * @param array $attrs
      * @return string
@@ -595,7 +622,7 @@ class TNP_Composer {
         $width = (int) $attrs['width'];
         $columns = (int) $attrs['columns'];
         $padding = (int) $attrs['padding'];
-        $column_width = ($width - $padding*$columns) / $columns;
+        $column_width = ($width - $padding * $columns) / $columns;
         $td_width = 100 / $columns;
         $chunks = array_chunk($items, $columns);
 
@@ -786,7 +813,6 @@ class TNP_Composer {
             }
         }
     }
-
 }
 
 class TNP_Style {
@@ -808,7 +834,6 @@ class TNP_Style {
             echo 'text-align: ', $this->align, ';';
         }
     }
-
 }
 
 /**
@@ -876,7 +901,6 @@ class TNP_Composer_Grid_System {
 
         return $str;
     }
-
 }
 
 /**
@@ -923,7 +947,6 @@ class TNP_Composer_Grid_Row {
     private function get_template() {
         return "<table border='0' cellpadding='0' cellspacing='0' width='100%'><tbody><tr><td>TNP_ROW_CONTENT_PH</td></tr></tbody></table>";
     }
-
 }
 
 /**
@@ -991,7 +1014,6 @@ class TNP_Composer_Grid_Cell {
                     </tbody>
                 </table>";
     }
-
 }
 
 class TNP_Composer_Component_Factory {
@@ -1004,27 +1026,26 @@ class TNP_Composer_Component_Factory {
      * @param Controller$controller
      */
     public function __construct($controller) {
-        
+
     }
 
     function heading() {
-        
+
     }
 
     function paragraph() {
-        
+
     }
 
     function link() {
-        
+
     }
 
     function button() {
-        
+
     }
 
     function image() {
-        
-    }
 
+    }
 }

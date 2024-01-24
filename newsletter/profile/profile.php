@@ -126,7 +126,7 @@ class NewsletterProfile extends NewsletterModule {
         return $text;
     }
 
-    function shortcode_newsletter_profile($attrs, $content) {
+    function shortcode_newsletter_profile($attrs, $content = '') {
         $user = $this->check_user();
 
         if (empty($user)) {
@@ -148,7 +148,7 @@ class NewsletterProfile extends NewsletterModule {
      */
     function get_profile_form($user) {
 
-        $options = $this->get_options();
+        $options = $this->get_options(); // Per language
 
         $subscription = NewsletterSubscription::instance();
 
@@ -380,7 +380,7 @@ class NewsletterProfile extends NewsletterModule {
         }
 
         // Every possible list shown in the profile must be processed
-        $ids = $this->get_option('lists');
+        $ids = $this->get_main_option('lists');
         foreach ($ids as $id) {
             $list = $this->get_list($id);
             if (!$list || $list->is_private())
@@ -390,7 +390,7 @@ class NewsletterProfile extends NewsletterModule {
         }
 
         // Profile
-        $ids = $this->get_option('profiles');
+        $ids = $this->get_main_option('profiles');
         foreach ($ids as $id) {
             $profile = $this->get_profile($id);
             if (!$profile || $profile->is_private())
@@ -418,7 +418,7 @@ class NewsletterProfile extends NewsletterModule {
     }
 
     function admin_menu() {
-        
+
     }
 
     // Patch to avoid conflicts with the "newsletter_profile" option of the subscription module
@@ -459,29 +459,6 @@ class NewsletterProfile extends NewsletterModule {
         foreach ($profiles as $profile) {
             $field = 'profile_' . $profile->id;
             $data['profiles'][] = array('name' => $profile->name, 'value' => $user->$field);
-        }
-
-        // Newsletters
-        if ($this->get_option('export_newsletters')) {
-            $sent = $wpdb->get_results($wpdb->prepare("select * from {$wpdb->prefix}newsletter_sent where user_id=%d order by email_id asc", $user->id));
-            $newsletters = array();
-            foreach ($sent as $item) {
-                $action = 'none';
-                if ($item->open == 1) {
-                    $action = 'read';
-                } else if ($item->open == 2) {
-                    $action = 'click';
-                }
-
-                $email = $this->get_email($item->email_id);
-                if (!$email) {
-                    continue;
-                }
-                // 'id'=>$item->email_id,
-                $newsletters[] = array('subject' => $email->subject, 'action' => $action, 'sent' => date('Y-m-d h:i:s', $email->send_on));
-            }
-
-            $data['newsletters'] = $newsletters;
         }
 
         $extra = apply_filters('newsletter_profile_export_extra', []);

@@ -5,7 +5,6 @@
 
 defined('ABSPATH') || exit;
 
-
 if ($controls->is_action('copy')) {
     $original = $this->get_email($_POST['btn']);
     $email = [];
@@ -23,7 +22,7 @@ if ($controls->is_action('copy')) {
 }
 
 if ($controls->is_action('new')) {
-    $email =[];
+    $email = [];
     $email['subject'] = 'New template';
     $email['message'] = '';
     $email['message_text'] = '';
@@ -102,17 +101,21 @@ $emails = $this->get_emails('composer_template');
 
 
                             <td style="white-space: nowrap">
+                                <?php $controls->button_icon_view(home_url('/') . '?na=view&id=' . $email->id) ?>
                                 <?php $controls->button_icon_copy($email->id); ?>
-    <?php $controls->button_icon_delete($email->id, ['secondary' => true]); ?>
+                                <?php $controls->button_icon_delete($email->id, ['secondary' => true]); ?>
+                                <?php if (NEWSLETTER_DEBUG) { ?>
+                                    <?php $controls->btn_link(home_url('/') . '?na=json&id=' . $email->id, '{}') ?>
+                                <?php } ?>
                             </td>
                         </tr>
-<?php } ?>
+                    <?php } ?>
                 </tbody>
             </table>
 
         </form>
     </div>
 
-<?php include NEWSLETTER_DIR . '/tnp-footer.php'; ?>
+    <?php include NEWSLETTER_DIR . '/tnp-footer.php'; ?>
 
 </div>

@@ -1481,9 +1481,6 @@ class NewsletterControls {
         foreach ($lists as $list) {
             $this->checkbox_group($name, $list->id, '<span>' . $list->id . '</span> ' . esc_html($list->name), ['label_escape' => false]);
         }
-        echo '<a href="https://www.thenewsletterplugin.com/documentation/newsletter-lists" target="_blank">'
-        . 'Click here to read more about lists.'
-        . '</a>';
         echo '</div>';
     }
 

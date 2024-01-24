@@ -57,7 +57,6 @@ $count = $wpdb->get_row("select " . implode(',', $conditions) . ' from ' . NEWSL
     <div id="tnp-heading">
         <?php $controls->title_help('/subscription/newsletter-lists/') ?>
         <h2><?php _e('Lists', 'newsletter') ?></h2>
-
     </div>
 
     <div id="tnp-body">
@@ -107,7 +106,7 @@ $count = $wpdb->get_row("select " . implode(',', $conditions) . ' from ' . NEWSL
                             <tr>
                                 <td><?php echo $i; ?></td>
                                 <td>
-                                    <?php $placeholder = !$language ? '' : $main_options['list_' . $i] ?>                            
+                                    <?php $placeholder = !$language ? '' : $main_options['list_' . $i] ?>
                                     <?php $controls->text('list_' . $i, 40, $placeholder); ?>
                                 </td>
                                 <?php if (!$language) { ?>
@@ -147,7 +146,7 @@ $count = $wpdb->get_row("select " . implode(',', $conditions) . ' from ' . NEWSL
                                         echo $text;
                                         //echo '<i class="fas fa-info-circle tnp-notes" title="', esc_attr($text), '"></i>';
                                     }
-                                    ?> 
+                                    ?>
 
                                 </td>
                             </tr>

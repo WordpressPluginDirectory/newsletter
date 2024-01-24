@@ -1,7 +1,7 @@
 === Newsletter - Send awesome emails from WordPress ===
 Tags: newsletter, email marketing, welcome email, signup forms, lead generation, marketing automation
 Tested up to: 6.4.2
-Stable tag: 8.0.8
+Stable tag: 8.0.9
 Contributors: satollo,webagile,michael-travan
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -126,10 +126,18 @@ Thank you, The Newsletter Team
 
 == Changelog ==
 
+= 8.0.9 =
+
+* Added third-party templates support
+* Fixed the opt-in on multilanguage installations
+* Fixed subject saving on standard welcome email
+* Fixes for multilanguage installations
+* Fixed single opt-in on repeated subscription
+
 = 8.0.8 =
 
 * New configuration of the unsubscribe process
-* New configuratioon of the welcome email
+* New configuration of the welcome email
 
 = 8.0.7 =
 

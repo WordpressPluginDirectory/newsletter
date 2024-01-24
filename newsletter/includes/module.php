@@ -98,6 +98,18 @@ class NewsletterModule extends NewsletterModuleBase {
         return $options[$key];
     }
 
+    /**
+     * Returns the main value of an option, not considering the current language.
+     * Used to get those options which are not language related.
+     *
+     * @param string $key
+     * @param string $sub
+     * @return mixed
+     */
+    function get_main_option($key, $sub = '') {
+        return $this->get_option($key, $sub, '');
+    }
+
     function get_last_run($sub = '') {
         return get_option($this->get_prefix($sub) . '_last_run', 0);
     }
@@ -1005,7 +1017,7 @@ class NewsletterModule extends NewsletterModuleBase {
             echo '+';
             echo '<input type="text" name="n2" value="', rand(1, 9), '" readonly style="width: 50px">';
             echo '=';
-            echo '<input type="text" name="n3" value="?" style="width: 50px">';
+            echo '<input type="text" name="n3" value="" placeholder="?" style="width: 50px">';
             echo '<br><br>';
             echo '<input type="submit" value="', esc_attr($submit_label), '">';
             echo '</div>';

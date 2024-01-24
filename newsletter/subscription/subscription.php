@@ -36,6 +36,21 @@ class NewsletterSubscription extends NewsletterModule {
             add_shortcode('newsletter_form', array($this, 'shortcode_newsletter_form'));
             add_shortcode('newsletter_field', array($this, 'shortcode_newsletter_field'));
         }
+
+        if (!empty($this->get_form_option('under_posts'))) {
+            add_filter('the_content', [$this, 'hook_the_content'], 99);
+        }
+    }
+
+    function hook_the_content($content) {
+        if (!is_single())
+            return $content;
+
+        return $content
+                . '<div class="tnp-subscription-posts">'
+                . $this->get_form_option('under_posts_text')
+                . $this->get_subscription_form('posts')
+                . '</div>';
     }
 
     /**
@@ -282,7 +297,7 @@ class NewsletterSubscription extends NewsletterModule {
         $subscription->data->language = $language;
         $subscription->optin = $this->is_double_optin() ? 'double' : 'single';
 
-        $multiple = (int) $this->get_option('multiple');
+        $multiple = (int) $this->get_main_option('multiple');
 
         switch ($multiple) {
             case 0: $subscription->if_exists = TNP_Subscription::EXISTING_ERROR;
@@ -371,7 +386,7 @@ class NewsletterSubscription extends NewsletterModule {
                 // Special behavior?
             }
 
-            if ($subscription->optin === 'single') {
+            if ($subscription->optin === 'single' || $subscription->if_exists === TNP_Subscription::EXISTING_SINGLE_OPTIN) {
                 $user->status = TNP_User::STATUS_CONFIRMED;
             } else {
                 if ($user->status == TNP_User::STATUS_CONFIRMED) {
@@ -664,7 +679,7 @@ class NewsletterSubscription extends NewsletterModule {
         }
 
         // Opt-in mode
-        if (!empty($this->get_option('optin_override')) && isset($_REQUEST['optin'])) {
+        if (!empty($this->get_main_option('optin_override')) && isset($_REQUEST['optin'])) {
             switch ($_REQUEST['optin']) {
                 case 'single': $subscription->optin = 'single';
                     break;
@@ -958,7 +973,7 @@ class NewsletterSubscription extends NewsletterModule {
     }
 
     function is_double_optin() {
-        return $this->get_option('noconfirmation') == 0;
+        return $this->get_main_option('noconfirmation') == 0;
     }
 
     /**
@@ -1032,7 +1047,7 @@ class NewsletterSubscription extends NewsletterModule {
      */
     function get_privacy_url() {
         if ($this->privacy_url === false) {
-            if (!empty($this->get_option('privacy_use_wp_url', 'form')) && function_exists('get_privacy_policy_url')) {
+            if (!empty($this->get_main_option('privacy_use_wp_url', 'form')) && function_exists('get_privacy_policy_url')) {
                 $this->privacy_url = get_privacy_policy_url();
             } else {
                 $this->privacy_url = $this->get_option('privacy_url', 'form');
@@ -1167,7 +1182,7 @@ class NewsletterSubscription extends NewsletterModule {
             if ($optin !== 'double' && $optin !== 'single') {
                 $b .= $this->build_field_admin_notice('The optin is set to an invalid value.');
             } else {
-                if ($optin !== 'double' && $this->is_double_optin() && empty($this->get_option('optin_override'))) {
+                if ($optin !== 'double' && $this->is_double_optin() && empty($this->get_main_option('optin_override'))) {
                     $b .= $this->build_field_admin_notice('The optin is specified but cannot be overridden (see the subscription configiraton page).');
                 } else {
                     $b .= '<input type="hidden" name="optin" value="' . esc_attr($optin) . '">';
@@ -1661,12 +1676,12 @@ class NewsletterSubscription extends NewsletterModule {
 
     function notify_admin_on_subscription($user) {
 
-        if (empty($this->get_option('notify'))) {
+        if (empty($this->get_main_option('notify'))) {
             return;
         }
 
         $message = $this->generate_admin_notification_message($user);
-        $email = trim($this->get_option('notify_email'));
+        $email = trim($this->get_main_option('notify_email'));
         $subject = $this->generate_admin_notification_subject('New subscription');
 
         Newsletter::instance()->mail($email, $subject, ['html' => $message]);

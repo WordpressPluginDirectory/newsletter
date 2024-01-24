@@ -5,7 +5,6 @@ defined('ABSPATH') || exit;
 class NewsletterEmailsAdmin extends NewsletterModuleAdmin {
 
     static $instance;
-
     var $themes;
 
     /**
@@ -39,7 +38,6 @@ class NewsletterEmailsAdmin extends NewsletterModuleAdmin {
             add_action('wp_ajax_tnpc_delete_preset', array($this, 'ajax_tnpc_delete_preset'));
             add_action('wp_ajax_tnpc_regenerate_email', array($this, 'ajax_tnpc_regenerate_email'));
         }
-
     }
 
     function admin_menu() {
@@ -275,7 +273,6 @@ class NewsletterEmailsAdmin extends NewsletterModuleAdmin {
 
         $result = NewsletterComposer::instance()->regenerate_blocks($content, [], $composer);
 
-
         wp_send_json_success([
             'content' => $result['content'],
             'message' => __('Successfully updated', 'newsletter')
@@ -338,9 +335,12 @@ class NewsletterEmailsAdmin extends NewsletterModuleAdmin {
             $preset = NewsletterComposer::instance()->get_preset_from_file($id);
 
             if (!empty($preset->version) && $preset->version == 2) {
-                $preset_name = $preset->subject;
-            }
-            else {
+                if (empty($preset->name)) {
+                    $preset_name = $preset->subject;
+                } else {
+                    $preset_name = $preset->name;
+                }
+            } else {
                 $preset_name = $preset->name;
             }
 
@@ -351,6 +351,14 @@ class NewsletterEmailsAdmin extends NewsletterModuleAdmin {
             }
             $content .= '<img src="' . esc_attr($preset->icon) . '" title="' . esc_attr($preset_name) . '" alt="' . esc_attr($preset_name) . '">';
             $content .= '<span class="tnpc-preset-label">' . esc_html($preset_name) . '</span>';
+            $content .= '</div>';
+        }
+
+        $templates = NewsletterComposer::instance()->get_templates();
+        foreach ($templates as $template) {
+            $content .= '<div class="tnpc-preset tnpc-preset2" onclick="tnpc_load_preset(\'' . esc_attr($template->id) . '\')">';
+            $content .= '<img src="' . esc_attr($template->icon) . '" title="' . esc_attr($preset_name) . '" alt="' . esc_attr($template->name) . '">';
+            $content .= '<span class="tnpc-preset-label">' . esc_html($template->name) . '</span>';
             $content .= '</div>';
         }
 
@@ -518,5 +526,4 @@ class NewsletterEmailsAdmin extends NewsletterModuleAdmin {
 
         return $messages;
     }
-
 }

@@ -62,8 +62,7 @@ class NewsletterUnsubscription extends NewsletterModule {
 
         switch ($action) {
             case 'u':
-                if ($this->get_option('mode') == '1') {
-                    $this->logger->debug('Mode 1');
+                if ($this->get_main_option('mode') == '1') {
                     if ($this->antibot_form_check()) {
                         $this->unsubscribe($user, $email);
                         $url = $this->build_message_url(null, 'unsubscribed', $user, $email);
@@ -137,7 +136,7 @@ class NewsletterUnsubscription extends NewsletterModule {
     }
 
     function send_unsubscribed_email($user, $force = false) {
-        if (!$force && !empty($this->get_option('unsubscribed_disabled'))) {
+        if (!$force && !empty($this->get_main_option('unsubscribed_disabled'))) {
             return true;
         }
 
@@ -149,12 +148,12 @@ class NewsletterUnsubscription extends NewsletterModule {
 
     function notify_admin($user) {
 
-        if (empty($this->get_option('notify'))) {
+        if (empty($this->get_main_option('notify'))) {
             return;
         }
 
         $message = $this->generate_admin_notification_message($user);
-        $email = trim($this->get_option('notify_email'));
+        $email = trim($this->get_main_option('notify_email'));
         $subject = $this->generate_admin_notification_subject('New cancellation');
 
         Newsletter::instance()->mail($email, $subject, ['html' => $message]);
@@ -167,10 +166,6 @@ class NewsletterUnsubscription extends NewsletterModule {
      * @return TNP_User
      */
     function reactivate($user = null) {
-        // For compatibility, to be removed
-        if (!$user) {
-            $user = $this->get_user_from_request(true);
-        }
         $this->set_user_status($user, TNP_User::STATUS_CONFIRMED);
         $this->add_user_log($user, 'reactivate');
         do_action('newsletter_user_reactivated', $user);
@@ -201,12 +196,6 @@ class NewsletterUnsubscription extends NewsletterModule {
      * @return type
      */
     function hook_newsletter_page_text($text, $key, $user = null) {
-
-        // For tests
-        if ($key === 'unsubscription_error') {
-            return $this->get_text('error_text');
-        }
-
         if ($key == 'unsubscribe') {
             if (!$user) {
                 return $this->get_text('error_text');
@@ -238,13 +227,13 @@ class NewsletterUnsubscription extends NewsletterModule {
      */
     function hook_add_unsubscribe_headers_to_email($headers, $email, $user) {
 
-        if (!empty($this->get_option('disable_unsubscribe_headers'))) {
+        if (!empty($this->get_main_option('disable_unsubscribe_headers'))) {
             return $headers;
         }
 
         $list_unsubscribe_values = [];
-        if (!empty($this->get_option('list_unsubscribe_mailto_header'))) {
-            $unsubscribe_address = $this->get_option('list_unsubscribe_mailto_header');
+        if (!empty($this->get_main_option('list_unsubscribe_mailto_header'))) {
+            $unsubscribe_address = $this->get_main_option('list_unsubscribe_mailto_header');
             $list_unsubscribe_values[] = "<mailto:$unsubscribe_address?subject=unsubscribe>";
         }
 

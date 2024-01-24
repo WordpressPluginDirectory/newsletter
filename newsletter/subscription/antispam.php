@@ -28,7 +28,7 @@ if ($controls->is_action()) {
                     continue;
                 $item = $ip . '/' . $bits;
             } else {
-                
+
             }
             $controls->data['ip_blacklist'][] = $item;
         }
@@ -46,7 +46,7 @@ if ($controls->is_action()) {
 
 <div class="wrap" id="tnp-wrap">
 
-    <?php include NEWSLETTER_DIR . '/header.php'; ?>
+    <?php include NEWSLETTER_ADMIN_HEADER ?>
 
     <div id="tnp-heading">
         <?php $controls->title_help('/subscription/antiflood') ?>
@@ -122,7 +122,7 @@ if ($controls->is_action()) {
                         </tr>
                         <tr>
                             <th>
-                                <?php $controls->label(__('Captcha', 'newsletter'), '/subscription/antiflood/#captcha') ?> 
+                                <?php $controls->label(__('Captcha', 'newsletter'), '/subscription/antiflood/#captcha') ?>
                             </th>
                             <td>
                                 <?php $controls->enabled('captcha'); ?>
@@ -187,6 +187,6 @@ if ($controls->is_action()) {
 
     </div>
 
-    <?php include NEWSLETTER_DIR . '/tnp-footer.php'; ?>
+    <?php include NEWSLETTER_ADMIN_FOOTER ?>
 
 </div>

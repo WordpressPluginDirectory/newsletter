@@ -5,9 +5,8 @@ defined('ABSPATH') || exit;
 class NewsletterEmails extends NewsletterModule {
 
     static $instance;
-    
-    const PRESET_EMAIL_TYPE = 'composer_template';
 
+    const PRESET_EMAIL_TYPE = 'composer_template';
     const EDITOR_COMPOSER = 2;
     const EDITOR_HTML = 1;
     const EDITOR_TINYMCE = 0;
@@ -27,11 +26,10 @@ class NewsletterEmails extends NewsletterModule {
         parent::__construct('emails');
         add_action('newsletter_action', array($this, 'hook_newsletter_action'), 13, 3);
         add_action('newsletter_init', [$this, 'hook_newsletter_init']);
-
-       
     }
 
     function hook_newsletter_init() {
+
     }
 
     function options_decode($options) {
@@ -48,10 +46,9 @@ class NewsletterEmails extends NewsletterModule {
 
     /**
      * Builds and returns the HTML with the form fields of a specific block.
-     * 
+     *
      * @global wpdb $wpdb
      */
-    
 
     /**
      * Regenerates a saved composed email rendering each block. Regeneration is
@@ -184,7 +181,7 @@ class NewsletterEmails extends NewsletterModule {
                 header('Content-Type: text/html;charset=UTF-8');
                 header('X-Robots-Tag: noindex,nofollow,noarchive');
                 header('Cache-Control: no-cache,no-store,private');
-                
+
                 $message = $this->replace($email->message, $user, $email);
                 if (Newsletter::instance()->get_option('do_shortcodes')) {
                     $message = do_shortcode($message);
@@ -193,15 +190,15 @@ class NewsletterEmails extends NewsletterModule {
 
                 die();
                 break;
-                
+
             case 'json':
-if (!$this->is_allowed()) {
+                if (!$this->is_allowed()) {
 
 
-                        header("HTTP/1.0 404 Not Found");
-                        die('Not sent yet');
+                    header("HTTP/1.0 404 Not Found");
+                    die('Not sent yet');
                 }
-                    $email = $this->get_email($_GET['id']);
+                $email = $this->get_email($_GET['id']);
 
                 if (empty($email)) {
                     header("HTTP/1.0 404 Not Found");
@@ -211,12 +208,12 @@ if (!$this->is_allowed()) {
                 header('Content-Type: application/json;charset=UTF-8');
                 header('X-Robots-Tag: noindex,nofollow,noarchive');
                 header('Cache-Control: no-cache,no-store,private');
-                
+
                 echo NewsletterComposer::instance()->to_json($email);
 
                 die();
                 break;
-                
+
             case 'emails-css':
                 $email_id = (int) $_GET['id'];
 
@@ -415,12 +412,12 @@ if (!$this->is_allowed()) {
 
         return array();
     }
-    
+
     /**
      * Used by Instasend
-     * 
+     *
      * @deprecated since version 7.8.0
-     * 
+     *
      * @param type $block_id
      * @param type $wrapper
      * @param type $options
@@ -429,9 +426,6 @@ if (!$this->is_allowed()) {
     function render_block($block_id, $wrapper, $options) {
         return NewsletterComposer::instance()->render_block($block_id, $wrapper, $options);
     }
-
-
-
 }
 
 NewsletterEmails::instance();

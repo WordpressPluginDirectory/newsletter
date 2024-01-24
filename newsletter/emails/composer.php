@@ -64,8 +64,7 @@ if ($controls->is_action()) {
         $email->status = 'new';
         $email->track = Newsletter::instance()->get_option('track');
         $email->token = $this->get_token();
-        $email->message_text = "This email requires a modern e-mail reader but you can view the email online here:\n{email_url}.\nThank you, " . wp_specialchars_decode(get_option('blogname'), ENT_QUOTES) .
-                "\nTo change your subscription follow: {profile_url}.";
+        $email->message_text = NewsletterModuleBase::get_email_default_text_part();
         $email->editor = NewsletterEmails::EDITOR_COMPOSER;
         $email->type = 'message';
         $email->send_on = time();

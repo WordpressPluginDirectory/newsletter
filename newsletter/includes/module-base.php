@@ -1077,6 +1077,10 @@ class NewsletterModuleBase {
         return $email->total > 0 ? intval($email->sent / $email->total * 100) : 0;
     }
 
+    static function get_email_default_text_part() {
+        return __("This email requires a modern e-mail reader.\nView online: {email_url}\nChange your subscription: {profile_url}\nUnsubscribe: {unsubscription_url}", 'newsletter');
+    }
+
     function show_email_progress_bar($email, $attrs = []) {
 
         $email = (object) $email;

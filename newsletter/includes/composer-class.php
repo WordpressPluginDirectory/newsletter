@@ -4,10 +4,11 @@ class NewsletterComposer {
 
     static $instance;
     var $logger;
-    var $blocks;
+    var $blocks = null;
+    var $templates = null;
 
     //const presets = ['halloween', 'zen', 'black-friday', "cta", "invite", "announcement", "posts", "sales", "product", "tour", "simple"];
-    const presets = ['black-friday', 'black-friday-2', "event", 'halloween', 'zen', "cta", "announcement", "posts", "sales", "product", "tour", "simple"];
+    const presets = ['welcome-1', 'valentine', 'black-friday', 'black-friday-2', "event", 'halloween', 'zen', "cta", "announcement", "posts", "sales", "product", "tour", "simple"];
 
     /**
      *
@@ -257,6 +258,11 @@ class NewsletterComposer {
 
     function get_preset_from_file($id, $dir = null) {
 
+        $templates = $this->get_templates();
+        if (isset($templates[$id])) {
+            return $templates[$id];
+        }
+
         if (is_null($dir)) {
             $dir = NEWSLETTER_DIR . '/emails/presets';
         }
@@ -273,6 +279,58 @@ class NewsletterComposer {
         $json->icon = Newsletter::plugin_url() . "/emails/presets/$id/icon.png?ver=2";
 
         return $json;
+    }
+
+    function build_template($dir) {
+        $dir = realpath($dir);
+        $dir = wp_normalize_path($dir);
+        $dir = untrailingslashit($dir);
+        $full_file = $dir . '/template.json';
+        if (!is_file($full_file)) {
+            return new WP_Error('1', 'Missing template.json file in ' . $dir);
+        }
+
+        $wp_content_dir = wp_normalize_path(realpath(WP_CONTENT_DIR));
+
+        $relative_dir = substr($dir, strlen($wp_content_dir));
+        $file = basename($dir);
+
+        $template_url = content_url($relative_dir);
+        $json = file_get_contents($full_file);
+        $json = str_replace("{template_url}", $template_url, $json);
+        $data = json_decode($json);
+        if (!$data) {
+            return new WP_Error('1', 'Unable to decode the template JSON in ' . $dir);
+        }
+        $data->icon = $template_url . "/icon.png?ver=2";
+        $data->id = sanitize_key(basename($dir));
+        $data->url = $template_url;
+
+        return $data;
+    }
+
+    function get_templates() {
+
+        if (!is_null($this->templates)) {
+            return $this->templates;
+        }
+        $this->templates = [];
+        do_action('newsletter_register_templates');
+
+        foreach (TNP_Composer::$template_dirs as $dir) {
+            $template = $this->build_template($dir);
+            if (is_wp_error($template)) {
+                $this->logger->error($template);
+                continue;
+            }
+            if (!isset($this->templates[$template->id])) {
+                $this->templates[$template->id] = $template;
+            } else {
+                $this->logger->error('The template "' . $template->id . '" has already been registered');
+            }
+        }
+
+        return $this->templates;
     }
 
     /**
@@ -332,6 +390,10 @@ class NewsletterComposer {
     }
 
     function get_preset_composer_options($preset_id) {
+        $templates = $this->get_templates();
+        if (isset($templates[$preset_id])) {
+            return (array) $templates[$preset_id]->settings;
+        }
 
         if ($this->is_a_tnp_default_preset($preset_id)) {
             $preset = $this->get_preset_from_file($preset_id);
@@ -367,6 +429,24 @@ class NewsletterComposer {
     function get_preset_content($preset_id) {
 
         $content = '';
+
+        $templates = $this->get_templates();
+        if (isset($templates[$preset_id])) {
+            $composer = (array) $templates[$preset_id]->settings;
+            foreach ($templates[$preset_id]->blocks as $item) {
+                $options = (array) $item;
+                foreach ($options as &$o) {
+                    if (is_object($o)) {
+                        $o = (array) $o;
+                    }
+                }
+                ob_start();
+                $this->render_block($item->block_id, true, $options, [], $composer);
+                $content .= trim(ob_get_clean());
+            }
+            return $content;
+        }
+
 
         if ($this->is_a_tnp_default_preset($preset_id)) {
 
@@ -735,5 +815,4 @@ class NewsletterComposer {
 
         return $result;
     }
-
 }
