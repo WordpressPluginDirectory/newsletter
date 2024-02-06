@@ -14,6 +14,7 @@ if ($controls->is_action()) {
                 unset($controls->data[$k]);
             }
         }
+        $controls->data = wp_kses_post_deep($controls->data);
         $this->save_options($controls->data, '', $language);
         $controls->add_toast_saved();
     }
@@ -34,7 +35,7 @@ foreach (['text'] as $key) {
 
     <div id="tnp-heading">
         <?php $controls->title_help('/profile-page') ?>
-        <h2><?php _e('Subscribers', 'newsletter') ?></h2>
+        <h2><?php esc_html_e('Subscribers', 'newsletter') ?></h2>
         <?php include __DIR__ . '/../users/nav.php' ?>
 
     </div>
@@ -48,9 +49,9 @@ foreach (['text'] as $key) {
             <?php $controls->init(); ?>
             <div id="tabs">
                 <ul>
-                    <li><a href="#tabs-general"><?php _e('General', 'newsletter') ?></a></li>
-                    <li><a href="#tabs-fields"><?php _e('Form', 'newsletter') ?></a></li>
-                    <li><a href="#tabs-labels"><?php _e('Messages and labels', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-general"><?php esc_html_e('General', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-fields"><?php esc_html_e('Form', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-labels"><?php esc_html_e('Messages and labels', 'newsletter') ?></a></li>
                     <?php if (NEWSLETTER_DEBUG) { ?>
                         <li><a href="#tabs-debug">Debug</a></li>
                     <?php } ?>
@@ -61,7 +62,7 @@ foreach (['text'] as $key) {
                     <table class="form-table">
 
                         <tr>
-                            <th><?php _e('Profile page', 'newsletter') ?>
+                            <th><?php esc_html_e('Page content', 'newsletter') ?>
                             </th>
                             <td>
 
@@ -80,7 +81,7 @@ foreach (['text'] as $key) {
                         </tr>
 
                         <tr>
-                            <th><?php _e('Alternative URL', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Alternative URL', 'newsletter') ?></th>
                             <td>
                                 <?php $controls->text('url', 70); ?>
                                 <p class="description">
@@ -100,18 +101,18 @@ foreach (['text'] as $key) {
                         <table class="widefat" style="width: auto">
                             <thead>
                                 <tr>
-                                    <th><?php _e('Field', 'newsletter') ?></th>
+                                    <th><?php esc_html_e('Field', 'newsletter') ?></th>
                                     <th>
-                                        <?php _e('Show', 'newsletter') ?>
+                                        <?php esc_html_e('Show', 'newsletter') ?>
                                     </th>
                                     <th>
-                                        <?php _e('Required', 'newsletter') ?></th>
+                                        <?php esc_html_e('Required', 'newsletter') ?></th>
                                     </th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <th><?php _e('Email', 'newsletter') ?></th>
+                                    <th><?php esc_html_e('Email', 'newsletter') ?></th>
                                     <td>
                                         <?php $controls->checkbox2('email') ?>
                                     </td>
@@ -120,7 +121,7 @@ foreach (['text'] as $key) {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th><?php _e('First name', 'newsletter') ?></th>
+                                    <th><?php esc_html_e('First name', 'newsletter') ?></th>
                                     <td>
                                         <?php $controls->checkbox2('name') ?>
                                     </td>
@@ -129,7 +130,7 @@ foreach (['text'] as $key) {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th><?php _e('Last name', 'newsletter') ?></th>
+                                    <th><?php esc_html_e('Last name', 'newsletter') ?></th>
                                     <td>
                                         <?php $controls->checkbox2('surname') ?>
                                     </td>
@@ -138,14 +139,14 @@ foreach (['text'] as $key) {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th><?php _e('Gender', 'newsletter') ?></th>
+                                    <th><?php esc_html_e('Gender', 'newsletter') ?></th>
 
                                     <td>
                                         <?php $controls->checkbox2('sex') ?>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th><?php _e('Language', 'newsletter') ?></th>
+                                    <th><?php esc_html_e('Language', 'newsletter') ?></th>
 
                                     <td>
                                         <?php $controls->checkbox2('language') ?>
@@ -155,8 +156,8 @@ foreach (['text'] as $key) {
 
                                 <tr>
                                     <th style="vertical-align: top">
-                                        <?php _e('Lists', 'newsletter') ?><br>
-                                        <a href="?page=newsletter_subscription_lists" target="_blank"><small><?php _e('Configure', 'newsletter') ?></small></a>
+                                        <?php esc_html_e('Lists', 'newsletter') ?><br>
+                                        <a href="?page=newsletter_subscription_lists" target="_blank"><small><?php esc_html_e('Configure', 'newsletter') ?></small></a>
                                     </th>
 
                                     <td>
@@ -168,8 +169,8 @@ foreach (['text'] as $key) {
 
                                 <tr>
                                     <th style="vertical-align: top">
-                                        <?php _e('Custom fields', 'newsletter') ?><br>
-                                        <a href="?page=newsletter_subscription_customfields" target="_blank"><small><?php _e('Configure', 'newsletter') ?></small></a>
+                                        <?php esc_html_e('Custom fields', 'newsletter') ?><br>
+                                        <a href="?page=newsletter_subscription_customfields" target="_blank"><small><?php esc_html_e('Configure', 'newsletter') ?></small></a>
                                     </th>
 
                                     <td>
@@ -192,7 +193,7 @@ foreach (['text'] as $key) {
                     <?php $this->language_notice() ?>
                     <table class="form-table">
                         <tr>
-                            <th><?php _e('Profile saved', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Profile saved', 'newsletter') ?></th>
                             <td>
                                 <?php $controls->text('saved', 80, $this->get_default_text('saved')); ?>
                             </td>
@@ -200,7 +201,7 @@ foreach (['text'] as $key) {
 
                         <tr>
                         <tr>
-                            <th><?php _e('Email changed alert', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Email changed alert', 'newsletter') ?></th>
                             <td>
                                 <?php $controls->text('email_changed', 80, $this->get_default_text('email_changed')); ?>
                             </td>
@@ -210,21 +211,21 @@ foreach (['text'] as $key) {
 
                         <tr>
                         <tr>
-                            <th><?php _e('General error', 'newsletter') ?></th>
+                            <th><?php esc_html_e('General error', 'newsletter') ?></th>
                             <td>
                                 <?php $controls->text('error', 80, $this->get_default_text('error')); ?>
                             </td>
                         </tr>
 
                         <tr>
-                            <th><?php _e('"Save" label', 'newsletter') ?></th>
+                            <th><?php esc_html_e('"Save" label', 'newsletter') ?></th>
                             <td>
                                 <?php $controls->text('save_label', 30, $this->get_default_text('save_label')); ?>
                             </td>
                         </tr>
 
                         <tr>
-                            <th><?php _e('Privacy link text', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Privacy link text', 'newsletter') ?></th>
                             <td>
                                 <?php $controls->text('privacy_label', 80, $this->get_default_text('privacy_label')); ?>
                                 <p class="description">
@@ -238,7 +239,7 @@ foreach (['text'] as $key) {
 
                 <?php if (NEWSLETTER_DEBUG) { ?>
                     <div id="tabs-debug">
-                        <pre><?php echo esc_html(json_encode($this->get_db_options('', $language), JSON_PRETTY_PRINT)) ?></pre>
+                        <pre><?php echo esc_html(wp_json_encode($this->get_db_options('', $language), JSON_PRETTY_PRINT)) ?></pre>
                     </div>
                 <?php } ?>
             </div>

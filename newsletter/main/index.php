@@ -68,93 +68,98 @@ $lists = $this->get_lists();
 
 $sources = [];
 
+$extensions_url = '?page=newsletter_main_extension';
+if (class_exists('NewsletterExtensions')) {
+    $extensions_url = '?page=newsletter_extensions_index';
+}
+
 $active = class_exists('NewsletterWoocommerce');
-$url = $active ? '?page=newsletter_woocommerce_index' : '?page=newsletter_main_extensions';
+$url = $active ? '?page=newsletter_woocommerce_index' : $extensions_url;
 $sources[] = ['title' => 'WC Registration', 'active' => $active, 'url' => $url];
 
 $active = class_exists('NewsletterWoocommerce');
-$url = $active ? '?page=newsletter_woocommerce_index' : '?page=newsletter_main_extensions';
+$url = $active ? '?page=newsletter_woocommerce_index' : $extensions_url;
 $sources[] = ['title' => 'WC Checkout', 'active' => $active, 'url' => $url];
 
 $active = class_exists('NewsletterCF7');
-$url = $active ? '?page=newsletter_cf7_index' : '?page=newsletter_main_extensions';
+$url = $active ? '?page=newsletter_cf7_index' : $extensions_url;
 $sources[] = ['title' => 'CF7 Forms', 'active' => $active, 'url' => $url];
 
 $active = class_exists('NewsletterWPForms');
-$url = $active ? '?page=newsletter_wpnlforms_index' : '?page=newsletter_main_extensions';
+$url = $active ? '?page=newsletter_wpnlforms_index' : $extensions_url;
 $sources[] = ['title' => 'WP Forms', 'active' => $active, 'url' => $url];
 
 $active = class_exists('NewsletterNinjaForms');
-$url = $active ? '?page=newsletter_ninjaforms_index' : '?page=newsletter_main_extensions';
+$url = $active ? '?page=newsletter_ninjaforms_index' : $extensions_url;
 $sources[] = ['title' => 'Ninja Forms', 'active' => $active, 'url' => $url];
 
 $active = class_exists('NewsletterGravityForms');
-$url = $active ? '?page=newsletter_gravityforms_index' : '?page=newsletter_main_extensions';
+$url = $active ? '?page=newsletter_gravityforms_index' : $extensions_url;
 $sources[] = ['title' => 'Gravity Forms', 'active' => $active, 'url' => $url];
 
 $active = class_exists('NewsletterElementor');
-$url = $active ? '?page=newsletter_elementor_index' : '?page=newsletter_main_extensions';
+$url = $active ? '?page=newsletter_elementor_index' : $extensions_url;
 $sources[] = ['title' => 'Elementor Forms', 'active' => $active, 'url' => $url];
 
 $active = class_exists('NewsletterForminator');
-$url = $active ? '?page=newsletter_forminator_index' : '?page=newsletter_main_extensions';
+$url = $active ? '?page=newsletter_forminator_index' : $extensions_url;
 $sources[] = ['title' => 'Forminator Forms', 'active' => $active, 'url' => $url];
 
 $active = class_exists('NewsletterFormidable');
-$url = $active ? '?page=newsletter_formidable_index' : '?page=newsletter_main_extensions';
+$url = $active ? '?page=newsletter_formidable_index' : $extensions_url;
 $sources[] = ['title' => 'Formidable Forms', 'active' => $active, 'url' => $url];
 
 $active = class_exists('NewsletterFluentForms');
-$url = $active ? '?page=newsletter_fluentforms_index' : '?page=newsletter_main_extensions';
+$url = $active ? '?page=newsletter_fluentforms_index' : $extensions_url;
 $sources[] = ['title' => 'Fluent Forms', 'active' => $active, 'url' => $url];
 
 $active = class_exists('NewsletterApi');
-$url = $active ? '?page=newsletter_api_index' : '?page=newsletter_main_extensions';
+$url = $active ? '?page=newsletter_api_index' : $extensions_url;
 $sources[] = ['title' => 'Newsletter API', 'active' => $active, 'url' => $url];
 
 $active = class_exists('NewsletterPmpro');
-$url = $active ? '?page=newsletter_pmpro_index' : '?page=newsletter_main_extensions';
+$url = $active ? '?page=newsletter_pmpro_index' : $extensions_url;
 $sources[] = ['title' => 'Paid Memb. Pro', 'active' => $active, 'url' => $url];
 
 $active = class_exists('NewsletterEdd');
-$url = $active ? '?page=newsletter_edd_index' : '?page=newsletter_main_extensions';
+$url = $active ? '?page=newsletter_edd_index' : $extensions_url;
 $sources[] = ['title' => 'EDD Checkout', 'active' => $active, 'url' => $url];
 
 $active = class_exists('NewsletterComments');
-$url = $active ? '?page=newsletter_comments_index' : '?page=newsletter_main_extensions';
+$url = $active ? '?page=newsletter_comments_index' : $extensions_url;
 $sources[] = ['title' => 'WP Comments', 'active' => $active, 'url' => $url];
 
 $active = class_exists('NewsletterAutomated');
-$url = $active ? '?page=newsletter_automated_index' : '?page=newsletter_main_extensions';
+$url = $active ? '?page=newsletter_automated_index' : '?page=newsletter_main_automated';
 $automated = ['title' => 'Automated', 'active' => $active, 'url' => $url, 'usable' => true];
 
 $active = class_exists('NewsletterAutoresponder');
-$url = $active ? '?page=newsletter_autoresponder_index' : '?page=newsletter_main_extensions';
+$url = $active ? '?page=newsletter_autoresponder_index' : $extensions_url;
 $autoresponder = ['title' => 'Autoresponder', 'active' => $active, 'url' => $url, 'usable' => true];
 
 $active = class_exists('NewsletterWpUsers');
-$url = $active ? '?page=newsletter_wpusers_index' : '?page=newsletter_main_extensions';
+$url = $active ? '?page=newsletter_wpusers_index' : $extensions_url;
 $sources[] = ['title' => 'WP Signup', 'active' => $active, 'url' => $url, 'usable' => $active];
 
 $active = class_exists('NewsletterReports');
-$url = $active ? '?page=newsletter_reports_newsletters' : '?page=newsletter_main_extensions#analytics';
+$url = $active ? '?page=newsletter_reports_newsletters' : $extensions_url . '#analytics';
 $reports = ['title' => 'Advanced Reports', 'active' => $active, 'url' => $url, 'usable' => true];
 
 $blocks = [];
 $active = class_exists('NewsletterBlocks');
-$url = $active ? '?page=newsletter_blocks_index' : '?page=newsletter_main_extensions';
+$url = $active ? '?page=newsletter_blocks_index' : $extensions_url;
 $blocks[] = ['title' => 'Extra Blocks', 'active' => $active, 'url' => $url];
 
 $active = class_exists('NewsletterWoocommerce');
-$url = $active ? '?page=newsletter_blocks_index' : '?page=newsletter_main_extensions';
+$url = $active ? '?page=newsletter_blocks_index' : $extensions_url;
 $blocks[] = ['title' => 'WC Products', 'active' => $active, 'url' => $url];
 
 $active = class_exists('NewsletterEdd');
-$url = $active ? '?page=newsletter_blocks_index' : '?page=newsletter_main_extensions';
+$url = $active ? '?page=newsletter_blocks_index' : $extensions_url;
 $blocks[] = ['title' => 'EDD Downloads', 'active' => $active, 'url' => $url];
 
 $active = class_exists('NewsletterEvents');
-$url = $active ? '?page=newsletter_blocks_index' : '?page=newsletter_main_extensions';
+$url = $active ? '?page=newsletter_blocks_index' : $extensions_url;
 $blocks[] = ['title' => 'Events', 'active' => $active, 'url' => $url];
 ?>
 
@@ -164,7 +169,7 @@ $blocks[] = ['title' => 'Events', 'active' => $active, 'url' => $url];
 
 <div class="wrap" id="tnp-wrap">
 
-    <?php include NEWSLETTER_DIR . '/tnp-header.php'; ?>
+    <?php include NEWSLETTER_ADMIN_HEADER ?>
 
     <div id="tnp-body" class="tnp-main-index">
 

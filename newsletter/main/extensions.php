@@ -22,23 +22,23 @@ function tnp_extensions_table($extensions, $category) {
     <table class="widefat tnp-extensions">
         <?php foreach ($extensions as $e) { ?>
             <?php if (strpos($e->category, $category) === false) continue; ?>
-            <tr>
+            <tr id="<?php echo esc_attr($e->slug) ?>">
                 <td width="1%">
                     <?php if ($e->url) { ?>
-                        <a href="<?php echo $e->url ?>" target="_blank">
+                        <a href="<?php echo esc_attr($e->url) ?>" target="_blank">
                         <?php } ?>
-                        <img src="<?php echo $e->image ?>" alt="<?php echo esc_attr($e->title) ?>">
+                        <img src="<?php echo esc_attr($e->image) ?>" alt="<?php echo esc_attr($e->title) ?>">
                         <?php if ($e->url) { ?>
                         </a>
                     <?php } ?>
                 </td>
                 <td width="79%">
                     <?php if ($e->url) { ?>
-                        <a href="<?php echo $e->url ?>" target="_blank" style="color: #444">
+                        <a href="<?php echo esc_attr($e->url) ?>" target="_blank" style="color: #444">
                         <?php } ?>
                         <strong><?php echo esc_html($e->title) ?></strong>
                         <?php if ($e->free) { ?>
-                            <span class="tnp-free">Free</span>
+                            <span class="tnp-free"><?php esc_html_e('Free', 'newsletter') ?></span>
                         <?php } ?>
 
                         <div style="font-size:.9em">
@@ -51,10 +51,10 @@ function tnp_extensions_table($extensions, $category) {
                 <td width="20%">
                     <?php if ($e->free) { ?>
                         <a href="#tnp-body" class="tnp-action tnp-install">
-                            <i class="fas fa-download" aria-hidden="true"></i> Free
+                            <i class="fas fa-download" aria-hidden="true"></i> <?php esc_html_e('Free', 'newsletter') ?>
                         </a>
                     <?php } else { ?>
-                        <a href="https://www.thenewsletterplugin.com/premium?utm_source=manager&utm_medium=<?php echo urlencode($e->slug) ?>&utm_campaign=plugin" class="tnp-action tnp-buy" target="_blank">
+                        <a href="https://www.thenewsletterplugin.com/premium?utm_source=manager&utm_medium=<?php echo esc_attr(urlencode($e->slug)) ?>&utm_campaign=plugin" class="tnp-action tnp-buy" target="_blank">
                             <i class="fas fa-shopping-cart" aria-hidden="true"></i> Buy Now
                         </a>
                     <?php } ?>
@@ -75,7 +75,7 @@ function tnp_extensions_table($extensions, $category) {
 
 <div class="wrap tnp-main tnp-main-extensions" id="tnp-wrap">
 
-    <?php include NEWSLETTER_DIR . '/header.php'; ?>
+    <?php include NEWSLETTER_ADMIN_HEADER ?>
 
     <div id="tnp-body">
 
@@ -92,7 +92,7 @@ function tnp_extensions_table($extensions, $category) {
                 </div>
                 <div class="tnp-promo-buttons">
                     <a class="tnp-promo-button" href="https://www.thenewsletterplugin.com/get-addons-manager"><i class="fas fa-cloud-download-alt"></i> Download Addons Manager</a>
-                    <a class="tnp-promo-button" href="<?php echo admin_url('plugin-install.php?tab=upload') ?>"><i class="fas fa-cloud-upload-alt"></i> Install</a>
+                    <a class="tnp-promo-button" href="<?php echo esc_attr(admin_url('plugin-install.php?tab=upload')) ?>"><i class="fas fa-cloud-upload-alt"></i> Install</a>
                 </div>
 
             </div>

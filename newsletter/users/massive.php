@@ -119,20 +119,20 @@ if ($controls->is_action('change_status')) {
 
 <div class="wrap tnp-users tnp-users-massive" id="tnp-wrap">
 
-    <?php include NEWSLETTER_DIR . '/header.php'; ?>
+    <?php include NEWSLETTER_ADMIN_HEADER; ?>
 
     <div id="tnp-heading">
 
-        <h2><?php _e('Subscribers', 'newsletter') ?></h2>
-        
+        <h2><?php esc_html_e('Subscribers', 'newsletter') ?></h2>
+
         <?php include __DIR__ . '/nav.php' ?>
     </div>
 
     <div id="tnp-body">
-        
+
         <?php $controls->show(); ?>
-        
-        <p><?php _e('Please backup before running a massive action.', 'newsletter') ?></p>
+
+        <p style="font-weight: bold"><?php esc_html_e('Please backup before running maintenance actions.', 'newsletter') ?></p>
 
         <?php if (!empty($results)) { ?>
 
@@ -148,21 +148,21 @@ if ($controls->is_action('change_status')) {
 
             <div id="tabs">
                 <ul>
-                    <li><a href="#tabs-1"><?php _e('General', 'newsletter') ?></a></li>
-                    <li><a href="#tabs-2"><?php _e('Lists', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-1"><?php esc_html_e('General', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-2"><?php esc_html_e('Lists', 'newsletter') ?></a></li>
                 </ul>
 
                 <div id="tabs-1">
                     <table class="widefat" style="width: auto">
                         <thead>
                             <tr>
-                                <th><?php _e('Status', 'newsletter') ?></th>
-                                <th><?php _e('Total', 'newsletter') ?></th>
-                                <th><?php _e('Actions', 'newsletter') ?></th>
+                                <th><?php esc_html_e('Status', 'newsletter') ?></th>
+                                <th><?php esc_html_e('Total', 'newsletter') ?></th>
+                                <th><?php esc_html_e('Actions', 'newsletter') ?></th>
                             </tr>
                         </thead>
                         <tr>
-                            <td><?php _e('Total', 'newsletter') ?></td>
+                            <td><?php esc_html_e('Total', 'newsletter') ?></td>
                             <td>
                                 <?php echo $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE); ?>
                             </td>
@@ -171,7 +171,7 @@ if ($controls->is_action('change_status')) {
                             </td>
                         </tr>
                         <tr>
-                            <td><?php _e('Confirmed', 'newsletter') ?></td>
+                            <td><?php esc_html_e('Confirmed', 'newsletter') ?></td>
                             <td>
                                 <?php echo $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE . " where status='C'"); ?>
                             </td>
@@ -180,7 +180,7 @@ if ($controls->is_action('change_status')) {
                             </td>
                         </tr>
                         <tr>
-                            <td>Not confirmed</td>
+                            <td><?php esc_html_e('Not comfirmed', 'newsletter') ?></td>
                             <td>
                                 <?php echo $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE . " where status='S'"); ?>
                             </td>
@@ -190,7 +190,7 @@ if ($controls->is_action('change_status')) {
                             </td>
                         </tr>
                         <tr>
-                            <td><?php _e('Unsubscribed', 'newsletter') ?></td>
+                            <td><?php esc_html_e('Unsubscribed', 'newsletter') ?></td>
                             <td>
                                 <?php echo $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE . " where status='U'"); ?>
                             </td>
@@ -200,7 +200,7 @@ if ($controls->is_action('change_status')) {
                         </tr>
 
                         <tr>
-                            <td><?php _e('Bounced', 'newsletter') ?></td>
+                            <td><?php esc_html_e('Bounced', 'newsletter') ?></td>
                             <td>
                                 <?php echo $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE . " where status='B'"); ?>
                             </td>
@@ -210,7 +210,7 @@ if ($controls->is_action('change_status')) {
                         </tr>
 
                         <tr>
-                            <td><?php _e('Complained', 'newsletter') ?></td>
+                            <td><?php esc_html_e('Complained', 'newsletter') ?></td>
                             <td>
                                 <?php echo $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE . " where status='P'"); ?>
                             </td>
@@ -220,11 +220,11 @@ if ($controls->is_action('change_status')) {
                         </tr>
                         <tr>
                             <td>
-                                <?php _e('Change status', 'newsletter') ?>
+                                <?php esc_html_e('Change status', 'newsletter') ?>
                             </td>
                             <td>
                                 <?php $controls->user_status('status_1'); ?>
-                                <?php _e('to', 'newsletter') ?>
+                                <?php esc_html_e('to', 'newsletter') ?>
                                 <?php $controls->user_status('status_2'); ?>
                             </td>
                             <td>
@@ -234,7 +234,7 @@ if ($controls->is_action('change_status')) {
 
                         <tr>
                             <td>
-                                <?php _e('Inactive since', 'newsletter') ?>
+                                <?php esc_html_e('Inactive since', 'newsletter') ?>
                                 <?php $controls->field_help('https://www.thenewsletterplugin.com/documentation/subscribers-and-management/subscribers/#inactive') ?>
                             </td>
                             <td>
@@ -267,7 +267,7 @@ if ($controls->is_action('change_status')) {
                             <tr>
                                 <td>Language</td>
                                 <td>
-                                    <?php _e('Set to', 'newsletter') ?>
+                                    <?php esc_html_e('Set to', 'newsletter') ?>
                                     <?php $controls->language('language', false) ?> <?php _e('subscribers without a language', 'newsletter') ?>
                                 </td>
                                 <td>
@@ -300,8 +300,8 @@ if ($controls->is_action('change_status')) {
 
                             <td>
                                 <?php $controls->select('list_action', array('move' => 'Change', 'add' => 'Add')); ?>
-                                <?php _e('all subscribers in', 'newsletter') ?> <?php $controls->lists_select('list_1'); ?>
-                                <?php _e('to', 'newsletter') ?> <?php $controls->lists_select('list_2'); ?>
+                                <?php esc_html_e('all subscribers in', 'newsletter') ?> <?php $controls->lists_select('list_1'); ?>
+                                <?php esc_html_e('to', 'newsletter') ?> <?php $controls->lists_select('list_2'); ?>
                                 <?php $controls->button_confirm('list_manage', '&raquo;'); ?>
 
                             </td>
@@ -309,8 +309,8 @@ if ($controls->is_action('change_status')) {
                         <tr>
 
                             <td>
-                                <?php _e('Add to list', 'newsletter') ?>
-                                <?php $controls->lists_select('list_3') ?> <?php _e('subscribers without a list', 'newsletter') ?> <?php $controls->button_confirm('list_none', '&raquo;'); ?>
+                                <?php esc_html_e('Add to list', 'newsletter') ?>
+                                <?php $controls->lists_select('list_3') ?> <?php esc_html_e('subscribers without a list', 'newsletter') ?> <?php $controls->button_confirm('list_none', '&raquo;'); ?>
                             </td>
                         </tr>
 
@@ -324,6 +324,6 @@ if ($controls->is_action('change_status')) {
         </form>
     </div>
 
-    <?php include NEWSLETTER_DIR . '/tnp-footer.php'; ?>
+    <?php include NEWSLETTER_ADMIN_FOOTER; ?>
 
 </div>

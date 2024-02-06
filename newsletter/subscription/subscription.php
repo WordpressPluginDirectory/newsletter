@@ -1,5 +1,4 @@
 <?php
-
 defined('ABSPATH') || exit;
 
 class NewsletterSubscription extends NewsletterModule {
@@ -9,6 +8,8 @@ class NewsletterSubscription extends NewsletterModule {
     const OPTIN_SINGLE = 1;
 
     static $instance;
+
+    var $popup_test = false;
 
     /**
      * @return NewsletterSubscription
@@ -37,19 +38,83 @@ class NewsletterSubscription extends NewsletterModule {
             add_shortcode('newsletter_field', array($this, 'shortcode_newsletter_field'));
         }
 
-        if (!empty($this->get_form_option('under_posts'))) {
+        if (!empty($this->get_option('bottom_enabled', 'inject'))) {
             add_filter('the_content', [$this, 'hook_the_content'], 99);
+        }
+        $this->popup_test = isset($_GET['tnp-popup-test']) && Newsletter::instance()->is_allowed();
+        if (!empty($this->get_option('enabled', 'popup')) || $this->popup_test) {
+            add_action('wp_footer', [$this, 'hook_wp_footer'], 99);
+            add_action('wp_enqueue_scripts', [$this, 'hook_wp_enqueue_scripts']);
+        }
+        add_action('newsletter_action', [$this, 'hook_newsletter_action_popup']);
+    }
+
+    function hook_wp_footer() {
+        if (!$this->popup_test) {
+            $user = Newsletter::instance()->check_user();
+            if ($user && $user->status === 'C') {
+                return;
+            }
+        }
+        ?>
+        <div id="tnp-modal">
+            <div id="tnp-modal-content">
+                <div id="tnp-modal-close">&times;</div>
+                <div id="tnp-modal-body">
+                </div>
+            </div>
+        </div>
+
+        <script>
+            var tnp_popup_test = <?php echo $this->popup_test ? 'true' : 'false' ?>;
+            var tnp_popup_url = '<?php echo esc_js(Newsletter::add_qs(home_url('/'), 'na=popup&language=' . urlencode($this->language()))); ?>';
+            var tnp_popup_action = '<?php echo esc_js($this->build_action_url('sa')); ?>';
+        </script>
+        <script src="<?php echo esc_attr(plugins_url('assets/popup.js', __FILE__)) ?>" async></script>
+        <?php
+    }
+
+    function hook_wp_enqueue_scripts() {
+
+        wp_enqueue_style('newsletter-popup', plugins_url('assets/popup.css', __FILE__), [], NEWSLETTER_VERSION);
+        if (is_rtl()) {
+            //wp_enqueue_style('newsletter-leads-rtl', plugins_url('newsletter-leads') . '/css/leads-rtl.css', [], $this->version);
+        }
+    }
+
+    function hook_newsletter_action_popup($action) {
+        switch ($action) {
+            case 'popup':
+                header('Content-Type: text/html;charset=UTF-8');
+                echo $this->get_option('text', 'popup');
+                echo NewsletterSubscription::instance()->get_subscription_form('popup', '#',
+                        ['class' => 'tnp-subscription-popup', 'id' => 'tnp-subscription-popup']);
+                die();
         }
     }
 
     function hook_the_content($content) {
-        if (!is_single())
+        if (!is_single()) {
             return $content;
+        }
+
+        $style = '';
+//        $bg = $this->get_option('bottom_bg', 'inject');
+//        if (!empty($bg)) {
+//            $style .= 'background-color: ' . sanitize_hex_color($bg) . ' !important;';
+//        }
+//
+//        $color = $this->get_option('bottom_color', 'inject');
+//        if (!empty($color)) {
+//            $style .= 'color: ' . sanitize_hex_color($color) . ' !important;';
+//        }
 
         return $content
-                . '<div class="tnp-subscription-posts">'
-                . $this->get_form_option('under_posts_text')
-                . $this->get_subscription_form('posts')
+                . '<div class="tnp-subscription-posts" id="tnp-subscription-posts"'
+                . ' style="' . esc_attr($style) . '"'
+                . '>'
+                . $this->get_option('bottom_text', 'inject')
+                . $this->get_subscription_form('posts_bottom')
                 . '</div>';
     }
 
@@ -143,6 +208,7 @@ class NewsletterSubscription extends NewsletterModule {
                 die();
 
             // AJAX subscription
+            case 'sa':
             case 'ajaxsub':
 
                 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -612,14 +678,6 @@ class NewsletterSubscription extends NewsletterModule {
 
         $data->email = $_REQUEST['ne'];
 
-        // TODO: Remove and let it be controlled by integrations
-        //die($_REQUEST['nsrc']);
-        if (isset($_REQUEST['nsrc'])) {
-            $data->source = trim(stripslashes($_REQUEST['nsrc']));
-        } else {
-            $data->source = '';
-        }
-
         if (isset($_REQUEST['nn'])) {
             $data->name = stripslashes($_REQUEST['nn']);
         }
@@ -670,8 +728,6 @@ class NewsletterSubscription extends NewsletterModule {
                 }
                 $data->lists['' . $list_id] = 1;
             }
-        } else {
-            $this->logger->debug('No lists received');
         }
 
         if (isset($_REQUEST['welcome_page_id'])) {

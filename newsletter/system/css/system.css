@@ -34,16 +34,16 @@
 }
 
 
-table.widefat {
+/*table.widefat {
     border: 0;
     box-shadow: none;
-}
+}*/
 
-#tnp-status-table>tbody>tr:nth-child(2n+1) {
+/*#tnp-status-table>tbody>tr:nth-child(2n+1) {
     background-color: #ECF0F1;
     border-radius: 2px;
     margin: 5px;
-}
+}*/
 
 #tnp-parameters-table tbody tr:nth-child(2n+1) {
     background-color: #ECF0F1;
@@ -115,7 +115,7 @@ table.widefat {
     text-align: center;
     margin: 0 20px;
     padding: 1em;
-    
+
 }
 .tnp-flow div i {
     font-size: 50px;

@@ -1032,6 +1032,7 @@ class NewsletterModule extends NewsletterModuleBase {
             echo 'document.getElementById("form").submit();';
         }
         echo '</script>';
+
         echo '</body></html>';
         die();
     }

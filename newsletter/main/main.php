@@ -1,6 +1,7 @@
 <?php
 /* @var $this NewsletterMainAdmin */
 /* @var $controls NewsletterControls */
+use Newsletter\License;
 
 defined('ABSPATH') || exit;
 
@@ -9,6 +10,9 @@ if (!$controls->is_action()) {
 } else {
 
     if ($controls->is_action('save')) {
+
+        License::update();
+
         $errors = null;
 
         if (!$this->is_email($controls->data['sender_email'])) {
@@ -40,7 +44,7 @@ if (!$controls->is_action()) {
 
         if (empty($controls->errors)) {
             $this->save_options($controls->data);
-            $controls->add_message_saved();
+            $controls->add_toast_saved();
             $this->logger->debug('Main options saved');
         }
 
@@ -72,22 +76,6 @@ if (!$controls->is_action()) {
         $this->save_options($controls->data);
 
         $controls->messages = 'A new page has been created';
-    }
-}
-
-$license_data = $this->get_license_data(true);
-
-if (is_wp_error($license_data)) {
-    $controls->errors .= esc_html('[' . $license_data->get_error_code()) . '] - ' . esc_html($license_data->get_error_message());
-} else {
-    if ($license_data !== false) {
-        if ($license_data->expire == 0) {
-            $controls->messages = 'Your FREE license is valid';
-        } elseif ($license_data->expire >= time()) {
-            $controls->messages = 'Your license is valid and expires on ' . esc_html(date('Y-m-d', $license_data->expire));
-        } else {
-            $controls->errors = 'Your license has expired on ' . esc_html(date('Y-m-d', $license_data->expire));
-        }
     }
 }
 
@@ -124,12 +112,12 @@ if (!empty($return_path)) {
 
 <div class="wrap" id="tnp-wrap">
 
-    <?php include NEWSLETTER_DIR . '/header.php'; ?>
+    <?php include NEWSLETTER_ADMIN_HEADER; ?>
 
     <div id="tnp-heading">
         <?php $controls->title_help('https://www.thenewsletterplugin.com/plugins/newsletter/newsletter-configuration') ?>
 
-        <h2><?php _e('Settings', 'newsletter') ?></h2>
+        <h2><?php esc_html_e('Settings', 'newsletter'); ?> <?php echo License::get_badge()?></h2>
         <?php include __DIR__ . '/nav.php'?>
 
     </div>
@@ -142,9 +130,9 @@ if (!empty($return_path)) {
             <div id="tabs">
 
                 <ul>
-                    <li><a href="#tabs-basic"><?php _e('Basic Settings', 'newsletter') ?></a></li>
-                    <li><a href="#tabs-speed"><?php _e('Delivery Speed', 'newsletter') ?></a></li>
-                    <li><a href="#tabs-advanced"><?php _e('Advanced Settings', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-basic"><?php esc_html_e('Settings', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-speed"><?php esc_html_e('Delivery Speed', 'newsletter') ?></a></li>
+                    <li class="tnp-tabs-advanced"><a href="#tabs-advanced"><?php esc_html_e('Advanced', 'newsletter') ?></a></li>
                 </ul>
 
                 <div id="tabs-basic">
@@ -153,7 +141,7 @@ if (!empty($return_path)) {
 
                         <tr>
                             <th>
-                                <?php _e('Sender email address', 'newsletter') ?>
+                                <?php esc_html_e('Sender email', 'newsletter') ?>
                                 <?php $controls->field_help('https://www.thenewsletterplugin.com/documentation/installation/newsletter-configuration/#sender') ?>
                             </th>
                             <td>
@@ -165,7 +153,7 @@ if (!empty($return_path)) {
                         </tr>
                         <tr>
                             <th>
-                                <?php _e('Sender name', 'newsletter') ?>
+                                <?php esc_html_e('Sender name', 'newsletter') ?>
                             </th>
                             <td>
                                 <?php $controls->text('sender_name', 40); ?>
@@ -175,7 +163,7 @@ if (!empty($return_path)) {
 
                         <tr>
                             <th>
-                                <?php _e('Dedicated page', 'newsletter') ?>
+                                <?php esc_html_e('Public page', 'newsletter') ?>
                                 <?php $controls->field_help('https://www.thenewsletterplugin.com/documentation/installation/newsletter-configuration/#dedicated-page') ?>
                             </th>
                             <td>
@@ -187,29 +175,29 @@ if (!empty($return_path)) {
                                         $controls->button('create', __('Create the page', 'newsletter'));
                                     }
                                     ?>
-                                
+
                                 <p class="description">
-                                    <?php _e('The page content should be only the shortcode [newsletter]', 'newsletter')?>.
+                                    <?php esc_html_e('The page content should be only the shortcode [newsletter]', 'newsletter')?>.
                                 </p>
 
                                     <?php if (Newsletter::$is_multilanguage) { ?>
                                         <p class="description">
                                             The selected page should be translated in every language leaving [newsletter] as content and changing the title.
                                         </p>
-                                    <?php } ?> 
-                                        
+                                    <?php } ?>
+
                                 <?php } else { ?>
                                     <?php $controls->hidden('page'); ?>
                                     Switch to "all languages" to set this option.
-                                <?php } ?> 
+                                <?php } ?>
                             </td>
                         </tr>
 
                         <tr>
-                            <th><?php _e('License key', 'newsletter') ?></th>
+                            <th><?php esc_html_e('License key', 'newsletter') ?></th>
                             <td>
                                 <?php if (defined('NEWSLETTER_LICENSE_KEY')) { ?>
-                                    <?php _e('A license key is set', 'newsletter') ?>
+                                    <?php esc_html_e('A license key is set', 'newsletter') ?>
                                 <?php } else { ?>
                                     <?php $controls->text('contract_key', 40); ?>
                                     <span class="description">
@@ -221,7 +209,7 @@ if (!empty($return_path)) {
 
                         <tr>
                             <th>
-                                <?php _e('Return path', 'newsletter') ?>
+                                <?php esc_html_e('Return path', 'newsletter') ?>
                                 <?php $controls->field_help('https://www.thenewsletterplugin.com/documentation/installation/newsletter-configuration/#return-path') ?>
                             </th>
                             <td>
@@ -231,7 +219,7 @@ if (!empty($return_path)) {
                         </tr>
                         <tr>
                             <th>
-                                <?php _e('Reply to', 'newsletter') ?>
+                                <?php esc_html_e('Reply to', 'newsletter') ?>
                                 <?php $controls->field_help('https://www.thenewsletterplugin.com/documentation/installation/newsletter-configuration/#reply-to') ?>
                             </th>
                             <td>
@@ -248,7 +236,7 @@ if (!empty($return_path)) {
                     <table class="form-table">
                         <tr>
                             <th>
-                                <?php _e('Max emails per hour', 'newsletter') ?>
+                                <?php esc_html_e('Max emails per hour', 'newsletter') ?>
                                 <?php $controls->field_help('https://www.thenewsletterplugin.com/documentation/installation/newsletter-configuration/#speed') ?>
                             </th>
                             <td>
@@ -267,7 +255,7 @@ if (!empty($return_path)) {
 
                     <table class="form-table">
                         <tr>
-                            <th><?php _e('Allowed roles', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Allowed roles', 'newsletter') ?></th>
                             <td>
                                 <?php
                                 $wp_roles = get_editable_roles();
@@ -296,18 +284,6 @@ if (!empty($return_path)) {
 
                         <tr>
                             <th>
-                                <?php $controls->label(__('Shortcodes', 'newsletter'), '/newsletter-configuration#shortcodes') ?>
-                            </th>
-                            <td>
-                                <?php $controls->yesno('do_shortcodes', 40); ?>
-                                <p class="description">
-                                    Execute shortcodes inside newsletters.
-                                </p>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <th>
                                 <?php $controls->label(__('Log level', 'newsletter'), '/newsletter-configuration#log') ?>
                             </th>
                             <td>
@@ -316,14 +292,14 @@ if (!empty($return_path)) {
                         </tr>
 
                         <tr>
-                            <th><?php _e('Standard styles', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Standard styles', 'newsletter') ?></th>
                             <td>
                                 <?php $controls->disabled('css_disabled'); ?>
                             </td>
                         </tr>
 
                         <tr>
-                            <th><?php _e('Custom styles', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Custom styles', 'newsletter') ?></th>
                             <td>
                                 <?php if (apply_filters('newsletter_enqueue_style', true) === false) { ?>
                                     <p><strong>Warning: Newsletter styles and custom styles are disable by your theme or a plugin.</strong></p>
@@ -334,7 +310,7 @@ if (!empty($return_path)) {
 
 
                         <tr>
-                            <th><?php _e('IP addresses', 'newsletter') ?></th>
+                            <th><?php esc_html_e('IP addresses', 'newsletter') ?></th>
                             <td>
                                 <?php $controls->select('ip', array('' => __('Store', 'newsletter'), 'anonymize' => __('Anonymize', 'newsletter'), 'skip' => __('Do not store', 'newsletter'))); ?>
                             </td>
@@ -374,7 +350,7 @@ if (!empty($return_path)) {
 
     </div>
 
-    <?php include NEWSLETTER_DIR . '/tnp-footer.php'; ?>
+    <?php include NEWSLETTER_ADMIN_FOOTER; ?>
 
 </div>
 

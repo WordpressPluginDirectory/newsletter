@@ -39,6 +39,10 @@ class NewsletterSubscriptionAdmin extends NewsletterModuleAdmin {
         $this->add_admin_page('profile', __('Subscription', 'newsletter'));
         $this->add_admin_page('antispam', __('Security', 'newsletter'));
         $this->add_admin_page('forms', __('Forms', 'newsletter'));
+        $this->add_admin_page('sources', __('Sources', 'newsletter'));
+        $this->add_admin_page('inject', __('Injection', 'newsletter'));
+        $this->add_admin_page('popup', __('Popup', 'newsletter'));
+        $this->add_admin_page('shortcodes', __('Shortcodes', 'newsletter'));
         $this->add_admin_page('template', __('Template', 'newsletter'));
         $this->add_admin_page('index', __('Overview', 'newsletter'));
         $this->add_admin_page('customfields', __('Custom fields', 'newsletter'));

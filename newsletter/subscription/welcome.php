@@ -46,6 +46,7 @@ if (!$controls->is_action()) {
         TNP_Composer::update_email($email, $controls);
         $email = NewsletterEmails::instance()->save_email($email);
         $controls->add_toast_saved();
+        $controls->data = $options;
         TNP_Composer::prepare_controls($controls, $email);
     }
 }
@@ -55,6 +56,8 @@ foreach (['confirmed_message'] as $key) {
         $controls->data[$key . '_custom'] = '1';
     }
 }
+
+
 ?>
 
 <script>

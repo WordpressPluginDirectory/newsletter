@@ -63,10 +63,6 @@ $icon = 'fas fa-plug';
 if ($mailer instanceof NewsletterDefaultMailer) {
     $mailer_name = 'Wordpress';
     $service_name = 'Hosting Provider';
-    if (!empty($functions)) {
-        $mailer_name .= '<br>(see below)';
-        $service_name .= '<br>(see below)';
-    }
     $icon = 'fab fa-wordpress';
 } else {
     $mailer_name = 'Unknown';
@@ -98,22 +94,20 @@ $speed = Newsletter::instance()->get_send_speed();
 
          <h2><?php _e('System', 'newsletter') ?></h2>
         <?php include __DIR__ . '/nav.php' ?>
-        
+
     </div>
 
     <div id="tnp-body">
-        
+
         <?php $controls->show() ?>
-        <p>
-            Test here the email delivery and the path it runs across to your subscribers.
-        </p>
+
         <form method="post" action="">
             <?php $controls->init(); ?>
-            <h3>Mailing test</h3>
+            <h3>Test</h3>
 
             <p>
-                <?php $controls->text_email('test_email', ['required' => true]) ?> 
-                <?php $controls->button('test', __('Send a test message')) ?>
+                <?php $controls->text_email('test_email', ['required' => true]) ?>
+                <?php $controls->button('test', __('Send')) ?>
                 <?php if (empty($options['mail'])) { ?>
                     <span class="tnp-ko">KO</span>
                 <?php } else { ?>
@@ -147,14 +141,14 @@ $speed = Newsletter::instance()->get_send_speed();
         </h3>
 
         <div class="tnp-flow tnp-flow-row">
-            <div class="tnp-mail"><i class="fas fa-envelope"></i><br><br>Messages<br>
+            <div class="tnp-mail"><i class="fas fa-envelope"></i><br><br>Newsletter<br>
                 (max: <?php echo esc_html($speed) ?> emails per hour)
             </div>
             <div class="tnp-arrow">&rightarrow;</div>
             <div class="tnp-addon"><i class="<?php echo $icon ?>"></i><br><br><?php echo $mailer_name ?></div>
             <div class="tnp-arrow">&rightarrow;</div>
             <div class="tnp-service"><i class="fas fa-cog"></i><br><br>
-                <?php echo $service_name ?>
+                <?php echo esc_html($service_name) ?>
             </div>
             <div class="tnp-arrow">&rightarrow;</div>
             <div class="tnp-user"><i class="fas fa-user"></i><br><br>Subscriber</div>
@@ -169,5 +163,5 @@ $speed = Newsletter::instance()->get_send_speed();
 
 
     </div>
-    <?php include NEWSLETTER_DIR . '/tnp-footer.php'; ?>
+    <?php include NEWSLETTER_ADMIN_FOOTER ?>
 </div>

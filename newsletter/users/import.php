@@ -4,11 +4,11 @@ defined('ABSPATH') || exit;
 
 <div class="wrap" id="tnp-wrap">
 
-    <?php include NEWSLETTER_DIR . '/header.php'; ?>
+    <?php include NEWSLETTER_ADMIN_HEADER; ?>
 
     <div id="tnp-heading">
 
-        <h2><?php _e('Import', 'newsletter') ?></h2>
+        <h2><?php esc_html_e('Import', 'newsletter') ?></h2>
 
     </div>
 
@@ -30,6 +30,6 @@ defined('ABSPATH') || exit;
 
     </div>
 
-    <?php include NEWSLETTER_DIR . '/tnp-footer.php'; ?>
+    <?php include NEWSLETTER_ADMIN_FOOTER; ?>
 
 </div>

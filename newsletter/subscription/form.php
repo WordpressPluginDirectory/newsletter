@@ -44,15 +44,19 @@ $main_options = $this->get_main_options('form');
     <?php include NEWSLETTER_ADMIN_HEADER ?>
 
     <div id="tnp-heading">
-<?php $controls->title_help('/subscription') ?>
-        <h2><?php _e('Subscription', 'newsletter') ?></h2>
-        <?php include __DIR__ . '/nav.php' ?>
+        <?php $controls->title_help('/subscription') ?>
+        <h2><?php esc_html_e('Standard Form', 'newsletter') ?></h2>
+        <?php include __DIR__ . '/nav-form.php' ?>
 
     </div>
 
     <div id="tnp-body">
 
         <?php $controls->show(); ?>
+
+        <p>
+            The standard subscription form settings.
+            See it on <a href="<?php echo esc_attr(Newsletter::instance()->get_newsletter_page_url()) ?>" target="_blank">the Newsletter public page</a>.
 
 
         <form action="" method="post">
@@ -61,13 +65,10 @@ $main_options = $this->get_main_options('form');
             <div id="tabs">
 
                 <ul>
-                    <li><a href="#tabs-fields"><?php _e('Main fields', 'newsletter') ?></a></li>
-                    <li><a href="#tabs-lists"><?php _e('Lists', 'newsletter') ?></a></li>
-                    <li><a href="#tabs-customfields"><?php _e('Custom fields', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-fields"><?php esc_html_e('Main fields', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-lists"><?php esc_html_e('Lists', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-customfields"><?php esc_html_e('Custom fields', 'newsletter') ?></a></li>
                     <?php if (NEWSLETTER_DEBUG) { ?>
-                        <li><a href="#tabs-where">Where</a></li>
-                        <li class="tnp-tabs-advanced"><a href="#tabs-advanced">Advanced</a></li>
-
                         <li><a href="#tabs-debug">Debug</a></li>
                     <?php } ?>
                 </ul>
@@ -78,7 +79,7 @@ $main_options = $this->get_main_options('form');
 
                     <table class="form-table">
                         <tr>
-                            <th><?php _e('Email', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Email', 'newsletter') ?></th>
                             <td>
                                 <?php if (!$language) { ?>
                                     <input type="checkbox" checked disabled>
@@ -88,7 +89,7 @@ $main_options = $this->get_main_options('form');
                         </tr>
 
                         <tr>
-                            <th><?php _e('First name', 'newsletter') ?></th>
+                            <th><?php esc_html_e('First name', 'newsletter') ?></th>
                             <td>
                                 <?php if (!$language) { ?>
                                     <?php $controls->checkbox2('name_status', '', ['title' => __('Show', 'newsletter')]); ?>
@@ -102,7 +103,7 @@ $main_options = $this->get_main_options('form');
                             </td>
                         </tr>
                         <tr>
-                            <th><?php _e('Last name', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Last name', 'newsletter') ?></th>
                             <td>
                                 <?php if (!$language) { ?>
                                     <?php $controls->checkbox2('surname_status', '', ['title' => __('Show', 'newsletter')]); ?>
@@ -116,7 +117,7 @@ $main_options = $this->get_main_options('form');
                             </td>
                         </tr>
                         <tr>
-                            <th><?php _e('Gender', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Gender', 'newsletter') ?></th>
                             <td>
                                 <?php if (!$language) { ?>
                                     <?php $controls->checkbox2('sex_status'); ?>
@@ -127,30 +128,30 @@ $main_options = $this->get_main_options('form');
                                 <?php } ?>
                                 <br><br>
 
-                                <strong><?php _e('Option labels', 'newsletter') ?></strong>
+                                <strong><?php esc_html_e('Option labels', 'newsletter') ?></strong>
                                 <br>
                                 <?php $controls->text('sex_none', 20, $this->get_default_text('sex_none', 'form')); ?>
                                 <?php $controls->text('sex_female', 20, $this->get_default_text('sex_female', 'form')); ?>
                                 <?php $controls->text('sex_male', 20, $this->get_default_text('sex_male', 'form')); ?>
                                 <br><br>
-                                <strong><?php _e('Salutation', 'newsletter') ?></strong>
+                                <strong><?php esc_html_e('Salutation', 'newsletter') ?></strong>
                                 <div class="tnpc-fields-row">
                                     <div class="tnpc-field">
-                                        <label><?php _e('Generic', 'newsletter') ?></label>
+                                        <label><?php esc_html_e('Generic', 'newsletter') ?></label>
                                         <?php $controls->text('title_none', 10, $this->get_default_text('title_none', 'form')); ?>
                                     </div>
                                     <div class="tnpc-field">
-                                        <label><?php _e('Female', 'newsletter') ?></label>
+                                        <label><?php esc_html_e('Female', 'newsletter') ?></label>
                                         <?php $controls->text('title_female', 10, $this->get_default_text('title_female', 'form')); ?>
                                     </div>
                                     <div class="tnpc-field">
-                                        <label><?php _e('Male', 'newsletter') ?></label>
+                                        <label><?php esc_html_e('Male', 'newsletter') ?></label>
                                         <?php $controls->text('title_male', 10, $this->get_default_text('title_male', 'form')); ?>
                                     </div>
                                 </div>
 
                                 <p class="description">
-                                    <?php _e('Salutation titles are inserted in emails message when the tag {title} is used. For example "Good morning {title} {surname} {name}".', 'newsletter') ?>
+                                    <?php esc_html_e('Salutation titles are inserted in emails message when the tag {title} is used. For example "Good morning {title} {surname} {name}".', 'newsletter') ?>
                                 </p>
                             </td>
                         </tr>
@@ -158,7 +159,7 @@ $main_options = $this->get_main_options('form');
 
 
                         <tr>
-                            <th><?php _e('Button', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Button', 'newsletter') ?></th>
                             <td>
                                 <?php $controls->text('subscribe', 40, $this->get_default_text('subscribe', 'form')); ?>
                             </td>
@@ -169,14 +170,22 @@ $main_options = $this->get_main_options('form');
                             <td>
                                 <table class="tnpc-grid">
                                     <?php if (!$language) { ?>
-                                        <tr><th><?php _e('Enabled?', 'newsletter') ?></th><td><?php $controls->select('privacy_status', array(0 => __('No', 'newsletter'), 1 => __('Yes', 'newsletter'), 2 => __('Only the notice', 'newsletter'))); ?></td></tr>
+                                        <tr>
+                                            <th><?php esc_html_e('Enabled?', 'newsletter') ?></th>
+                                            <td>
+                                                <?php $controls->select('privacy_status', array(0 => __('No', 'newsletter'), 1 => __('Yes', 'newsletter'), 2 => __('Only the notice', 'newsletter'))); ?>
+                                            </td>
+                                        </tr>
                                     <?php } ?>
-                                    <tr><th><?php _e('Label', 'newsletter') ?></th><td><?php $controls->text('privacy', 50, $this->get_default_text('privacy', 'form')); ?></td></tr>
+                                    <tr>
+                                        <th><?php esc_html_e('Label', 'newsletter') ?></th>
+                                        <td><?php $controls->text('privacy', 50, $this->get_default_text('privacy', 'form')); ?></td>
+                                    </tr>
                                     <tr>
                                         <th>Privacy URL</th>
                                         <td>
                                             <?php if ($language && !empty($controls->data['privacy_use_wp_url'])) { ?>
-                                                <?php _e('The "all language" setting is set to use the WordPress default privacy page. Please translate that page.', 'newsletter') ?>
+                                                <?php esc_html_e('The "all language" setting is set to use the WordPress default privacy page. Please translate that page.', 'newsletter') ?>
                                             <?php } else { ?>
                                                 <?php if (!$language) { ?>
                                                     <?php if (function_exists('get_privacy_policy_url') && get_privacy_policy_url()) { ?>
@@ -186,7 +195,7 @@ $main_options = $this->get_main_options('form');
                                                     <?php } ?>
                                                 <?php } ?>
                                                 <?php if ($language) { ?>
-                                                    <?php _e('To use the WordPress privacy page, switch to "all language" and activate it.', 'newsletter') ?><br>
+                                                    <?php esc_html_e('To use the WordPress privacy page, switch to "all language" and activate it.', 'newsletter') ?><br>
                                                 <?php } ?>
                                                 <?php $controls->text_url('privacy_url', 50); ?>
                                             <?php } ?>
@@ -194,7 +203,7 @@ $main_options = $this->get_main_options('form');
                                     </tr>
                                 </table>
                                 <div class="tnpc-hint">
-                                    <?php _e('The privacy acceptance checkbox (required in many Europen countries) forces the subscriber to check it before proceeding. If an URL is specified the label becomes a link.', 'newsletter') ?>
+                                    <?php esc_html_e('The privacy acceptance checkbox (required in many Europen countries) forces the subscriber to check it before proceeding. If an URL is specified the label becomes a link.', 'newsletter') ?>
                                 </div>
                             </td>
                         </tr>
@@ -206,10 +215,6 @@ $main_options = $this->get_main_options('form');
 
                     <?php $this->language_notice(); ?>
 
-                    <p>
-                        <a href="?page=newsletter_subscription_lists" target="_blank"><?php _e('Configure', 'newsletter') ?></a>
-                    </p>
-
                     <?php if (!$language) { ?>
 
                         <?php
@@ -220,8 +225,8 @@ $main_options = $this->get_main_options('form');
                                 <tr>
                                     <th></th>
                                     <th></th>
-                                    <th><?php _e('Show', 'newsletter') ?></th>
-                                    <th><?php _e('Checked', 'newsletter') ?></th>
+                                    <th><?php esc_html_e('Show', 'newsletter') ?></th>
+                                    <th><?php esc_html_e('Checked', 'newsletter') ?></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -238,15 +243,17 @@ $main_options = $this->get_main_options('form');
                         </table>
 
                     <?php } ?>
+
+                    <p>
+                        <a href="?page=newsletter_subscription_lists" target="_blank"><?php esc_html_e('Configure', 'newsletter') ?></a>
+                    </p>
                 </div>
 
                 <div id="tabs-customfields">
 
                     <?php $this->language_notice(); ?>
 
-                    <p>
-                        <a href="?page=newsletter_subscription_customfields" target="_blank"><?php _e('Configure', 'newsletter') ?></a>
-                    </p>
+
                     <?php if (!$language) { ?>
                         <?php
                         $customfields = $this->get_customfields_public();
@@ -257,7 +264,7 @@ $main_options = $this->get_main_options('form');
                                 <tr>
                                     <th></th>
                                     <th></th>
-                                    <th><?php _e('Show', 'newsletter') ?></th>
+                                    <th><?php esc_html_e('Show', 'newsletter') ?></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -273,61 +280,15 @@ $main_options = $this->get_main_options('form');
                         </table>
                     <?php } ?>
 
-                </div>
-
-                <div id="tabs-advanced">
-
-                    <ul>
-                        <li>
-                            Create forms with <a href="https://www.thenewsletterplugin.com/documentation/subscription/subscription-form-shortcodes/" target="_blank">shortcodes</a></li>
-                        </li>
-                        <li>
-                            Customize newsletters with <a href="https://www.thenewsletterplugin.com/documentation/newsletters/newsletter-tags/" target="_blank">subscriber data tags</a>
-                        </li>
-                        <li>
-                            <a href="?page=newsletter_subscription_forms"><?php _e('HTML coded forms', 'newsletter') ?></a>
-                        </li>
-                    </ul>
+                    <p>
+                        <a href="?page=newsletter_subscription_customfields" target="_blank"><?php esc_html_e('Configure', 'newsletter') ?></a>
+                    </p>
 
                 </div>
 
                 <?php if (NEWSLETTER_DEBUG) { ?>
-
-                    <div id="tabs-where">
-                        <table class="form-table">
-                            <tr>
-                                <th>Main page</th>
-                                <td>
-                                    <a href="<?php echo esc_attr(Newsletter::instance()->get_newsletter_page_url()) ?>">Open</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Widgets</th>
-                                <td>
-                                    <p class="description">
-                                        You can find two widgets (standard and minimal) to be added to your sidebar or
-                                        theme widget areas. You can use the "shortcode widget" provided by WP and use the
-                                        <a href="https://www.thenewsletterplugin.com/documentation/subscription/subscription-form-shortcodes/" target="_blank>"<code>[newsletter_form]</code> shortcode</a>.
-                                    </p>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Show under each post</th>
-                                <td>
-                                    <?php $controls->checkbox('under_posts'); ?>
-                                    <span class="description">
-                                        With the new WordPress full site editor you can alternatively add a subscription wiget
-                                        in the single post template.
-                                    </span>
-                                    <?php $controls->wp_editor('under_posts_text', ['editor_height' => 150]); ?>
-                                    <p class="description">Text shown before the form.</p>
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-
                     <div id="tabs-debug">
-                        <pre><?php echo esc_html(json_encode($this->get_db_options('form', $language), JSON_PRETTY_PRINT)) ?></pre>
+                        <pre><?php echo esc_html(wp_json_encode($this->get_db_options('form', $language), JSON_PRETTY_PRINT)) ?></pre>
                     </div>
                 <?php } ?>
 
@@ -344,6 +305,6 @@ $main_options = $this->get_main_options('form');
 
     </div>
 
-    <?php include NEWSLETTER_ADMIN_FOOTER ?>
+    <?php include NEWSLETTER_ADMIN_FOOTER; ?>
 
 </div>

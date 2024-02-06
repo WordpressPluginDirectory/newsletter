@@ -122,13 +122,13 @@ $controls->data['search_page']++;
     <div id="tnp-heading">
 
         <?php $controls->title_help('/subscribers-and-management/') ?>
-        <h2><?php _e('Subscribers', 'newsletter') ?></h2>
+        <h2><?php esc_html_e('Subscribers', 'newsletter') ?></h2>
         <?php include __DIR__ . '/nav.php' ?>
 
     </div>
 
     <div id="tnp-body">
-        
+
         <?php $controls->show(); ?>
 
         <form id="channel" method="post" action="">
@@ -156,7 +156,7 @@ $controls->data['search_page']++;
 
             <?php if (false && $filtered) { ?>
                 <p><?php _e('The list below is filtered.', 'newsletter') ?></p>
-            <?php } ?>        
+            <?php } ?>
 
             <div class="tnp-paginator">
 
@@ -180,8 +180,8 @@ $controls->data['search_page']++;
                         <td class="check-column"><input type="checkbox" onchange="jQuery('input.tnp-selector').prop('checked', this.checked)"></th>
                         <th>Id</th>
                         <th>Email</th>
-                        <th><?php _e('Name', 'newsletter') ?></th>
-                        <th><?php _e('Status', 'newsletter') ?></th>
+                        <th><?php esc_html_e('Name', 'newsletter') ?></th>
+                        <th><?php esc_html_e('Status', 'newsletter') ?></th>
                         <th style="white-space: nowrap"><?php $controls->checkbox('show_lists', __('Lists', 'newsletter'), ['onchange'=>'this.form.act.value=\'go\'; this.form.submit()']) ?></th>
                         <th>&nbsp;</th>
 
@@ -200,7 +200,7 @@ $controls->data['search_page']++;
                         <td>
                           <?php echo $this->get_user_status_label($s, true) ?>
                         </td>
-                       
+
                             <td>
                                  <?php if (!empty($controls->data['show_lists'])) { ?>
                                 <small><?php
@@ -213,19 +213,18 @@ $controls->data['search_page']++;
                                     ?></small>
                                 <?php } ?>
                             </td>
-                        
+
                         <td>
                             <?php $controls->button_icon_edit($this->get_admin_page_url('edit') . '&amp;id=' . $s->id) ?>
                         </td>
                         <td style="white-space: nowrap">
-                            
+
                             <?php if ($s->status == "C") { ?>
                                 <?php $controls->btn('resend_welcome', '', ['secondary' => true, 'data' => $s->id, 'icon' => 'fa-redo', 'confirm' => true, 'title' => __('Resend welcome', 'newsletter')]); ?>
-                                <?php //$controls->button_icon('resend_welcome', 'fa-redo', __('Resend welcome', 'newsletter'), $s->id, true); ?>
                             <?php } else { ?>
                                 <?php $controls->btn('resend', '', ['secondary' => true, 'data' => $s->id, 'icon' => 'fa-redo', 'confirm' => true, 'title' => __('Resend activation', 'newsletter')]); ?>
                             <?php } ?>
-                            
+
                             <?php $controls->button_icon_delete($s->id); ?>
 
                         </td>
@@ -242,6 +241,6 @@ $controls->data['search_page']++;
         </form>
     </div>
 
-    <?php include NEWSLETTER_DIR . '/tnp-footer.php'; ?>
+    <?php include NEWSLETTER_ADMIN_FOOTER; ?>
 
 </div>

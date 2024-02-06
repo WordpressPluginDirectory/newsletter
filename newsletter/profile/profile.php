@@ -30,10 +30,12 @@ class NewsletterProfile extends NewsletterModule {
 
     function hook_newsletter_action($action, $user, $email) {
 
-        if (in_array($action, ['p', 'profile', 'pe', 'profile-save', 'profile_export', 'ps'])) {
-            if (!$user || $user->status != TNP_User::STATUS_CONFIRMED) {
-                $this->dienow(__('Subscriber not found or not confirmed.', 'newsletter'), '', 404);
-            }
+        if (!in_array($action, ['p', 'profile', 'pe', 'profile-save', 'profile_export', 'ps'])) {
+            return;
+        }
+
+        if (!$user || $user->status != TNP_User::STATUS_CONFIRMED) {
+                $this->dienow(__('Subscriber not found or not confirmed or started from a test newsletter.', 'newsletter'), 'From a test newsletter or subscriber key not valid or subscriber not confirmed', 404);
         }
 
         switch ($action) {
@@ -44,8 +46,7 @@ class NewsletterProfile extends NewsletterModule {
                 $profile_url = $this->message_url($user, $email);
                 $profile_url = apply_filters('newsletter_profile_url', $profile_url, $user); // Compatibility
 
-                wp_redirect($profile_url);
-                die();
+                $this->redirect($profile_url);
 
                 break;
 

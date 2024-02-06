@@ -264,9 +264,15 @@ form.tnp-subscription, form.tnp-profile {
     margin: 0;
 }
 
-.tnp-subscription.tnp-subscription-posts {
+.tnp-subscription-posts {
     margin-top: 2em;
     margin-bottom: 2em;
+    padding: 2rem;
+}
+
+.tnp-subscription-posts .tnp-subscription {
+    max-width: auto;
+    margin: 0;
 }
 
 @media all and (max-width: 525px) {

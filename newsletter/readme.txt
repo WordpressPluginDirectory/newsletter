@@ -1,7 +1,7 @@
 === Newsletter - Send awesome emails from WordPress ===
 Tags: newsletter, email marketing, welcome email, signup forms, lead generation, marketing automation
-Tested up to: 6.4.2
-Stable tag: 8.0.9
+Tested up to: 6.4.3
+Stable tag: 8.1.1
 Contributors: satollo,webagile,michael-travan
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -21,6 +21,7 @@ We redesigned our drag and drop composer to make your campaign creation even eas
 * **Easy-to-use Drag and drop composer** to build responsive newsletters
 * **Unlimited subscribers** with statistics
 * **Unlimited newsletters** with tracking
+* Fully compatible with the **One-Click Unsubscribe** made mandatory by Google and Yahoo
 * **Subscription spam check** with domain/ip black lists, Akismet, captcha
 * **Delivery speed** fine control (from 12 emails per hour to as much as your blog can manage)
 * [WPML ready](https://www.thenewsletterplugin.com/documentation/multilanguage), [Polylang ready](https://www.thenewsletterplugin.com/documentation/multilanguage), [Translatepress ready](https://www.thenewsletterplugin.com/documentation/multilanguage)
@@ -125,6 +126,22 @@ Thank you, The Newsletter Team
 3. The Reports extension
 
 == Changelog ==
+
+= 8.1.1 =
+
+* Fixed user saving
+
+= 8.1.0 =
+
+* Improved logging
+* Removed shortcode option (default on)
+* Simplified the newsletter editing panel
+* Change the one click unsubscribe header to improve bot blocking
+* Changed the delivery engine locks since the WP transients seem not enough reliable
+* Changed the Hero Block to be compatible with Outlook on Mac
+* Added "in posts" forms
+* Added popup form
+* Added forms overview panel
 
 = 8.0.9 =
 

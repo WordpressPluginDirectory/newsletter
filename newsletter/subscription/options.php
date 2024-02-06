@@ -104,10 +104,10 @@ foreach (['confirmed_text', 'confirmed_message', 'confirmation_text', 'confirmat
             <?php $controls->init(); ?>
             <div id="tabs">
                 <ul>
-                    <li><a href="#tabs-subscription"><?php _e('Subscription', 'newsletter') ?></a></li>
-                    <li><a href="#tabs-4"><?php _e('Welcome', 'newsletter') ?></a></li>
-                    <li><a href="#tabs-3"><?php _e('Activation', 'newsletter') ?></a></li>
-                    <li class="tnp-tabs-advanced"><a href="#tabs-advanced"><?php _e('Advanced', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-subscription"><?php esc_html_e('Subscription', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-4"><?php esc_html_e('Welcome', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-3"><?php esc_html_e('Activation', 'newsletter') ?></a></li>
+                    <li class="tnp-tabs-advanced"><a href="#tabs-advanced"><?php esc_html_e('Advanced', 'newsletter') ?></a></li>
                     <?php if (NEWSLETTER_DEBUG) { ?>
                         <li><a href="#tabs-debug">Debug</a></li>
                     <?php } ?>
@@ -123,7 +123,7 @@ foreach (['confirmed_text', 'confirmed_message', 'confirmation_text', 'confirmat
                             </td>
                         </tr>
                         <tr>
-                            <th><?php _e('Subscription page', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Subscription page', 'newsletter') ?></th>
                             <td>
 
                                 <?php $controls->checkbox2('subscription_text_custom', 'Customize', ['onchange' => 'tnp_refresh_binds()']); ?>
@@ -149,7 +149,7 @@ foreach (['confirmed_text', 'confirmed_message', 'confirmation_text', 'confirmat
                         <table class="form-table">
                             <tr>
                                 <th>
-                                    <?php _e('Repeated subscriptions', 'newsletter') ?>
+                                    <?php esc_html_e('Repeated subscriptions', 'newsletter') ?>
                                 </th>
                                 <td>
                                     <?php
@@ -179,12 +179,12 @@ foreach (['confirmed_text', 'confirmed_message', 'confirmation_text', 'confirmat
 
                     <?php $this->language_notice(); ?>
 
-                    <p><?php _e('Only for double opt-in mode.', 'newsletter') ?></p>
+                    <p><?php esc_html_e('Only for double opt-in mode.', 'newsletter') ?></p>
 
 
                     <table class="form-table">
                         <tr>
-                            <th><?php _e('Activation message', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Activation message', 'newsletter') ?></th>
                             <td>
                                 <?php $controls->checkbox2('confirmation_text_custom', 'Customize', ['onchange' => 'tnp_refresh_binds()']); ?>
                                 <div data-bind="options-confirmation_text_custom">
@@ -197,7 +197,7 @@ foreach (['confirmed_text', 'confirmed_message', 'confirmation_text', 'confirmat
                         </tr>
 
                         <tr>
-                            <th><?php _e('Alternative activation page', 'newsletter'); ?></th>
+                            <th><?php esc_html_e('Alternative activation page', 'newsletter'); ?></th>
                             <td>
                                 <?php $controls->text('confirmation_url', 70, 'https://...'); ?>
                             </td>
@@ -206,7 +206,7 @@ foreach (['confirmed_text', 'confirmed_message', 'confirmation_text', 'confirmat
 
                         <!-- CONFIRMATION EMAIL -->
                         <tr>
-                            <th><?php _e('Activation email', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Activation email', 'newsletter') ?></th>
                             <td>
                                 <?php $controls->text('confirmation_subject', 70, $this->get_default_text('confirmation_subject')); ?>
                                 <br><br>
@@ -231,7 +231,7 @@ foreach (['confirmed_text', 'confirmed_message', 'confirmation_text', 'confirmat
                     <?php $this->language_notice(); ?>
                     <table class="form-table">
                         <tr>
-                            <th><?php _e('Welcome message', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Welcome message', 'newsletter') ?></th>
                             <td>
                                 <?php $controls->checkbox2('confirmed_text_custom', 'Customize', ['onchange' => 'tnp_refresh_binds()']); ?>
                                 <div data-bind="options-confirmed_text_custom">
@@ -244,14 +244,14 @@ foreach (['confirmed_text', 'confirmed_message', 'confirmation_text', 'confirmat
                         </tr>
 
                         <tr>
-                            <th><?php _e('Alternative welcome page URL', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Alternative welcome page URL', 'newsletter') ?></th>
                             <td>
                                 <?php $controls->text('confirmed_url', 70, 'https://...'); ?>
                             </td>
                         </tr>
 
                         <tr>
-                            <th><?php _e('Conversion tracking code', 'newsletter') ?>
+                            <th><?php esc_html_e('Conversion tracking code', 'newsletter') ?>
                                 <?php $controls->help('/subscription#conversion') ?></th>
                             <td>
                                 <?php $controls->textarea('confirmed_tracking'); ?>
@@ -275,7 +275,7 @@ foreach (['confirmed_text', 'confirmed_message', 'confirmation_text', 'confirmat
                             </tr>
 
                             <tr>
-                                <th><?php _e('Notifications', 'newsletter') ?></th>
+                                <th><?php esc_html_e('Notifications', 'newsletter') ?></th>
                                 <td>
                                     <?php $controls->yesno('notify'); ?>
                                     <?php $controls->text_email('notify_email'); ?>

@@ -78,7 +78,7 @@ $system_warnings = NewsletterSystemAdmin::instance()->get_warnings_count();
                 </li>
 
                 <li>
-                    <a href="?page=newsletter_subscription_form"><?php _e('Form', 'newsletter') ?></a>
+                    <a href="?page=newsletter_subscription_sources"><?php _e('Forms', 'newsletter') ?></a>
                 </li>
 
                 <li>
@@ -159,7 +159,7 @@ $system_warnings = NewsletterSystemAdmin::instance()->get_warnings_count();
                         <a href="<?php echo admin_url('site-health.php') ?>"><?php _e('WP Site Health') ?></a>
                     </li>
                     <li>
-                        <a href="?page=newsletter_system_delivery"><?php _e('Delivery Diagnostic', 'newsletter') ?></a>
+                        <a href="?page=newsletter_system_delivery"><?php _e('Delivery', 'newsletter') ?></a>
                     </li>
                     <li>
                         <a href="?page=newsletter_system_scheduler"><?php _e('Scheduler', 'newsletter') ?>

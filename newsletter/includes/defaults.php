@@ -90,6 +90,20 @@ class NewsletterDefaults {
             ];
         }
 
+        if ($sub === 'inject') {
+            return [
+                'bottom_enabled' => '0',
+                'bottom_text' => ''
+            ];
+        }
+
+        if ($sub === 'popup') {
+            return [
+                'enabled' => '0',
+                'text' => ''
+            ];
+        }
+
         if ($sub === 'profile') {
             return [
                 'text_custom' => '0',

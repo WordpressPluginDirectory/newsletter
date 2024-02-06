@@ -26,7 +26,7 @@ if (!$user) {
     </div>
 
     <div id="tnp-body">
-        
+
         <?php $controls->show(); ?>
 
         <form method="post" action="">
@@ -36,7 +36,7 @@ if (!$user) {
             <div id="tabs">
 
                 <ul>
-                    <li><a href="#tabs-history"><?php _e('Logs', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-history"><?php esc_html_e('Logs', 'newsletter') ?></a></li>
 
                 </ul>
 
@@ -66,7 +66,7 @@ if (!$user) {
                                         $data = $data['new'];
                                     ?>
                                     <tr>
-                                        <td><?php echo $log->id ?></td>
+                                        <td><?php echo esc_html($log->id) ?></td>
                                         <td><?php echo $controls->print_date($log->created) ?></td>
                                         <td><?php echo esc_html($log->source) ?></td>
                                         <td><?php echo esc_html($log->ip) ?></td>
@@ -91,7 +91,7 @@ if (!$user) {
 
             </div>
 
-           
+
 
         </form>
     </div>

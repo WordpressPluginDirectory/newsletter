@@ -4,8 +4,8 @@
 
 defined('ABSPATH') || exit;
 
-$id = (int) $_GET['id'];
-$user = $this->get_user($id);
+$user_id = (int) $_GET['id'];
+$user = $this->get_user($user_id);
 
 if (!$user) {
     echo 'Subscriber not found.';
@@ -16,7 +16,7 @@ if ($controls->is_action('save')) {
 
     $email = $this->normalize_email($controls->data['email']);
     if (empty($email)) {
-        $controls->errors = __('Wrong email address', 'newsletter');
+        $controls->errors = esc_html__('Wrong email address', 'newsletter');
     } else {
         $controls->data['email'] = $email;
     }
@@ -24,8 +24,8 @@ if ($controls->is_action('save')) {
 
     if (empty($controls->errors)) {
         $u = $this->get_user($controls->data['email']);
-        if ($u && $u->id != $id) {
-            $controls->errors = __('The email address is already in use', 'newsletter');
+        if ($u && $u->id != $user->id) {
+            $controls->errors = esc_html__('The email address is already in use', 'newsletter');
         }
     }
 
@@ -41,12 +41,12 @@ if ($controls->is_action('save')) {
             $controls->data['token'] = $this->get_token();
         }
 
-        $controls->data['id'] = $id;
+        $controls->data['id'] = $user->id;
         $user = $this->save_user($controls->data);
         $this->add_user_log($user, 'edit');
         //$this->save_user_meta($id, 'ip', $controls->data['ip']);
         if ($user === false) {
-            $controls->errors = __('Error. Check the log files.', 'newsletter');
+            $controls->errors = esc_html__('Error. Check the log files.', 'newsletter');
         } else {
             $controls->add_message_saved();
             $controls->data = (array) $user;
@@ -55,7 +55,7 @@ if ($controls->is_action('save')) {
 }
 
 if ($controls->is_action('delete')) {
-    $this->delete_user($id);
+    $this->delete_user($user->id);
     $controls->js_redirect($this->get_admin_page_url('index'));
     return;
 }
@@ -107,56 +107,56 @@ function percentValue($value, $total) {
             <div id="tabs">
 
                 <ul>
-                    <li><a href="#tabs-general"><?php _e('General', 'newsletter') ?></a></li>
-                    <li><a href="#tabs-preferences"><?php _e('Lists', 'newsletter') ?></a></li>
-                    <li><a href="#tabs-profile"><?php _e('Custom fields', 'newsletter') ?></a></li>
-                    <li><a href="#tabs-other"><?php _e('Other', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-general"><?php esc_html_e('General', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-preferences"><?php esc_html_e('Lists', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-profile"><?php esc_html_e('Custom fields', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-other"><?php esc_html_e('Other', 'newsletter') ?></a></li>
                 </ul>
 
                 <div id="tabs-general" class="tnp-tab">
 
-                    <?php do_action('newsletter_users_edit_general', $id, $controls) ?>
+                    <?php do_action('newsletter_users_edit_general', $user->id, $controls) ?>
 
                     <table class="form-table">
 
                         <tr>
-                            <th><?php _e('Email', 'newsletter'); ?></th>
+                            <th><?php esc_html_e('Email', 'newsletter'); ?></th>
                             <td>
                                 <?php $controls->text_email('email', 60); ?>
                             </td>
                         </tr>
                         <tr>
-                            <th><?php _e('First name', 'newsletter'); ?></th>
+                            <th><?php esc_html_e('First name', 'newsletter'); ?></th>
                             <td>
                                 <?php $controls->text('name', 50); ?>
                             </td>
                         </tr>
                         <tr>
-                            <th><?php _e('Last name', 'newsletter'); ?></th>
+                            <th><?php esc_html_e('Last name', 'newsletter'); ?></th>
                             <td>
                                 <?php $controls->text('surname', 50); ?>
                             </td>
                         </tr>
                         <tr>
-                            <th><?php _e('Gender', 'newsletter'); ?></th>
+                            <th><?php esc_html_e('Gender', 'newsletter'); ?></th>
                             <td>
                                 <?php $controls->gender('sex'); ?>
                             </td>
                         </tr>
                         <tr>
-                            <th><?php _e('Status', 'newsletter'); ?></th>
+                            <th><?php esc_html_e('Status', 'newsletter'); ?></th>
                             <td>
                                 <?php $controls->user_status() ?>
                             </td>
                         </tr>
                         <tr>
-                            <th><?php _e('Language', 'newsletter'); ?></th>
+                            <th><?php esc_html_e('Language', 'newsletter'); ?></th>
                             <td>
                                 <?php $controls->language('language', __('None', 'newsletter')); ?>
                             </td>
                         </tr>
                         <tr>
-                            <th><?php _e('Test subscriber', 'newsletter'); ?>
+                            <th><?php esc_html_e('Test subscriber', 'newsletter'); ?>
                                 <br><?php $controls->help('https://www.thenewsletterplugin.com/documentation/subscribers#test-subscribers') ?></th>
                             <td>
                                 <?php $controls->yesno('test'); ?>
@@ -165,18 +165,12 @@ function percentValue($value, $total) {
 
                         <?php do_action('newsletter_user_edit_extra', $controls); ?>
 
-                        <tr>
-                            <th>Feed by mail</th>
-                            <td>
-                                <?php $controls->yesno('feed'); ?>
-                            </td>
-                        </tr>
                     </table>
                 </div>
                 <div id="tabs-preferences" class="tnp-tab">
                     <table class="form-table">
                         <tr>
-                            <th><?php _e('Lists', 'newsletter') ?><br><?php echo $controls->help('https://www.thenewsletterplugin.com/plugins/newsletter/newsletter-preferences') ?></th>
+                            <th><?php esc_html_e('Lists', 'newsletter') ?><br><?php echo $controls->help('https://www.thenewsletterplugin.com/plugins/newsletter/newsletter-preferences') ?></th>
                             <td>
                                 <?php $controls->preferences('list'); ?>
                             </td>
@@ -190,8 +184,8 @@ function percentValue($value, $total) {
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th><?php _e('Name', 'newsletter'); ?></th>
-                                <th><?php _e('Value', 'newsletter'); ?></th>
+                                <th><?php esc_html_e('Name', 'newsletter'); ?></th>
+                                <th><?php esc_html_e('Value', 'newsletter'); ?></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -224,49 +218,49 @@ function percentValue($value, $total) {
                             </td>
                         </tr>
                         <tr>
-                            <th><?php _e('Created', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Created', 'newsletter') ?></th>
                             <td>
                                 <?php echo $controls->print_date(strtotime($controls->data['created'])); ?>
                             </td>
                         </tr>
                         <tr>
-                            <th><?php _e('Referrer', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Referrer', 'newsletter') ?></th>
                             <td>
                                 <?php echo $controls->value('referrer'); ?>
                             </td>
                         </tr>
                         <tr>
-                            <th><?php _e('HTTP Referrer', 'newsletter') ?></th>
+                            <th><?php esc_html_e('HTTP Referrer', 'newsletter') ?></th>
                             <td>
                                 <?php echo $controls->value('http_referer'); ?>
                             </td>
                         </tr>
                         <tr>
-                            <th><?php _e('Last activity', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Last activity', 'newsletter') ?></th>
                             <td>
                                 <?php echo $controls->print_date($controls->data['last_activity']); ?>
                             </td>
                         </tr>
                         <tr>
-                            <th><?php _e('WP user ID', 'newsletter') ?></th>
+                            <th><?php esc_html_e('WP user ID', 'newsletter') ?></th>
                             <td>
                                 <?php $controls->text('wp_user_id'); ?>
                             </td>
                         </tr>
                         <tr>
-                            <th><?php _e('IP address', 'newsletter'); ?></th>
+                            <th><?php esc_html_e('IP address', 'newsletter'); ?></th>
                             <td>
                                 <?php $controls->value('ip'); ?>
                             </td>
                         </tr>
                         <tr>
-                            <th><?php _e('Secret token', 'newsletter'); ?></th>
+                            <th><?php esc_html_e('Secret token', 'newsletter'); ?></th>
                             <td>
                                 <?php $controls->text('token', 50); ?>
                             </td>
                         </tr>
                         <tr>
-                            <th><?php _e('Profile URL', 'newsletter'); ?></th>
+                            <th><?php esc_html_e('Profile URL', 'newsletter'); ?></th>
                             <td>
                                 <?php $profile_url = NewsletterProfile::instance()->get_profile_url($user) ?>
                                 <a href='<?php echo $profile_url ?>' target="_blank"><?php echo $profile_url ?></a>

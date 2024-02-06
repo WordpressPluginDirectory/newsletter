@@ -468,6 +468,10 @@ class NewsletterControls {
         $this->toasts[] = __('Saved.', 'newsletter');
     }
 
+    function add_toast_done() {
+        $this->toasts[] = __('Done.', 'newsletter');
+    }
+
     function add_message_deleted() {
         if (!empty($this->messages)) {
             $this->messages .= '<br><br>';
@@ -1111,8 +1115,8 @@ class NewsletterControls {
         $this->btn('delete', '', ['data' => $data, 'icon' => 'fa-times', 'confirm' => true, 'title' => __('Delete', 'newsletter'), 'style' => $style]);
     }
 
-    function button_icon_configure($url) {
-        $this->btn_link($url, '', ['icon' => 'fa-cog', 'title' => __('Configure', 'newsletter')]);
+    function button_icon_configure($url, $attrs = []) {
+        $this->btn_link($url, '', array_merge(['icon' => 'fa-cog', 'title' => __('Configure', 'newsletter')], $attrs));
     }
 
     function button_icon_subscribers($url) {
@@ -1211,10 +1215,16 @@ class NewsletterControls {
         if (empty($value) && isset($attrs['default'])) {
             $value = $attrs['default'];
         }
+
+        $content_style = '';
+        if (isset($attrs['body_background'])) {
+            $content_style = 'body {background-color:' . wp_strip_all_tags($attrs['body_background']) . ';}';
+        }
         wp_editor($value, $name, array_merge(
                         [
                             'tinymce' => [
-                                'content_css' => plugins_url('newsletter') . '/admin/css/wp-editor.css?ver=' . NEWSLETTER_VERSION
+                                'content_css' => plugins_url('newsletter') . '/admin/css/wp-editor.css?ver=' . NEWSLETTER_VERSION,
+                                'content_style' => $content_style,
                             ],
                             'textarea_name' => 'options[' . esc_attr($name) . ']',
                             'wpautop' => false,

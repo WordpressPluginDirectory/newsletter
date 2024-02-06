@@ -46,14 +46,11 @@ $main_options = $this->get_options('customfields', '');
 
 <div class="wrap" id="tnp-wrap">
 
-    <?php include NEWSLETTER_ADMIN_HEADER ?>
+    <?php include NEWSLETTER_ADMIN_HEADER; ?>
 
     <div id="tnp-heading">
-
-        <h2><?php _e('Custom fields', 'newsletter') ?></h2>
+        <h2><?php esc_html_e('Custom fields', 'newsletter') ?></h2>
         <?php //include __DIR__ . '/nav.php' ?>
-
-
     </div>
 
     <div id="tnp-body">
@@ -71,7 +68,7 @@ $main_options = $this->get_options('customfields', '');
                 <div id="tabs">
 
                     <ul>
-                        <li><a href="#tabs-fields"><?php _e('Fields', 'newsletter') ?></a></li>
+                        <li><a href="#tabs-fields"><?php esc_html_e('Fields', 'newsletter') ?></a></li>
 
                         <?php if (NEWSLETTER_DEBUG) { ?>
                             <li><a href="#tabs-debug">Debug</a></li>
@@ -85,16 +82,16 @@ $main_options = $this->get_options('customfields', '');
                         <table class="widefat">
                             <thead>
                                 <tr>
-                                    <th><?php _e('Field', 'newsletter') ?></th>
-                                    <th><?php _e('Name/Label', 'newsletter') ?></th>
-                                    <th><?php _e('Placeholder', 'newsletter') ?></th>
+                                    <th><?php esc_html_e('Field', 'newsletter') ?></th>
+                                    <th><?php esc_html_e('Name/Label', 'newsletter') ?></th>
+                                    <th><?php esc_html_e('Placeholder', 'newsletter') ?></th>
 
                                     <?php if (!$language) { ?>
-                                    <th><?php _e('Status', 'newsletter') ?></th>
-                                    <th><?php _e('Type', 'newsletter') ?></th>
-                                    <th><?php _e('Rule', 'newsletter') ?></th>
+                                    <th><?php esc_html_e('Status', 'newsletter') ?></th>
+                                    <th><?php esc_html_e('Type', 'newsletter') ?></th>
+                                    <th><?php esc_html_e('Rule', 'newsletter') ?></th>
                                     <?php } ?>
-                                    <th><?php _e('List values comma separated', 'newsletter') ?></th>
+                                    <th><?php esc_html_e('List values comma separated', 'newsletter') ?></th>
                                 </tr>
                             </thead>
                             <?php for ($i = 1; $i <= NEWSLETTER_PROFILE_MAX; $i++) { ?>

@@ -61,8 +61,8 @@ if ($controls->is_action('test')) {
 
         <?php $controls->show() ?>
         <p>
-            The scheduler is a WordPress component that executes <strong>background tasks</strong> 
-            (publish future post, run backups, send newsletters, ...). 
+            The scheduler is a WordPress component that executes <strong>background tasks</strong>
+            (publish future post, run backups, send newsletters, ...).
             <br>
             Here some steps you can consider if the scheduler has issues.
         </p>
@@ -128,7 +128,7 @@ if ($controls->is_action('test')) {
                     <td>
                         <?php echo $controls->print_date($this->get_last_cron_call()) ?>
                     </td>
-                </tr>                
+                </tr>
 
 
                 <tr>
@@ -204,7 +204,7 @@ if ($controls->is_action('test')) {
 
                         </td>
                     <?php } ?>
-                </tr>          
+                </tr>
 
                 <?php
                 $condition = $this->has_newsletter_schedule() ? 1 : 0;
@@ -248,7 +248,7 @@ if ($controls->is_action('test')) {
                         <br><br>
                         Can be used to trigger the WordPress scheduler from an external cron service.
                     </td>
-                </tr>                      
+                </tr>
 
 
 
@@ -263,7 +263,7 @@ if ($controls->is_action('test')) {
                     <td>
                         <?php $controls->button_test() ?>
                     </td>
-                </tr>       
+                </tr>
 
                 <?php
                 $condition = (defined('DISABLE_WP_CRON') && DISABLE_WP_CRON) ? 2 : 1;
@@ -297,7 +297,7 @@ if ($controls->is_action('test')) {
                             Option not active, it's ok.
                         <?php } ?>
                     </td>
-                </tr>  
+                </tr>
 
                 <?php
                 $condition = NEWSLETTER_CRON_INTERVAL == 300 ? 1 : 2;
@@ -332,7 +332,7 @@ if ($controls->is_action('test')) {
                             A non standard (<?php echo MINUTE_IN_SECONDS ?> seconds) value is specified probably in your <code>wp-config.php</code>.
                         <?php } ?>
                     </td>
-                </tr>                
+                </tr>
 
 
                 <?php
@@ -372,7 +372,7 @@ if ($controls->is_action('test')) {
                         Attached functions:<br>
                         <?php echo $functions ? $functions : '[none]' ?>
                     </td>
-                </tr>    
+                </tr>
 
                 <?php
                 $transient = get_transient('doing_cron');
@@ -397,12 +397,12 @@ if ($controls->is_action('test')) {
                         When set it means the scheduler is executing background jobs. Install the WP Crontol plugin to have more information about
                         your site background jobs.
                     </td>
-                </tr>    
+                </tr>
             </table>
 
         </form>
     </div>
 
-    <?php include NEWSLETTER_DIR . '/tnp-footer.php'; ?>
+    <?php include NEWSLETTER_ADMIN_FOOTER ?>
 
 </div>

@@ -50,7 +50,7 @@ if ($controls->is_action()) {
 
     <div id="tnp-heading">
         <?php $controls->title_help('/subscription/antiflood') ?>
-        <h2><?php _e('Subscription', 'newsletter') ?></h2>
+        <h2><?php esc_html_e('Subscription', 'newsletter') ?></h2>
         <?php include __DIR__ . '/nav.php' ?>
     </div>
 
@@ -64,8 +64,8 @@ if ($controls->is_action()) {
 
             <div id="tabs" class="tnp-tabs">
                 <ul>
-                    <li><a href="#tabs-general"><?php _e('General', 'newsletter') ?></a></li>
-                    <li><a href="#tabs-blacklists"><?php _e('Blacklists', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-general"><?php esc_html_e('General', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-blacklists"><?php esc_html_e('Blacklists', 'newsletter') ?></a></li>
                     <?php if (NEWSLETTER_DEBUG) { ?>
                         <li><a href="#tabs-debug">Debug</a></li>
                     <?php } ?>
@@ -82,7 +82,7 @@ if ($controls->is_action()) {
                             <td>
                                 <?php $controls->yesno('disabled'); ?>
                                 <p class="description">
-                                    <?php _e('Disable for ajax form submission', 'newsletter'); ?>
+                                    <?php esc_html_e('Disable for ajax form submission', 'newsletter'); ?>
                                 </p>
                             </td>
                         </tr>
@@ -153,7 +153,7 @@ if ($controls->is_action()) {
                             <td>
                                 <?php $controls->textarea('ip_blacklist'); ?>
                                 <p class="description">
-                                    <?php _e('One per line', 'newsletter') ?>
+                                    <?php esc_html_e('One per line', 'newsletter') ?>
                                     IPv4 (aaa.bbb.ccc.ddd) supported. IPv6 supported. CIDR supported only for IPv4. Lines starting with # are
                                     considered comments.
                                 </p>
@@ -165,7 +165,7 @@ if ($controls->is_action()) {
                             </th>
                             <td>
                                 <?php $controls->textarea('address_blacklist'); ?>
-                                <p class="description"><?php _e('One per line', 'newsletter') ?></p>
+                                <p class="description"><?php esc_html_e('One per line', 'newsletter') ?></p>
                             </td>
                         </tr>
                     </table>

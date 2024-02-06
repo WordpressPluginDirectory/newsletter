@@ -4,7 +4,7 @@
   Plugin Name: Newsletter
   Plugin URI: https://www.thenewsletterplugin.com
   Description: Newsletter is a cool plugin to create your own subscriber list, to send newsletters, to build your business. <strong>Before update give a look to <a href="https://www.thenewsletterplugin.com/category/release">this page</a> to know what's changed.</strong>
-  Version: 8.0.9
+  Version: 8.1.1
   Author: Stefano Lissa & The Newsletter Team
   Author URI: https://www.thenewsletterplugin.com
   Disclaimer: Use at your own risk. No warranty expressed or implied is provided.
@@ -13,7 +13,7 @@
   Requires at least: 5.0
   Requires PHP: 7.0
 
-  Copyright 2009-2023 The Newsletter Team (email: info@thenewsletterplugin.com, web: https://www.thenewsletterplugin.com)
+  Copyright 2009-2024 The Newsletter Team (email: info@thenewsletterplugin.com, web: https://www.thenewsletterplugin.com)
 
   Newsletter is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ if (version_compare(phpversion(), '7.0', '<')) {
     return;
 }
 
-define('NEWSLETTER_VERSION', '8.0.9');
+define('NEWSLETTER_VERSION', '8.1.1');
 
 global $newsletter, $wpdb;
 
@@ -90,6 +90,22 @@ if (!defined('NEWSLETTER_PROFILE_MAX'))
 
 if (!defined('NEWSLETTER_FORMS_MAX'))
     define('NEWSLETTER_FORMS_MAX', 10);
+
+spl_autoload_register(function ($class) {
+    static $prefix = 'Newsletter\\';
+    static $dir = __DIR__ . '/classes/';
+
+    $len = strlen($prefix);
+    if (strncmp($prefix, $class, $len) !== 0) {
+        return;
+    }
+
+    $file = $dir . str_replace('\\', '/', $class) . '.php';
+
+    if (file_exists($file)) {
+        require $file;
+    }
+});
 
 require_once NEWSLETTER_INCLUDES_DIR . '/defaults.php';
 require_once NEWSLETTER_INCLUDES_DIR . '/classes.php';
@@ -410,26 +426,26 @@ class Newsletter extends NewsletterModule {
 
         $this->logger->debug(__METHOD__ . '> Start');
 
-        if (!$this->check_transient('engine', NEWSLETTER_CRON_INTERVAL)) {
-            $this->logger->debug(__METHOD__ . '> Engine already active, exit');
+        if (!$this->set_lock('engine', NEWSLETTER_CRON_INTERVAL * 2)) {
+            $this->logger->fatal('Delivery lock already set!');
             return;
         }
 
         $emails = $this->get_results("select * from " . NEWSLETTER_EMAILS_TABLE . " where status='sending' and send_on<" . time() . " order by id asc");
-        $this->logger->debug(__METHOD__ . '> Emails found in sending status: ' . count($emails));
+
+        $this->logger->debug(__METHOD__ . '> ' . count($emails) . ' newsletter to be processed');
 
         foreach ($emails as $email) {
-            $this->logger->debug(__METHOD__ . '> Start newsletter ' . $email->id);
+
             $email->options = maybe_unserialize($email->options);
             $r = $this->send($email);
-            $this->logger->debug(__METHOD__ . '> End newsletter ' . $email->id);
+
             if (!$r) {
-                $this->logger->debug(__METHOD__ . '> Engine returned false, there is no more capacity');
                 break;
             }
         }
-        // Remove the semaphore so the delivery engine can be activated again
-        $this->delete_transient('engine');
+
+        $this->reset_lock('engine');
 
         $this->logger->debug(__METHOD__ . '> End');
     }
@@ -537,7 +553,7 @@ class Newsletter extends NewsletterModule {
             $email = (object) $email;
         }
 
-        $this->logger->info(__METHOD__ . '> Send email ' . $email->id);
+        $this->logger->info(__METHOD__ . '> Start newsletter ' . $email->id);
 
         $this->send_setup();
 
@@ -555,12 +571,14 @@ class Newsletter extends NewsletterModule {
         if (!$supplied_users) {
 
             if ($this->skip_this_run($email)) {
+                $this->logger->info(__METHOD__ . '> Asked to skip this run');
                 return true;
             }
 
             // Speed change for specific email by Speed Control Addon
             $max_emails = $this->get_max_emails($email);
             if ($max_emails <= 0) {
+                $this->logger->info(__METHOD__ . '> Reached max emails for this newsletter');
                 return true;
             }
 
@@ -569,15 +587,15 @@ class Newsletter extends NewsletterModule {
 
             $this->logger->debug(__METHOD__ . '> Query: ' . $query);
 
-            //Retrieve subscribers
             $users = $this->get_results($query);
 
-            $this->logger->debug(__METHOD__ . '> Loaded subscribers: ' . count($users));
-
-            // If there was a database error, return error
             if ($users === false) {
-                return new WP_Error('1', 'Unable to query subscribers, check the logs');
+                $this->logger->fatal(__METHOD__ . '> Database error (see logs)');
+                $this->set_error_state_of_email($email, 'Database error (see logs)');
+                return true; // Continue with the next newsletter
             }
+
+            $this->logger->debug(__METHOD__ . '> Loaded subscribers: ' . count($users));
 
             if (empty($users)) {
                 $this->logger->info(__METHOD__ . '> No more users, set as sent');
@@ -586,7 +604,7 @@ class Newsletter extends NewsletterModule {
                 return true;
             }
         } else {
-            $this->logger->info(__METHOD__ . '> Subscribers supplied');
+            $this->logger->info(__METHOD__ . '> Subscribers supplied externally');
         }
 
         $start_time = microtime(true);
@@ -597,8 +615,7 @@ class Newsletter extends NewsletterModule {
 
         $batch_size = $mailer->get_batch_size();
 
-        $this->logger->debug(__METHOD__ . '> Batch size: ' . $batch_size);
-
+        //$this->logger->debug(__METHOD__ . '> Batch size: ' . $batch_size);
         // For batch size == 1 (normal condition) we optimize
         if ($batch_size == 1) {
 
@@ -659,10 +676,11 @@ class Newsletter extends NewsletterModule {
 
                 // Peeparing a batch of messages
                 foreach ($chunk as $user) {
+
                     $this->logger->debug(__METHOD__ . '> Processing user ID: ' . $user->id);
                     $user = apply_filters('newsletter_send_user', $user);
                     if (!$this->is_email($user->email)) {
-                        $this->logger->error('Subscriber ' . $user->id . ' with invalid email, skipped');
+                        $this->logger->error('Subscriber ' . $user->id . ' with invalid email');
                         continue;
                     }
                     $message = $this->build_message($email, $user);
@@ -721,7 +739,8 @@ class Newsletter extends NewsletterModule {
 
     function update_send_stats($start_time, $end_time, $count, $result) {
         $send_calls = get_option('newsletter_diagnostic_send_calls', []);
-        if (!is_array($send_calls)) $send_calls = [];
+        if (!is_array($send_calls))
+            $send_calls = [];
         $send_calls[] = [$start_time, $end_time, $count, $result];
 
         if (count($send_calls) > 100) {
@@ -763,18 +782,19 @@ class Newsletter extends NewsletterModule {
 
         $message->to = $user->email;
 
-        $message->headers = [];
-        $message->headers['Precedence'] = 'bulk';
-        $message->headers['X-Newsletter-Email-Id'] = $email->id;
-        $message->headers['X-Auto-Response-Suppress'] = 'OOF, AutoReply';
+        $message->headers = [
+            'Precedence' => 'bulk',
+            'X-Newsletter-Email-Id' => $email->id,
+            'X-Auto-Response-Suppress' => 'OOF, AutoReply'
+        ];
+
         $message->headers = apply_filters('newsletter_message_headers', $message->headers, $email, $user);
 
         $message->body = preg_replace('/data-json=".*?"/is', '', $email->message);
         $message->body = preg_replace('/  +/s', ' ', $message->body);
         $message->body = $this->replace($message->body, $user, $email);
-        if ($this->options['do_shortcodes']) {
-            $message->body = do_shortcode($message->body);
-        }
+        $message->body = do_shortcode($message->body);
+
         $message->body = apply_filters('newsletter_message_html', $message->body, $email, $user);
 
         $message->body_text = $this->replace($email->message_text, $user, $email);
@@ -1145,7 +1165,7 @@ class Newsletter extends NewsletterModule {
         if (!$page_id) {
             return false;
         }
-        return get_post($this->get_newsletter_page_id());
+        return get_post($page_id);
     }
 
     /**
@@ -1202,11 +1222,8 @@ class Newsletter extends NewsletterModule {
      */
     function get_license_data($refresh = false) {
 
-        $this->logger->debug('Getting license data');
-
         $license_key = $this->get_license_key();
         if (empty($license_key)) {
-            $this->logger->debug('License was empty');
             delete_transient('newsletter_license_data');
             return false;
         }
@@ -1214,12 +1231,9 @@ class Newsletter extends NewsletterModule {
         if (!$refresh) {
             $license_data = get_transient('newsletter_license_data');
             if ($license_data !== false && is_object($license_data)) {
-                $this->logger->debug('License data found on cache');
                 return $license_data;
             }
         }
-
-        $this->logger->debug('Refreshing the license data');
 
         $license_data_url = 'https://www.thenewsletterplugin.com/wp-content/plugins/file-commerce-pro/get-license-data.php';
 
@@ -1229,14 +1243,11 @@ class Newsletter extends NewsletterModule {
 
         // Fall back to http...
         if (is_wp_error($response)) {
-            $this->logger->error($response);
-            $this->logger->error('Falling back to http');
             $license_data_url = str_replace('https', 'http', $license_data_url);
             $response = wp_remote_post($license_data_url, array(
                 'body' => array('k' => $license_key)
             ));
             if (is_wp_error($response)) {
-                $this->logger->error($response);
                 set_transient('newsletter_license_data', $response, DAY_IN_SECONDS);
                 return $response;
             }
@@ -1245,7 +1256,6 @@ class Newsletter extends NewsletterModule {
         $download_message = 'You can download all addons from www.thenewsletterplugin.com if your license is valid.';
 
         if (wp_remote_retrieve_response_code($response) != '200') {
-            $this->logger->error('license data error: ' . wp_remote_retrieve_response_code($response));
             $data = new WP_Error(wp_remote_retrieve_response_code($response), 'License validation service error. <br>' . $download_message);
             set_transient('newsletter_license_data', $data, DAY_IN_SECONDS);
             return $data;
@@ -1255,7 +1265,6 @@ class Newsletter extends NewsletterModule {
         $data = json_decode($json);
 
         if (!is_object($data)) {
-            $this->logger->error($json);
             $data = new WP_Error(1, 'License validation service error. <br>' . $download_message);
             set_transient('newsletter_license_data', $data, DAY_IN_SECONDS);
             return $data;
@@ -1297,7 +1306,6 @@ class Newsletter extends NewsletterModule {
             return new WP_Error(-1, 'Unable to detect the license expiration. Debug data to report to the support: <code>' . esc_html(wp_remote_retrieve_body($response)) . '</code>');
         }
     }
-
 }
 
 $newsletter = Newsletter::instance();

@@ -45,6 +45,12 @@ class NewsletterModuleBase {
         return self::$plugin_url;
     }
 
+    /**
+     * Returns the current language code set by multiplanguage plugins or empty in single language installations.
+     * Note: the language code is not the WordPress "locale" code.
+     *
+     * @return string
+     */
     function language() {
         return self::$language;
     }
@@ -56,8 +62,7 @@ class NewsletterModuleBase {
     }
 
     /**
-     * Gets the locale for the specified language using the available multilanguage plugin
-     * (Polylang, WPML, ...).
+     * Gets the WordPress locale code for the specified language code of a multilanguage plugin (Polylang, WPML, ...).
      * Not all multilanguage plugins can be queried for the locale.
      *
      * @param string $language
@@ -82,6 +87,12 @@ class NewsletterModuleBase {
         return '';
     }
 
+    /**
+     * Switch the internal language and locale variables, then used to get language
+     * specific URLs, translations, ...
+     *
+     * @param string $language
+     */
     function switch_language($language) {
         if ($this->is_multilanguage() && $language && $language !== self::$language) {
             self::$previous_language = self::$language;
@@ -1025,6 +1036,7 @@ class NewsletterModuleBase {
             $message .= $admin_message;
         }
         wp_die($message, $http_code);
+        die(); // There are plugins that change the wp_die() behavior without actually die().
     }
 
     static function dump($var) {
@@ -1127,9 +1139,9 @@ class NewsletterModuleBase {
 
 
         if ($email->status == 'sent') {
-            echo '<div class="tnp-progress-numbers">', $email->total, ' ', __('of', 'newsletter'), ' ', $email->total, '</div>';
+            echo '<div class="tnp-progress-numbers">', $email->total, '/', $email->total, '</div>';
         } else {
-            echo '<div class="tnp-progress-numbers">', $email->sent, ' ', __('of', 'newsletter'), ' ', $email->total, '</div>';
+            echo '<div class="tnp-progress-numbers">', $email->sent, '/', $email->total, '</div>';
         }
     }
 
@@ -1170,4 +1182,33 @@ class NewsletterModuleBase {
         return '-';
     }
 
+    static function redirect($url) {
+        wp_redirect($url);
+        die();
+    }
+
+    function set_lock($name, $duration) {
+        global $wpdb;
+
+        $duration = (int)$duration;
+
+        $row = $wpdb->get_row($wpdb->prepare("SELECT * FROM $wpdb->options WHERE option_name = %s LIMIT 1", 'newsletter_lock_' . $name));
+        if (is_object($row)) {
+            if ((int) $row->option_value < time()) {
+                //$wpdb->update($wpdb->options, ['option_value' => time() + $duration], ['option_id' => $row->option_id]);
+                $wpdb->query($wpdb->prepare("update $wpdb->options set option_value=%s where option_id=%d limit 1", time() + $duration, $row->option_id));
+                return true;
+            }
+            return false;
+        }
+        $wpdb->insert($wpdb->options, ['option_name' => 'newsletter_lock_' . $name, 'option_value' => time() + $duration]);
+        return true;
+    }
+
+    function reset_lock($name) {
+        global $wpdb;
+        $wpdb->query($wpdb->prepare("update $wpdb->options set option_value=%s where option_name=%s limit 1", '0', 'newsletter_lock_' . $name));
+        //$wpdb->update($wpdb->options, ['option_value' => 0], ['option_id' => $row->option_id]);
+        $wpdb->flush();
+    }
 }

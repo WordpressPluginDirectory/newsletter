@@ -183,7 +183,7 @@ class NewsletterAdmin extends NewsletterModuleAdmin {
         // Main pages (to get them in the right order
         NewsletterMainAdmin::instance()->add_menu_page('index', __('Dashboard', 'newsletter'));
         NewsletterSubscriptionAdmin::instance()->add_menu_page('options', __('Subscription', 'newsletter'));
-        NewsletterSubscriptionAdmin::instance()->add_menu_page('form', __('Form', 'newsletter'));
+        NewsletterSubscriptionAdmin::instance()->add_menu_page('sources', __('Forms', 'newsletter'));
         NewsletterEmailsAdmin::instance()->add_menu_page('index', __('Newsletters', 'newsletter'));
         NewsletterUsersAdmin::instance()->add_menu_page('index', __('Subscribers', 'newsletter'));
         NewsletterSubscriptionAdmin::instance()->add_menu_page('lists', __('Lists', 'newsletter'));

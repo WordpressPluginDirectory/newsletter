@@ -21,12 +21,20 @@ class NewsletterUnsubscription extends NewsletterModule {
 
         add_filter('newsletter_replace', [$this, 'hook_newsletter_replace'], 10, 4);
         add_filter('newsletter_page_text', [$this, 'hook_newsletter_page_text'], 10, 3);
-        add_filter('newsletter_message_headers', [$this, 'hook_add_unsubscribe_headers_to_email'], 10, 3);
+        add_filter('newsletter_message', [$this, 'hook_newsletter_message'], 9, 3);
 
         add_action('newsletter_action', [$this, 'hook_newsletter_action'], 11, 3);
     }
 
     function hook_newsletter_action($action, $user, $email) {
+
+        if (!in_array($action, ['u', 'uc', 'ocu', 'reactivate'])) {
+            return;
+        }
+
+        if (!$user) {
+            $this->dienow(__('Subscriber not found', 'newsletter'), 'From a test newsletter or already deleted or using the wrong subscriber key in the URL', 404);
+        }
 
         if (isset($_SERVER['HTTP_USER_AGENT'])) {
             $agent = strtolower($_SERVER['HTTP_USER_AGENT']);
@@ -50,57 +58,55 @@ class NewsletterUnsubscription extends NewsletterModule {
             }
         }
 
-        if (in_array($action, ['u', 'uc', 'lu', 'reactivate'])) {
-            if (!$user) {
-                $this->dienow(__('Subscriber not found', 'newsletter'), 'Already deleted or using the wrong subscriber key in the URL', 404);
+        if ($this->get_main_option('mode') == '1' && $action === 'u') {
+            $action = 'uc';
+        }
+
+        // Action conversion from old links from the email headers
+        if (isset($_POST['List-Unsubscribe']) && 'One-Click' === $_POST['List-Unsubscribe']) {
+            $action = 'ocu';
+        }
+
+        // Show the antibot and stop
+        if (in_array($action, ['u', 'uc', 'reactivate'])) {
+            if (!$this->antibot_form_check()) {
+                $this->request_to_antibot_form('Confirm');
             }
         }
 
-//        if ($action === 'u' && empty($this->options['optout'])) {
-//            $action = 'uc';
-//        }
-
         switch ($action) {
             case 'u':
-                if ($this->get_main_option('mode') == '1') {
-                    if ($this->antibot_form_check()) {
-                        $this->unsubscribe($user, $email);
-                        $url = $this->build_message_url(null, 'unsubscribed', $user, $email);
-                        wp_redirect($url);
-                    } else {
-                        $this->request_to_antibot_form('Unsubscribe');
-                    }
-                    die();
-                }
                 $url = $this->build_message_url(null, 'unsubscribe', $user, $email);
-                wp_redirect($url);
-                die();
+                $this->redirect($url);
                 break;
 
-            case 'lu': //Left for backwards compatibility, could be removed after some time
             case 'uc':
+                $this->unsubscribe($user, $email);
+                $url = $this->build_message_url(null, 'unsubscribed', $user, $email);
+                setcookie('newsletter', '', 0, '/');
+                $this->redirect($url);
+                break;
+
+            case 'ocu': // One Click Unsubscribe
                 if (isset($_POST['List-Unsubscribe']) && 'One-Click' === $_POST['List-Unsubscribe']) {
                     $this->unsubscribe($user, $email);
-                } else if ($this->antibot_form_check()) {
+                    die('ok');
+                }
+                die('ko');
+                break;
+
+            case 'ocu': // One Click Unsubscribe
+                if (isset($_POST['List-Unsubscribe']) && 'One-Click' === $_POST['List-Unsubscribe']) {
                     $this->unsubscribe($user, $email);
-                    $url = $this->build_message_url(null, 'unsubscribed', $user, $email);
-                    wp_redirect($url);
-                } else {
-                    $this->request_to_antibot_form('Unsubscribe');
                 }
                 die();
                 break;
 
             case 'reactivate':
-                if ($this->antibot_form_check()) {
-                    $this->reactivate($user);
-                    $url = $this->build_message_url(null, 'reactivated', $user);
-                    setcookie('newsletter', $user->id . '-' . $user->token, time() + 60 * 60 * 24 * 365, '/');
-                    wp_redirect($url);
-                } else {
-                    $this->request_to_antibot_form('Reactivate');
-                }
-                die();
+                $this->reactivate($user);
+                $url = $this->build_message_url(null, 'reactivated', $user);
+                setcookie('newsletter', $user->id . '-' . $user->token, time() + 60 * 60 * 24 * 365, '/');
+                $this->redirect($url);
                 break;
         }
     }
@@ -225,10 +231,10 @@ class NewsletterUnsubscription extends NewsletterModule {
      *
      * @return array
      */
-    function hook_add_unsubscribe_headers_to_email($headers, $email, $user) {
+    function hook_newsletter_message($message, $email, $user) {
 
         if (!empty($this->get_main_option('disable_unsubscribe_headers'))) {
-            return $headers;
+            return $message;
         }
 
         $list_unsubscribe_values = [];
@@ -237,13 +243,13 @@ class NewsletterUnsubscription extends NewsletterModule {
             $list_unsubscribe_values[] = "<mailto:$unsubscribe_address?subject=unsubscribe>";
         }
 
-        $unsubscribe_action_url = $this->build_action_url('uc', $user, $email);
+        $unsubscribe_action_url = $this->build_action_url('ocu', $user, $email);
         $list_unsubscribe_values[] = "<$unsubscribe_action_url>";
 
-        $headers['List-Unsubscribe'] = implode(', ', $list_unsubscribe_values);
-        $headers['List-Unsubscribe-Post'] = 'List-Unsubscribe=One-Click';
+        $message->headers['List-Unsubscribe'] = implode(', ', $list_unsubscribe_values);
+        $message->headers['List-Unsubscribe-Post'] = 'List-Unsubscribe=One-Click';
 
-        return $headers;
+        return $message;
     }
 }
 

@@ -298,16 +298,25 @@
     margin-bottom: 1rem;
     margin-left: 0;
     margin-right: 0;
+    border-radius: 10px;
+    background-color: #fff;
+}
+
+#tnp-body .widefat thead {
+    color: var(--tnp-text) !important;
+    border-radius: 10px;
 }
 
 #tnp-body .widefat th {
     text-align: left;
 }
 
-#tnp-body .widefat thead {
-    background-color: #fff;
-    color: var(--tnp-text) !important;
+#tnp-body .widefat tbody tr:hover td,
+#tnp-body .widefat tbody tr:hover th
+{
+    background-color: #eee;
 }
+
 
 #tnp-body .widefat thead tr th {
     color: var(--tnp-text) !important;
@@ -407,21 +416,15 @@ table.clicks {
 }
 
 .tnp-tab-notice {
-    background-color: #fff;
-    border: 1px solid #eee;
-    border-left: 3px solid gray;
-    padding: 10px;
-    margin: 10px 0;
-    color: #444;
+    padding: 15px;
+    border: 1px dashed #999;
+    background-color: var(--tnp-blue-lighter);
 }
 
 .tnp-tab-warning {
-    background-color: #fff;
-    border: 1px solid #eee;
-    border-left: 3px solid orange;
-    padding: 10px;
-    margin: 10px 0;
-    color: #444;
+    padding: 15px;
+    border: 1px dashed #999;
+    background-color: var(--tnp-orange-lighter);
 }
 
 .tnp-tab-success {
@@ -434,12 +437,9 @@ table.clicks {
 }
 
 .tnp-tab-error {
-    background-color: #fff;
-    border: 1px solid #eee;
-    border-left: 3px solid red;
-    padding: 10px;
-    margin: 10px 0;
-    color: #444;
+    padding: 15px;
+    border: 1px dashed #999;
+    background-color: var(--tnp-red-light);
 }
 
 
@@ -770,6 +770,7 @@ iframe.tnp-editor-preview-desktop {
     color: #666;
     white-space: nowrap;
     line-height: normal;
+    font-size: .9em;
 }
 
 .tnp-progress-date {
@@ -1357,15 +1358,49 @@ span.tnp-user-status {
 /* Title */
 #tnp-heading h2 {
     color: var(--tnp-title);
-    font-size: 1.2rem;
+    font-size: .9rem;
     line-height: normal;
     vertical-align: middle;
-    /*font-weight: bold;*/
+    font-weight: bold;
     font-weight: normale;
     padding: 0;
     margin: 0px;
     margin-bottom: .5rem;
     text-transform: uppercase;
+}
+
+#tnp-heading h2 span {
+    background-color: transparent;
+    border: 1px solid #999;
+    font-weight: normal;
+    display: inline-block;
+    padding: .3rem 1rem;
+    font-size: .75em;
+    border-radius: 7px;
+    vertical-align: middle;
+    color: #444;
+    margin-left: 2em;
+}
+
+#tnp-heading h2 span.tnp-badge-green {
+    background-color: green;
+    border: 1px solid #999;
+    font-weight: normal;
+    color: #fff;
+}
+
+#tnp-heading h2 span.tnp-badge-red {
+    background-color: red;
+    border: 1px solid #999;
+    font-weight: normal;
+    color: #fff;
+}
+
+#tnp-heading h2 span.tnp-badge-orange {
+    background-color: var(--tnp-orange);
+    border: 1px solid #999;
+    font-weight: normal;
+    color: #fff;
 }
 
 #tnp-heading .tnp-title-help {
@@ -1484,7 +1519,7 @@ span.tnp-user-status {
     color: #000 !important;
     font-weight: normal !important;
     display: inline-block;
-    border-bottom: 5px solid #aaa;
+    border-bottom: 3px solid var(--tnp-title);
 }
 
 #tnp-heading .tnp-nav-title {
@@ -1765,11 +1800,12 @@ span.tnp-user-status {
     padding: 0;
     margin: 0;
     /*background-color: var(--tnp-blue-light);*/
-    background-color: #ddd;
+    background-color: #fff;
     border: 0;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
     width: fit-content;
+    border-bottom: 1px solid #ddd;
 }
 
 #tnp-body .ui-tabs .ui-tabs-nav .ui-tabs-tab {
@@ -1781,7 +1817,7 @@ span.tnp-user-status {
 #tnp-body .ui-tabs a.ui-tabs-anchor,
 #tnp-body .ui-tabs a.ui-tabs-anchor:visited {
     /*color: #fff;*/
-    color:  #444;
+    color:  #888;
     font-size: .9rem;
     box-shadow: none;
     font-weight: normal;

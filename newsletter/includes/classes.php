@@ -154,7 +154,7 @@ class TNP_Subscription_Data {
     var $sex = null;
     var $language = null;
     var $referrer = null;
-    var $http_referrer = null;
+    var $http_referer = null;
     var $ip = null;
     var $country = null;
     var $region = null;
