@@ -1,7 +1,7 @@
 === Newsletter - Send awesome emails from WordPress ===
 Tags: newsletter, email marketing, welcome email, signup forms, lead generation, marketing automation
 Tested up to: 6.4.3
-Stable tag: 8.1.1
+Stable tag: 8.1.3
 Contributors: satollo,webagile,michael-travan
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -19,8 +19,10 @@ We redesigned our drag and drop composer to make your campaign creation even eas
 = Main Features =
 
 * **Easy-to-use Drag and drop composer** to build responsive newsletters
+* Newsletter templates management
 * **Unlimited subscribers** with statistics
 * **Unlimited newsletters** with tracking
+* **Popup** and "in-post" subscription forms
 * Fully compatible with the **One-Click Unsubscribe** made mandatory by Google and Yahoo
 * **Subscription spam check** with domain/ip black lists, Akismet, captcha
 * **Delivery speed** fine control (from 12 emails per hour to as much as your blog can manage)
@@ -54,7 +56,7 @@ Improve The Newsletter Plugin with these free addons:
 * [Newsletter REST API Addon](https://www.thenewsletterplugin.com/documentation/developers/newsletter-api-2/) - adds a tier of REST api to integrate with the Newsletter core services
 * [Sendinblue Addon](https://www.thenewsletterplugin.com/documentation/addons/delivery-addons/sendinblue-extension/) - deliver your newsletters with Sendinblue
 * [SMTP Addon](https://www.thenewsletterplugin.com/documentation/addons/delivery-addons/smtp-extension/) - deliver your newsletters with external SMTP
-* [Advanced Import Addon](https://www.thenewsletterplugin.com/documentation/addons/extended-features/advanced-import/) - import contact from file or copy and paste data with full mapping
+* [Import Addon](https://www.thenewsletterplugin.com/documentation/addons/extended-features/advanced-import/) - import contact from file or copy and paste data with full mapping
 
 (*easily add them from our [Addons panel](https://www.thenewsletterplugin.com/documentation/install-extensions)*)
 
@@ -64,7 +66,6 @@ Improve The Newsletter Plugin with these free addons:
 * [Popup Maker Integration](https://wordpress.org/plugins/newsletter-popupmaker/) - (3rd party) integration of Newsletter forms with Popup Maker plugin
 * [BuddyPress integration](https://wordpress.org/plugins/newsletter-buddypress/) - subscription opt-in inside BuddyPress signup form
 * [WP User Manager addon for Newsletter](https://wordpress.org/plugins/wpum-newsletter/) - adds the subscription option on registration forms
-* [Plaintext Generator](https://wordpress.org/plugins/plaintext-newsletter/) - generates the plaintext version from an HTML newsletter
 
 = Professional Addons =
 
@@ -126,6 +127,24 @@ Thank you, The Newsletter Team
 3. The Reports extension
 
 == Changelog ==
+
+= 8.1.3 =
+
+* Fixed subscription form extra DIV
+
+= 8.1.2 =
+
+* Added better tracking of unsubscription via One-Click Unsubscribe RFC 8058
+* Fixed wrong helper text on profile page
+* Added font size and face to the editor for specific settings
+* Fixed one-click unsubscribe for Yahoo
+* Added form field placeholders
+* Added option to hide the field labels to the form shortcode
+* Improved the bot blocking step
+* Refactored addon class code
+* Added hid labels option on widget
+* Improved the System panel
+* Fixed unsubscription email in multilanguage setups
 
 = 8.1.1 =
 
@@ -294,82 +313,3 @@ Thank you, The Newsletter Team
 * Fixed error text field on subscription panel not displaying when customized
 * Security fix on minimal form shortcode
 * Removed the "before" and "after" attributes of the main shortcode
-
-= 7.8.9 =
-
-* Added default subject when it is missing
-* Added check on regeneration for missing subject
-* Text block editor now uses the block background
-* Added sub-menu to the subscriber edit page
-
-= 7.8.8 =
-
-* Fixed dismiss button no reloading the page correctly
-* Restored error messages when adding as new an extiting email
-* Added constant to define a delay between emails
-
-= 7.8.7 =
-
-* Fixed the dashboard layout (side effect of links not clickable)
-
-= 7.8.6 =
-
-* Restored the welcome wizard on new installations
-* Revisited the main settings page
-* Fixed preset deletion
-* Added check on controls for fatal errors on some installations (apparently using the plugin in the wrong way)
-* Fixed errors with PHP 8 on profile page
-
-= 7.8.5 =
-
-* Added new options to the "hero" block (alignement, color schema)
-* Change the font scaling on blocks to scale only when the size is set to "default"
-* Restored public access to $instance in Newsletter class since someone is (wrongly) using it
-* Added post order patch by B. K.
-* Fixed debug notice
-* Fix on style.css
-* Fixed captcha
-* Fixed warning on newsletter online with with {title} tag
-* Fixed custom fields not showing on profile page
-
-= 7.8.4 =
-
-* Fixed sanitization method used by the API
-* Fixed missing cleanup functions used after massive deletions
-* Fixed sending of text messages for activation and welcome emails
-* Fixed warnings with wp-cli ()
-* Fixed error with the old "default" legacy theme
-* Fixed automatic subject from posts block
-
-= 7.8.3 =
-
-* Fixed debug notices
-* Fixed missing form on dedicated page
-* Fixed notices on main settings (in debug mode)
-
-= 7.8.2 =
-
-* Fixed migration of custom HTML forms
-
-= 7.8.1 =
-
-* Fixed menu order
-* Fixed gender field sanitization
-* Fixed submit button style on subscription form created with shortcodes
-* Fixed privacy label not aligned with the checkbox
-* Fixed errors on legacy themes
-* Fixed the export respoding with "0"
-
-= 7.8.0 =
-
-* Removed the unsed feed by mail references
-* Fixed CSS for profile page form
-* Improved configuration of the standard subscription form
-* Added configuration for the profile page form
-* Relativized font size and spaces on forms
-* New admin organization with sub-menus
-* New translation management (both for single language and multilanguage blogs)
-* Removed the legacy SMTP
-* Removed the PHPMailer instantiator
-* Removed deprecated and unused code
-* Added option to use the pre-translated texts (default on new installations)

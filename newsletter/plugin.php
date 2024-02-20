@@ -4,13 +4,13 @@
   Plugin Name: Newsletter
   Plugin URI: https://www.thenewsletterplugin.com
   Description: Newsletter is a cool plugin to create your own subscriber list, to send newsletters, to build your business. <strong>Before update give a look to <a href="https://www.thenewsletterplugin.com/category/release">this page</a> to know what's changed.</strong>
-  Version: 8.1.1
+  Version: 8.1.3
   Author: Stefano Lissa & The Newsletter Team
   Author URI: https://www.thenewsletterplugin.com
   Disclaimer: Use at your own risk. No warranty expressed or implied is provided.
   Text Domain: newsletter
   License: GPLv2 or later
-  Requires at least: 5.0
+  Requires at least: 5.1
   Requires PHP: 7.0
 
   Copyright 2009-2024 The Newsletter Team (email: info@thenewsletterplugin.com, web: https://www.thenewsletterplugin.com)
@@ -37,7 +37,7 @@ if (version_compare(phpversion(), '7.0', '<')) {
     return;
 }
 
-define('NEWSLETTER_VERSION', '8.1.1');
+define('NEWSLETTER_VERSION', '8.1.3');
 
 global $newsletter, $wpdb;
 
@@ -63,7 +63,7 @@ if (!defined('NEWSLETTER_STATS_TABLE'))
 if (!defined('NEWSLETTER_SENT_TABLE'))
     define('NEWSLETTER_SENT_TABLE', $wpdb->prefix . 'newsletter_sent');
 
-if (!defined('NEWSLETTER_SEND_DELAY_MS'))
+if (!defined('NEWSLETTER_SEND_DELAY'))
     define('NEWSLETTER_SEND_DELAY', 0);
 
 if (!defined('NEWSLETTER_USE_POST_GALLERY'))
@@ -72,6 +72,9 @@ if (!defined('NEWSLETTER_USE_POST_GALLERY'))
 // Empty or "ajax"
 if (!defined('NEWSLETTER_TRACKING_TYPE'))
     define('NEWSLETTER_TRACKING_TYPE', '');
+
+if (!defined('NEWSLETTER_PAGE_WARNING'))
+    define('NEWSLETTER_PAGE_WARNING', true);
 
 // Empty or "ajax"
 if (!defined('NEWSLETTER_ACTION_TYPE'))
@@ -1169,7 +1172,7 @@ class Newsletter extends NewsletterModule {
     }
 
     /**
-     * Returns the Newsletter dedicated page URL or an alternative URL if that page if not
+     * Returns the Newsletter public page URL or an alternative URL if that page if not
      * configured or not available.
      *
      * @staticvar string $url

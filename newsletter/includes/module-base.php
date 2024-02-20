@@ -906,8 +906,8 @@ class NewsletterModuleBase {
 
     /**
      * Try to sanitize and email and return false if it is not valid.
-     * @param type $email
-     * @return type
+     * @param string $email
+     * @return bool
      */
     static function sanitize_email($email) {
         return self::normalize_email($email);

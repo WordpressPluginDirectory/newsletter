@@ -17,6 +17,11 @@ if (!$controls->is_action()) {
 
 $posts = get_posts(['posts_per_page' => 1]);
 $last_post_url = $posts ? get_the_permalink($posts[0]) : null;
+
+$leads_url = '?page=newsletter_main_extensions#newsletter-leads';
+if (class_exists('NewsletterExtensions')) {
+    $extensions_url = '?page=newsletter_extensions_index#newsletter-leads';
+}
 ?>
 
 <div class="wrap" id="tnp-wrap">
@@ -36,8 +41,7 @@ $last_post_url = $posts ? get_the_permalink($posts[0]) : null;
         <?php $controls->language_notice(); ?>
 
         <p>
-            Injected after the content of each post.
-
+            Injected after the content of each post. More options are available with the <a href="<?php echo esc_attr($leads_url)?>" target="_blank">Leads Addon</a>.
         </p>
 
         <form action="" method="post">

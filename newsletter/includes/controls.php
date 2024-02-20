@@ -1220,6 +1220,7 @@ class NewsletterControls {
         if (isset($attrs['body_background'])) {
             $content_style = 'body {background-color:' . wp_strip_all_tags($attrs['body_background']) . ';}';
         }
+        add_filter('mce_buttons_2', [$this, '_wp_editor_options']);
         wp_editor($value, $name, array_merge(
                         [
                             'tinymce' => [
@@ -1229,6 +1230,17 @@ class NewsletterControls {
                             'textarea_name' => 'options[' . esc_attr($name) . ']',
                             'wpautop' => false,
                         ], $settings));
+    }
+
+    function _wp_editor_options($buttons) {
+        static $applied = false;
+        if ($applied) {
+            return $buttons;
+        }
+        $applied = true;
+        array_unshift($buttons, 'fontselect');
+        array_unshift($buttons, 'fontsizeselect');
+        return $buttons;
     }
 
     function wp_editor_multilanguage($name, $settings, $languages) {
@@ -2323,5 +2335,4 @@ tnp_controls_init();
         echo '<br>';
         $this->select2($name . '_off', $lists, null, true, null, __('None', 'newsletter'));
     }
-
 }

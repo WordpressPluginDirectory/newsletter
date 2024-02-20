@@ -246,16 +246,17 @@ $news = NewsletterMainAdmin::instance()->get_news();
 if (!empty(NewsletterMainAdmin::instance()->get_option('page'))) {
     $tnp_page_id = NewsletterMainAdmin::instance()->get_option('page');
     if (get_post_status($tnp_page_id) !== 'publish') {
-        echo '<div class="tnp-notice tnp-notice-warning">The Newsletter dedicated page is not published. <a href="', site_url('/wp-admin/post.php') . '?post=', $tnp_page_id, '&action=edit"><strong>Edit the page</strong></a> or <a href="admin.php?page=newsletter_main_main"><strong>review the main settings</strong></a>.</div>';
-    } else if (!isset($dismissed['newsletter-shortcode'])) {
+        echo '<div class="tnp-notice tnp-notice-warning">The Newsletter public page is not published. <a href="', esc_attr(admin_url('post.php')) . '?post=', esc_attr($tnp_page_id), '&action=edit"><strong>Edit the page</strong></a> or <a href="admin.php?page=newsletter_main_main"><strong>review the main settings</strong></a>.</div>';
+    } else if (NEWSLETTER_PAGE_WARNING) {
         $content = get_post_field('post_content', $tnp_page_id);
         // With and without attributes
         if (strpos($content, '[newsletter]') === false && strpos($content, '[newsletter ') === false) {
             ?>
             <div class="tnp-notice tnp-notice-warning">
-                <a href="<?php echo esc_attr($_SERVER['REQUEST_URI']) . '&dismiss=newsletter-shortcode' ?>" class="tnp-dismiss">&times;</a>
-                The Newsletter dedicated page does not contain the <code>[newsletter]</code> shortcode. If you're using a visual composer it could be ok.
-                <a href="<?php echo site_url('/wp-admin/post.php') ?>?post=<?php echo esc_attr($tnp_page_id) ?>&action=edit"><strong>Edit the page</strong></a>.
+                The Newsletter public page does not contain the <code>[newsletter]</code> shortcode.
+                <a href="<?php echo esc_attr(admin_url('post.php')) ?>?post=<?php echo esc_attr($tnp_page_id) ?>&action=edit"><strong>Edit the page</strong></a>.
+                <br>
+
             </div>
             <?php
         }

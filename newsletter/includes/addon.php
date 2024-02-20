@@ -13,7 +13,7 @@ class NewsletterAddon {
     var $labels;
     var $menu_priority = 100;
 
-    public function __construct($name, $version = '0.0.0') {
+    public function __construct($name, $version = '0.0.0', $dir = '') {
         $this->name = $name;
         $this->version = $version;
         if (is_admin()) {
@@ -26,6 +26,16 @@ class NewsletterAddon {
         add_action('newsletter_init', array($this, 'init'));
         //Load translations from specific addon /languages/ directory
         load_plugin_textdomain('newsletter-' . $this->name, false, 'newsletter-' . $this->name . '/languages/');
+
+        if (is_admin() && !wp_next_scheduled('newsletter_addon_' . $this->name)) {
+            wp_schedule_event(time(), 'weekly', 'newsletter_addon_' . $this->name);
+        }
+
+        add_action('newsletter_addon_' . $this->name, [$this, 'weekly_check']);
+
+        if ($dir) {
+            register_deactivation_hook($dir . '/' . $this->name . '.php', [$this, 'deactivate']);
+        }
     }
 
     /**
@@ -53,6 +63,19 @@ class NewsletterAddon {
                 }
             }
         }
+    }
+
+    function weekly_check() {
+        $logger = $this->get_logger();
+        $logger->info('Weekly check for ' . $this->name);
+    }
+
+    function deactivate() {
+        $logger = $this->get_logger();
+        $logger->info($this->name . ' deactivated');
+
+        // The periodic check
+        wp_clear_scheduled_hook('newsletter_addon_' . $this->name);
     }
 
     function admin_menu() {
@@ -116,7 +139,18 @@ class NewsletterAddon {
         if ($this->options) {
             return;
         }
-        $this->options = get_option('newsletter_' . $this->name, []);
+        $this->options = $this->get_option_array('newsletter_' . $this->name, []);
+        if (!is_array($this->options)) {
+            $this->options = [];
+        }
+    }
+
+    function get_option_array($name) {
+        $opt = get_option($name, []);
+        if (!is_array($opt)) {
+            return [];
+        }
+        return $opt;
     }
 
     /**
@@ -127,9 +161,9 @@ class NewsletterAddon {
      */
     function get_options($language = '') {
         if ($language) {
-            return array_merge(get_option('newsletter_' . $this->name, []), get_option('newsletter_' . $this->name . '_' . $language, []));
+            return array_merge($this->get_option_array('newsletter_' . $this->name), $this->get_option_array('newsletter_' . $this->name . '_' . $language));
         } else {
-            return get_option('newsletter_' . $this->name, []);
+            return $this->get_option_array('newsletter_' . $this->name);
         }
     }
 
@@ -222,7 +256,7 @@ class NewsletterMailerAddon extends NewsletterAddon {
     var $dir = '';
 
     function __construct($name, $version = '0.0.0', $dir = '') {
-        parent::__construct($name, $version);
+        parent::__construct($name, $version, $dir);
         $this->dir = $dir;
         $this->setup_options();
         $this->enabled = !empty($this->options['enabled']);
@@ -245,6 +279,13 @@ class NewsletterMailerAddon extends NewsletterAddon {
         }
     }
 
+    function deactivate() {
+        parent::deactivate();
+
+        // For delivery services without webkooks
+        wp_clear_scheduled_hook('newsletter_' . $this->name . '_bounce');
+    }
+
     function hook_newsletter_menu_settings($entries) {
         $entries[] = array('label' => '<i class="fas fa-envelope"></i> ' . $this->menu_title, 'url' => '?page=newsletter_' . $this->name . '_index', 'description' => $this->menu_description);
         return $entries;
@@ -259,9 +300,9 @@ class NewsletterMailerAddon extends NewsletterAddon {
     }
 
     function set_warnings($controls) {
-        if (!$this->enabled) {
-            $controls->warnings[] = 'Enable to send with this service.';
-        }
+//        if (!$this->enabled) {
+//            $controls->warnings[] = 'Enable to send with this service.';
+//        }
 
         $current_mailer = Newsletter::instance()->get_mailer();
         if ($current_mailer && $this->enabled && get_class($current_mailer) != get_class($this->get_mailer())) {
@@ -271,6 +312,18 @@ class NewsletterMailerAddon extends NewsletterAddon {
         if ($this->enabled && class_exists('NewsletterBounce')) {
             $controls->warnings[] = 'The Bounce addon is active and should be disabled (bounces are managed by this addon)';
         }
+    }
+
+    function get_status_badge() {
+        if ($this->enabled) {
+            return '<span class="tnp-badge-green">' . esc_html('Enabled', 'newsletter') . '</span>';
+        } else {
+            return '<span class="tnp-badge-orange">' . esc_html('Disabled', 'newsletter') . '</span>';
+        }
+    }
+
+    function get_title() {
+        return esc_html($this->menu_title) . $this->get_status_badge();
     }
 
     function set_bounced($email) {
@@ -382,7 +435,7 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
     var $forms = null; // For caching
 
     function __construct($name, $version, $dir, $menu_slug = null) {
-        parent::__construct($name, $version);
+        parent::__construct($name, $version, $dir);
         $this->dir = $dir;
         $this->menu_slug = $menu_slug;
         if (empty($this->menu_slug)) {
@@ -460,11 +513,20 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
     function hook_admin_menu() {
         add_submenu_page('newsletter_main_index', $this->menu_title, '<span class="tnp-side-menu">' . $this->menu_title . '</span>', 'exist', $this->index_page,
                 function () {
+
                     require $this->dir . '/admin/index.php';
                 }
         );
         add_submenu_page('admin.php', $this->menu_title, '<span class="tnp-side-menu">' . $this->menu_title . '</span>', 'exist', $this->edit_page,
                 function () {
+                    require_once NEWSLETTER_INCLUDES_DIR . '/controls.php';
+                    $controls = new NewsletterControls();
+
+                    $form = $this->get_form($_GET['id']);
+                    if (!$form) {
+                        echo 'Form not found';
+                        return;
+                    }
                     require $this->dir . '/admin/edit.php';
                 }
         );

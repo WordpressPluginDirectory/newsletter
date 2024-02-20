@@ -203,6 +203,38 @@ class Integrations {
         return $sources;
     }
 
+    static function is_fluentforms_active() {
+        return function_exists('fluentFormApi');
+    }
+
+    static function get_fluentforms_sources() {
+        if (!self::is_fluentforms_active()) {
+            return [];
+        }
+
+        $formApi = fluentFormApi('forms');
+        $atts = [
+            'status' => 'all',
+            'sort_column' => 'id',
+            'sort_by' => 'DESC',
+            'per_page' => 100,
+            'page' => 1
+        ];
+        $result = $formApi->forms($atts, true);
+        $forms = $result['data'];
+
+        $sources = [];
+        foreach ($forms as $form) {
+            $source = new Source($form->title, 'Fluent Forms', 'fluentforms');
+            if (class_exists('NewsletterFluentForms')) {
+                $source->config_url = '?page=newsletter_fluentforms_edit&id=' . urlencode($form->id);
+            }
+            $sources[] = $source;
+        }
+
+        return $sources;
+    }
+
     static function config_button(Source $source, \NewsletterControls $controls) {
         static $default_url;
         if (!$default_url) {

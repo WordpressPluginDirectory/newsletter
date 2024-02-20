@@ -365,7 +365,7 @@ function tnp_describe_table($table) {
                         }
                         ?>
                         <td>
-                            Dedicated page<br>
+                            Public page<br>
                             <small>The blog page Newsletter uses for messages</small>
                         </td>
                         <td>
@@ -373,10 +373,10 @@ function tnp_describe_table($table) {
                         </td>
                         <td>
                             <?php if ($condition == 2) { ?>
-                                Newsletter is using a neutral page to show messages, if you want to use a dedicated page, configure it on
+                                Newsletter is using a neutral page to show messages, if you want to use a public page, configure it on
                                 <a href="?page=newsletter_main_main">main settings</a>.
                             <?php } else if ($condition == 0) { ?>
-                                A dedicated page is set but it is no more available or no more published. Review the dedicated page on
+                                A public page is set but it is no more available or no more published. Review the public page on
                                 <a href="?page=newsletter_main_main">main settings</a>.
                             <?php } ?>
                         </td>
@@ -399,7 +399,7 @@ function tnp_describe_table($table) {
                         }
                         ?>
                         <td>
-                            Dedicated page content<br>
+                            Public page content<br>
                         </td>
                         <td>
                             <?php $this->condition_flag($condition) ?>
@@ -409,7 +409,7 @@ function tnp_describe_table($table) {
                                 The page seems to not contain the <code>[newsletter]</code>, but sometime it cannot be detected if you use
                                 a visual composer. <a href="post.php?post=<?php echo $page->ID ?>&action=edit" target="_blank">Please, check the page</a>.
                             <?php } else if ($condition == 0) { ?>
-                                The dedicated page seems to not be available.
+                                The public page seems to not be available.
                             <?php } ?>
                         </td>
                     </tr>
@@ -1166,7 +1166,7 @@ function tnp_describe_table($table) {
                                     ?></td>
                             </tr>
                         <?php } ?>
-<?php } ?>
+                    <?php } ?>
 
                 </tbody>
             </table>
@@ -1184,69 +1184,83 @@ function tnp_describe_table($table) {
                 </thead>
                 <tbody>
                     <?php
-                    $r = $wpdb->get_row("check table " . NEWSLETTER_USERS_TABLE);
+                    $r = $wpdb->get_row("check table " . esc_sql(NEWSLETTER_USERS_TABLE));
                     $condition = $r->Msg_text == 'OK' ? 1 : 0;
                     ?>
                     <tr>
-                        <td><code><?php echo NEWSLETTER_USERS_TABLE ?></code></td>
+                        <td><code><?php echo esc_html(NEWSLETTER_USERS_TABLE) ?></code></td>
                         <td>
-<?php $this->condition_flag($condition) ?>
+                            <?php $this->condition_flag($condition) ?>
                         </td>
                         <td>
-<?php esc_html(print_r($r)) ?>
+                            <?php esc_html(print_r($r)) ?>
                         </td>
                     </tr>
                     <?php
-                    $r = $wpdb->get_row("check table " . NEWSLETTER_EMAILS_TABLE);
+                    $r = $wpdb->get_row("check table " . esc_sql(NEWSLETTER_EMAILS_TABLE));
                     $condition = $r->Msg_text == 'OK' ? 1 : 0;
                     ?>
                     <tr>
-                        <td><code><?php echo NEWSLETTER_EMAILS_TABLE ?></code></td>
+                        <td><code><?php echo esc_html(NEWSLETTER_EMAILS_TABLE) ?></code></td>
                         <td>
-<?php $this->condition_flag($condition) ?>
+                            <?php $this->condition_flag($condition) ?>
                         </td>
                         <td>
-<?php esc_html(print_r($r)) ?>
+                            <?php esc_html(print_r($r)) ?>
                         </td>
                     </tr>
                     <?php
-                    $r = $wpdb->get_row("check table " . NEWSLETTER_SENT_TABLE);
+                    $r = $wpdb->get_row("check table " . esc_sql(NEWSLETTER_SENT_TABLE));
                     $condition = $r->Msg_text == 'OK' ? 1 : 0;
                     ?>
                     <tr>
-                        <td><code><?php echo NEWSLETTER_SENT_TABLE ?></code></td>
+                        <td><code><?php echo esc_html(NEWSLETTER_SENT_TABLE) ?></code></td>
                         <td>
-<?php $this->condition_flag($condition) ?>
+                            <?php $this->condition_flag($condition) ?>
                         </td>
                         <td>
-<?php esc_html(print_r($r)) ?>
+                            <?php esc_html(print_r($r)) ?>
                         </td>
                     </tr>
                     <?php
-                    $r = $wpdb->get_row("check table " . NEWSLETTER_STATS_TABLE);
+                    $r = $wpdb->get_row("check table " . esc_sql(NEWSLETTER_STATS_TABLE));
                     $condition = $r->Msg_text == 'OK' ? 1 : 0;
                     ?>
                     <tr>
-                        <td><code><?php echo NEWSLETTER_STATS_TABLE ?></code></td>
+                        <td><code><?php echo esc_html(NEWSLETTER_STATS_TABLE) ?></code></td>
                         <td>
-<?php $this->condition_flag($condition) ?>
+                            <?php $this->condition_flag($condition) ?>
                         </td>
                         <td>
-<?php esc_html(print_r($r)) ?>
+                            <?php esc_html(print_r($r)) ?>
                         </td>
                     </tr>
 
                     <?php
-                    $r = $wpdb->get_row("check table " . NEWSLETTER_SENT_TABLE);
+                    $r = $wpdb->get_row("check table " . esc_sql(NEWSLETTER_SENT_TABLE));
                     $condition = $r->Msg_text == 'OK' ? 1 : 0;
                     ?>
                     <tr>
-                        <td><code><?php echo NEWSLETTER_SENT_TABLE ?></code></td>
+                        <td><code><?php echo esc_html(NEWSLETTER_SENT_TABLE) ?></code></td>
                         <td>
-<?php $this->condition_flag($condition) ?>
+                            <?php $this->condition_flag($condition) ?>
                         </td>
                         <td>
-<?php esc_html(print_r($r)) ?>
+                            <?php esc_html(print_r($r)) ?>
+                        </td>
+                    </tr>
+
+                    <?php
+                    $r = $wpdb->get_row("check table " . esc_sql(NEWSLETTER_USERS_META_TABLE));
+                    $condition = $r->Msg_text == 'OK' ? 1 : 0;
+                    ?>
+                    <tr>
+                        <td><code><?php echo esc_html(NEWSLETTER_USERS_META_TABLE) ?></code></td>
+                        <td>
+                            <?php $this->condition_flag($condition) ?>
+                        </td>
+                        <td>
+                            <?php esc_html(print_r($r)) ?>
                         </td>
                     </tr>
 
@@ -1258,10 +1272,10 @@ function tnp_describe_table($table) {
                         <tr>
                             <td><code><?php echo $wpdb->prefix . 'newsletter_automated' ?></code></td>
                             <td>
-    <?php $this->condition_flag($condition) ?>
+                                <?php $this->condition_flag($condition) ?>
                             </td>
                             <td>
-    <?php esc_html(print_r($r)) ?>
+                                <?php esc_html(print_r($r)) ?>
                             </td>
                         </tr>
                     <?php } ?>
@@ -1274,10 +1288,10 @@ function tnp_describe_table($table) {
                         <tr>
                             <td><code><?php echo $wpdb->prefix . 'newsletter_autoresponder' ?></code></td>
                             <td>
-    <?php $this->condition_flag($condition) ?>
+                                <?php $this->condition_flag($condition) ?>
                             </td>
                             <td>
-    <?php esc_html(print_r($r)) ?>
+                                <?php esc_html(print_r($r)) ?>
                             </td>
                         </tr>
                         <?php
@@ -1287,13 +1301,13 @@ function tnp_describe_table($table) {
                         <tr>
                             <td><code><?php echo $wpdb->prefix . 'newsletter_autoresponder_steps' ?></code></td>
                             <td>
-    <?php $this->condition_flag($condition) ?>
+                                <?php $this->condition_flag($condition) ?>
                             </td>
                             <td>
-    <?php esc_html(print_r($r)) ?>
+                                <?php esc_html(print_r($r)) ?>
                             </td>
                         </tr>
-<?php } ?>
+                    <?php } ?>
                 </tbody>
             </table>
 
@@ -1310,9 +1324,44 @@ function tnp_describe_table($table) {
                 <tbody>
 
                     <tr>
-                        <td>Newsletter version</td>
+                        <td>NEWSLETTER_VERSION</td>
                         <td>
-<?php echo NEWSLETTER_VERSION ?>
+                            <?php echo esc_html(NEWSLETTER_VERSION) ?>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>NEWSLETTER_PAGE_WARNING</td>
+                        <td>
+                            <?php echo NEWSLETTER_PAGE_WARNING ? 'true' : 'false' ?>
+                        </td>
+                    </tr>
+                    <?php
+                    if (!defined('NEWSLETTER_ANTIBOT')) define('NEWSLETTER_ANTIBOT', true);
+                    ?>
+                    <tr>
+                        <td>NEWSLETTER_ANTIBOT</td>
+                        <td>
+                            <?php echo NEWSLETTER_ANTIBOT ? 'true' : 'false' ?>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>NEWSLETTER_SEND_DELAY</td>
+                        <td>
+                            <?php echo esc_html(NEWSLETTER_SEND_DELAY) ?> (seconds)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>NEWSLETTER_TRACKING_TYPE</td>
+                        <td>
+                            <?php echo esc_html(NEWSLETTER_TRACKING_TYPE) ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>NEWSLETTER_ACTION_TYPE</td>
+                        <td>
+                            <?php echo esc_html(NEWSLETTER_ACTION_TYPE) ?>
                         </td>
                     </tr>
 
@@ -1321,7 +1370,7 @@ function tnp_describe_table($table) {
                         <td>
                             <?php
                             if (defined('NEWSLETTER_MAX_EXECUTION_TIME')) {
-                                echo NEWSLETTER_MAX_EXECUTION_TIME . ' (seconds)';
+                                echo esc_html(NEWSLETTER_MAX_EXECUTION_TIME) . ' (seconds)';
                             } else {
                                 echo 'Not set';
                             }
@@ -1330,22 +1379,43 @@ function tnp_describe_table($table) {
                     </tr>
 
                     <tr>
+                        <td>NEWSLETTER_LIST_MAX</td>
+                        <td>
+                            <?php echo esc_html(NEWSLETTER_LIST_MAX) ?>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>NEWSLETTER_PROFILE_MAX</td>
+                        <td>
+                            <?php echo esc_html(NEWSLETTER_PROFILE_MAX) ?>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>NEWSLETTER_USE_POST_GALLERY</td>
+                        <td>
+                            <?php echo NEWSLETTER_USE_POST_GALLERY ? 'true' : 'false' ?>
+                        </td>
+                    </tr>
+
+                    <tr>
                         <td>Absolute path</td>
                         <td>
-<?php echo esc_html(ABSPATH); ?>
+                            <?php echo esc_html(ABSPATH); ?>
                         </td>
                     </tr>
                     <tr>
                         <td>Tables Prefix</td>
                         <td>
-<?php echo $wpdb->prefix; ?>
+                            <?php echo $wpdb->prefix; ?>
                         </td>
                     </tr>
                 </tbody>
             </table>
 
 
-<?php if (isset($_GET['advanced'])) { ?>
+            <?php if (isset($_GET['advanced'])) { ?>
 
 
 
@@ -1353,20 +1423,20 @@ function tnp_describe_table($table) {
                 <?php tnp_describe_table('newsletter') ?>
                 <?php tnp_describe_table('newsletter_emails') ?>
                 <?php tnp_describe_table('newsletter_sent') ?>
-    <?php tnp_describe_table('newsletter_stats') ?>
+                <?php tnp_describe_table('newsletter_stats') ?>
 
                 <h3>Update plugins data</h3>
                 <pre style="font-size: 11px; font-family: monospace; background-color: #efefef; color: #444"><?php echo esc_html(print_r(get_site_transient('update_plugins'), true)); ?></pre>
 
-<?php } else { ?>
+            <?php } else { ?>
 
                 <p>
                     <a href="?page=newsletter_system_status&advanced=1">Show advanced parameters</a>
                 </p>
-<?php } ?>
+            <?php } ?>
         </form>
     </div>
 
-<?php include NEWSLETTER_DIR . '/tnp-footer.php'; ?>
+    <?php include NEWSLETTER_DIR . '/tnp-footer.php'; ?>
 
 </div>

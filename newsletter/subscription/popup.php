@@ -30,12 +30,13 @@ if (!$controls->is_action()) {
 
         <?php $controls->show(); ?>
         <?php $controls->language_notice(); ?>
-        <p style="font-weight: bold">
-            If not working, report us the site where it is active so we can check it.
-        </p>
+
         <p>
             Starting from the 2nd visit and after 5 seconds. It doesn't show up if the visitor is already subscribed.
             When closed it shows up again after 30 days.
+        </p>
+        <p>
+            More options are available with the <a href="<?php echo esc_attr($leads_url)?>" target="_blank">Leads Addon</a>.
         </p>
 
 

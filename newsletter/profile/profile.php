@@ -124,7 +124,13 @@ class NewsletterProfile extends NewsletterModule {
         }
         $text = $this->get_text('text');
         $text = str_replace('{profile_form}', '[newsletter_profile]', $text);
-        return $text;
+
+        // Admin notice
+        $admin_notice = '';
+        if (current_user_can('administrator')) {
+            $admin_notice = '<p style="background-color: #eee; color: #000; padding: 1rem; margin: 1rem 0"><a href="' . admin_url('admin.php?page=newsletter_profile_index') . '" target="_blank">Edit this form</a>. <span style="color: #999; font-style: italic">Shown only to blog administrators</span></p>';
+        }
+        return $admin_notice . $text;
     }
 
     function shortcode_newsletter_profile($attrs, $content = '') {

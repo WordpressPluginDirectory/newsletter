@@ -24,12 +24,12 @@ class NewsletterWidget extends WP_Widget {
 
         $form .= NewsletterSubscription::instance()->get_subscription_form('widget', null, array(
             'referrer' => 'widget',
-            'before' => '<div class="tnp tnp-widget">',
-            'after' => '</div>',
+            'class' => 'tnp-widget',
             'lists' => implode(',', $instance['nl']),
             'lists_field_layout' => $instance['lists_layout'],
             'lists_field_empty_label' => $instance['lists_empty_label'],
             'lists_field_label' => $instance['lists_field_label'],
+            'show_labels' => isset($instance['hide_labels']) ? 'false' : 'true'
         ));
 
         return $form;
@@ -52,7 +52,6 @@ class NewsletterWidget extends WP_Widget {
         }
 
         $buffer = apply_filters('widget_text', $instance['text'], $instance);
-
 
         if (stripos($instance['text'], '<form') === false) {
 
@@ -99,12 +98,16 @@ class NewsletterWidget extends WP_Widget {
                 <?php _e('Title') ?>:
                 <input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo esc_attr($instance['title']); ?>" />
             </label>
-
+            <br>
             <label for="<?php echo $this->get_field_id('text'); ?>">
                 Introduction:
                 <textarea class="widefat" rows="10" cols="20" id="<?php echo $this->get_field_id('text'); ?>" name="<?php echo $this->get_field_name('text'); ?>"><?php echo esc_html($instance['text']); ?></textarea>
             </label>
-
+            <br>
+            <label for="<?php echo $this->get_field_id('hide_labels'); ?>">
+                <input type="checkbox" id="<?php echo $this->get_field_id('hide_labels'); ?>" value="1" name="<?php echo $this->get_field_name('hide_labels') ?>" <?php echo isset($instance['hide_labels']) ? 'checked' : '' ?>> Hide the field labels
+            </label>
+            <br>
             <label>
                 Show lists as:
                 <select name="<?php echo $this->get_field_name('lists_layout'); ?>" id="<?php echo $this->get_field_id('lists_layout'); ?>" style="width: 100%">
@@ -146,7 +149,6 @@ class NewsletterWidget extends WP_Widget {
         </p>
         <?php
     }
-
 }
 
 add_action('widgets_init', function () {

@@ -1,4 +1,5 @@
 <?php
+return;
 defined('ABSPATH') || exit;
 ?>
 <div id="tnp-footer">
@@ -24,7 +25,7 @@ defined('ABSPATH') || exit;
             <input type="hidden" value="double" name="optin">
             <input type="submit" value="<?php _e('Get news and promotions', 'newsletter') ?>">
             <span style="color: #bbb; margin-bottom: 0px; display: block; line-height: normal">
-                Proceeding you agree to the 
+                Proceeding you agree to the
                 <a href="https://www.thenewsletterplugin.com/privacy" target="_blank" style="color: #2ECC71">privacy policy</a>
             </span>
 

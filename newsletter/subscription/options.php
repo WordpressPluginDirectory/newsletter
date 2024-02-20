@@ -130,9 +130,9 @@ foreach (['confirmed_text', 'confirmed_message', 'confirmation_text', 'confirmat
                                 <div data-bind="options-subscription_text_custom">
                                     <?php $controls->wp_editor('subscription_text', ['editor_height' => 150], ['default' => $this->get_default_text('subscription_text')]); ?>
                                     <p class="description">
-                                        Remember to add at least the <code>[newsletter_form]</code> shortcode or
-                                        <a href="https://www.thenewsletterplugin.com/documentation/subscription/subscription-form-shortcodes/" target="_blank">other shortcodes</a> to include a form. If you
-                                        don't want this page to show a subscription form, remove the shortcode.
+                                        Remember to add at least the <code>[newsletter_form]</code> shortcode
+                                        (<a href="https://www.thenewsletterplugin.com/documentation/subscription/subscription-form-shortcodes/#attributes" target="_blank">see all the options</a>).
+                                        Remove the shortcode if you don't want to show the subscription form.
                                     </p>
                                 </div>
                                 <div data-bind="!options-subscription_text_custom" class="tnpc-default-text">

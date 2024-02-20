@@ -120,7 +120,7 @@ class NewsletterDefaults {
 
         if ($sub === 'unsubscription') {
             return [
-                'mode' => '1',
+                'mode' => '2',
                 'notify' => '',
                 'notify_email' => '',
                 'unsubscribe_text_custom' => '0',

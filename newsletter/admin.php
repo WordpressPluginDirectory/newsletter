@@ -43,7 +43,7 @@ class NewsletterAdmin extends NewsletterModuleAdmin {
 
         //add_action('admin_menu', [$this, 'add_extensions_menu'], 90);
 
-        add_action('admin_enqueue_scripts', [$this, 'hook_admin_enqueue_scripts']);
+        add_action('admin_enqueue_scripts', [$this, 'hook_admin_enqueue_scripts'], 999);
     }
 
     function hook_wp_loaded() {

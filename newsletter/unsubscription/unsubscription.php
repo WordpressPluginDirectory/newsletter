@@ -38,9 +38,9 @@ class NewsletterUnsubscription extends NewsletterModule {
 
         if (isset($_SERVER['HTTP_USER_AGENT'])) {
             $agent = strtolower($_SERVER['HTTP_USER_AGENT']);
-            if (strpos($agent, 'yahoomailproxy') !== false) {
-                return;
-            }
+//            if (strpos($agent, 'yahoomailproxy') !== false) {
+//                return;
+//            }
             if (strpos($agent, 'googlebot') !== false) {
                 return;
             }
@@ -70,7 +70,7 @@ class NewsletterUnsubscription extends NewsletterModule {
         // Show the antibot and stop
         if (in_array($action, ['u', 'uc', 'reactivate'])) {
             if (!$this->antibot_form_check()) {
-                $this->request_to_antibot_form('Confirm');
+                $this->antibot_unsubscription('');
             }
         }
 
@@ -87,19 +87,12 @@ class NewsletterUnsubscription extends NewsletterModule {
                 $this->redirect($url);
                 break;
 
-            case 'ocu': // One Click Unsubscribe
+            case 'ocu': // One Click Unsubscribe rfc8058
                 if (isset($_POST['List-Unsubscribe']) && 'One-Click' === $_POST['List-Unsubscribe']) {
-                    $this->unsubscribe($user, $email);
+                    $this->unsubscribe($user, $email, 'unsubscribe-rfc8058');
                     die('ok');
                 }
                 die('ko');
-                break;
-
-            case 'ocu': // One Click Unsubscribe
-                if (isset($_POST['List-Unsubscribe']) && 'One-Click' === $_POST['List-Unsubscribe']) {
-                    $this->unsubscribe($user, $email);
-                }
-                die();
                 break;
 
             case 'reactivate':
@@ -116,7 +109,7 @@ class NewsletterUnsubscription extends NewsletterModule {
      *
      * @return TNP_User
      */
-    function unsubscribe($user, $email = null) {
+    function unsubscribe($user, $email = null, $type = 'unsubscribe') {
         global $wpdb;
 
         if ($user->status === TNP_User::STATUS_UNSUBSCRIBED) {
@@ -126,7 +119,7 @@ class NewsletterUnsubscription extends NewsletterModule {
         $this->refresh_user_token($user);
         $this->set_user_status($user, TNP_User::STATUS_UNSUBSCRIBED);
 
-        $this->add_user_log($user, 'unsubscribe');
+        $this->add_user_log($user, $type);
 
         do_action('newsletter_user_unsubscribed', $user);
 
@@ -145,6 +138,8 @@ class NewsletterUnsubscription extends NewsletterModule {
         if (!$force && !empty($this->get_main_option('unsubscribed_disabled'))) {
             return true;
         }
+
+        $this->switch_language($user->language);
 
         $message = do_shortcode($this->get_text('unsubscribed_message'));
         $subject = $this->get_text('unsubscribed_subject');

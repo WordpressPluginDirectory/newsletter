@@ -1371,7 +1371,7 @@ span.tnp-user-status {
 
 #tnp-heading h2 span {
     background-color: transparent;
-    border: 1px solid #999;
+    /*border: 1px solid #999;*/
     font-weight: normal;
     display: inline-block;
     padding: .3rem 1rem;
@@ -1380,25 +1380,26 @@ span.tnp-user-status {
     vertical-align: middle;
     color: #444;
     margin-left: 2em;
+    box-shadow: 0 0 3px #ccc;
 }
 
 #tnp-heading h2 span.tnp-badge-green {
     background-color: green;
-    border: 1px solid #999;
+    /*border: 1px solid #999;*/
     font-weight: normal;
     color: #fff;
 }
 
 #tnp-heading h2 span.tnp-badge-red {
     background-color: red;
-    border: 1px solid #999;
+    /*border: 1px solid #999;*/
     font-weight: normal;
     color: #fff;
 }
 
 #tnp-heading h2 span.tnp-badge-orange {
     background-color: var(--tnp-orange);
-    border: 1px solid #999;
+    /*border: 1px solid #999;*/
     font-weight: normal;
     color: #fff;
 }
@@ -2030,7 +2031,11 @@ span.tnp-user-status {
 
 #tnp-body .form-table input,
 #tnp-body .form-table textarea,
-#tnp-body .form-table select
+#tnp-body .form-table select,
+#tnp-body .widefat input,
+#tnp-body .widefat textarea,
+#tnp-body .widefat select
+
 {
     border: var(--tnp-input-border);
 }
@@ -2039,7 +2044,6 @@ span.tnp-user-status {
 #tnp-body .widefat input::placeholder,
 #tnp-body .form-table textarea::placeholder,
 #tnp-body .widefat textarea::placeholder
-
 {
     font-style: italic;
     color: var(--tnp-gray-light);

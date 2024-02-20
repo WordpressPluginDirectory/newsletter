@@ -96,7 +96,7 @@ class NewsletterMainAdmin extends NewsletterModuleAdmin {
     function hook_display_post_states($post_states, $post) {
 
         if ($post->ID == $this->get_option('page')) {
-            $post_states[] = __('Newsletter plugin page, do not delete', 'newsletter');
+            $post_states[] = __('Newsletter public page, keep public and published', 'newsletter');
         }
 
         return $post_states;

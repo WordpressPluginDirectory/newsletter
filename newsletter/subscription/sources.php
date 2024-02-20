@@ -104,6 +104,8 @@ if (class_exists('NewsletterExtensions')) {
 
                     <?php Integrations::source_rows(Integrations::get_ninjaforms_sources(), $controls) ?>
 
+                    <?php Integrations::source_rows(Integrations::get_fluentforms_sources(), $controls) ?>
+
                     <?php Integrations::source_rows(Integrations::get_woocommerce_sources(), $controls) ?>
 
                     <?php Integrations::source_rows(Integrations::get_edd_sources(), $controls) ?>
@@ -116,7 +118,6 @@ if (class_exists('NewsletterExtensions')) {
             </table>
 
             <p>Integrations with many other plugins are available on the addons page.<p>
-
 
         </form>
     </div>
