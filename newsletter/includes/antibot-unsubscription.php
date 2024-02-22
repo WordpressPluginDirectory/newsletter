@@ -39,7 +39,7 @@ header('Cache-Control: no-cache,no-store,private');
                 border-radius: 2px;
                 margin: 0px 5px;
             }
-            input[type=submit] {
+            input[type=button] {
                 text-align: center;
                 border: none;
                 padding: 10px 15px;
@@ -122,7 +122,7 @@ header('Cache-Control: no-cache,no-store,private');
                 echo '=';
                 echo '<input type="text" name="n3" value="" placeholder="?" style="width: 50px">';
                 echo '<br><br>';
-                echo '<input type="button" value="', esc_attr($submit_label), '" onclick="go(); return false;>';
+                echo '<input type="button" value="&gt;" onclick="go(); return false;">';
                 echo '</div>';
             }
             ?>

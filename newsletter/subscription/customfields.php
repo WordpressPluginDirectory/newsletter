@@ -41,7 +41,7 @@ $status = array(0 => __('Private', 'newsletter'), 1 => __('Public', 'newsletter'
 $rules = array(0 => __('Optional', 'newsletter'), 1 => __('Required', 'newsletter'));
 $extra_type = array('text' => __('Text', 'newsletter'), 'select' => __('List', 'newsletter'));
 
-$main_options = $this->get_options('customfields', '');
+$main_options = $this->get_main_options('customfields');
 ?>
 
 <div class="wrap" id="tnp-wrap">
@@ -140,6 +140,6 @@ $main_options = $this->get_options('customfields', '');
 
     </div>
 
-    <?php include NEWSLETTER_ADMIN_FOOTER ?>
+    <?php include NEWSLETTER_ADMIN_FOOTER; ?>
 
 </div>

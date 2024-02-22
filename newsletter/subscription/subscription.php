@@ -179,9 +179,10 @@ class NewsletterSubscription extends NewsletterModule {
 
                     if (is_wp_error($user)) {
                         if ($user->get_error_code() === 'exists') {
-                            $this->dienow($this->get_text('error_text'), $user->get_error_message(), 200);
+                            $this->show_message('error', $user);
+                            //$this->dienow($this->get_text('error_text'), $user->get_error_message(), 200);
                         }
-                        $this->dienow('Registration failed.', $user->get_error_message(), 400);
+                        $this->dienow(__('Registration failed.', 'newsletter'), $user->get_error_message(), 400);
                     }
 
                     if ($user->status == TNP_User::STATUS_CONFIRMED) {
@@ -214,7 +215,7 @@ class NewsletterSubscription extends NewsletterModule {
                         echo $this->get_text('error_text');
                         die();
                     } else {
-                        $this->dienow('Registration failed.', $user->get_error_message(), 400);
+                        $this->dienow(__('Registration failed.', 'newsletter'), $user->get_error_message(), 400);
                     }
                 } else {
                     if ($user->status == TNP_User::STATUS_CONFIRMED) {
@@ -412,7 +413,7 @@ class NewsletterSubscription extends NewsletterModule {
             require_once NEWSLETTER_INCLUDES_DIR . '/antispam.php';
             $antispam = NewsletterAntispam::instance();
             if ($antispam->is_spam($subscription)) {
-                return new WP_Error('spam', 'This looks like a spam subscription');
+                return new WP_Error('spam', __('This looks like a spam subscription', 'newsletter'));
             }
         }
 
@@ -423,8 +424,8 @@ class NewsletterSubscription extends NewsletterModule {
 
         // Do we accept repeated subscriptions?
         if ($user != null && $subscription->if_exists === TNP_Subscription::EXISTING_ERROR) {
-            //$this->show_message('error', $user);
-            return new WP_Error('exists', 'Email address already registered and Newsletter sets to block repeated registrations. You can change this behavior or the user message above on subscription configuration panel.');
+            $this->show_message('error', $user);
+            //return new WP_Error('exists', 'Email address already registered and Newsletter sets to block repeated registrations. You can change this behavior or the user message above on subscription configuration panel.');
         }
 
 
@@ -1934,6 +1935,12 @@ class NewsletterSubscription extends NewsletterModule {
 
         if ($key === 'confirmed') {
             $text .= $this->get_option($key . '_tracking');
+        }
+
+        if ($key === 'error' && current_user_can('administrator')) {
+            $text .= '<div style="padding: 1rem; background-color: #eee"><strong>Message only visibile to administrators</strong><br>';
+            $text .= 'Email address probably already registered and Newsletter sets to block repeated registrations. You can change this behavior or the user message above on subscription configuration panel.';
+            $text .= '</div>';
         }
 
         return $text;

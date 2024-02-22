@@ -10,17 +10,13 @@ $user_count = Newsletter::instance()->get_user_count();
 $is_administrator = current_user_can('administrator');
 
 function newsletter_print_entries($group) {
-    $entries = apply_filters('newsletter_menu_' . $group, array());
+    $entries = apply_filters('newsletter_menu_' . $group, []);
     if (!$entries) {
         return;
     }
 
     foreach ($entries as &$entry) {
-        echo '<li><a href="', $entry['url'], '">', $entry['label'];
-        if (!empty($entry['description'])) {
-            //echo '<small>', $entry['description'], '</small>';
-        }
-        echo '</a></li>';
+        echo '<li><a href="', esc_attr($entry['url']), '">', esc_html($entry['label']), '</a></li>';
     }
 }
 
@@ -256,7 +252,6 @@ if (!empty(NewsletterMainAdmin::instance()->get_option('page'))) {
                 The Newsletter public page does not contain the <code>[newsletter]</code> shortcode.
                 <a href="<?php echo esc_attr(admin_url('post.php')) ?>?post=<?php echo esc_attr($tnp_page_id) ?>&action=edit"><strong>Edit the page</strong></a>.
                 <br>
-
             </div>
             <?php
         }

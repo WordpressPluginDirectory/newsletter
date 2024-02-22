@@ -116,7 +116,7 @@ class NewsletterUnsubscription extends NewsletterModule {
             return $user;
         }
 
-        $this->refresh_user_token($user);
+        //$this->refresh_user_token($user);
         $this->set_user_status($user, TNP_User::STATUS_UNSUBSCRIBED);
 
         $this->add_user_log($user, $type);

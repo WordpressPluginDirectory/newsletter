@@ -477,6 +477,9 @@ class NewsletterEmailsAdmin extends NewsletterModuleAdmin {
 
                 $controls->messages .= ' ' . implode(', ', $emails);
                 $controls->messages .= '.<br>';
+                $controls->messages .= 'If the message does not shows up on the mailbox, check the spam folder and run a test from the '
+                        . '<a href="?page=newsletter_system_delivery" target="_blank"><strong>System/Delivery panel</strong></a>.<br>';
+
                 $controls->messages .= '<a href="https://www.thenewsletterplugin.com/documentation/subscribers#test" target="_blank"><strong>' .
                         __('Read more about test subscribers', 'newsletter') . '</strong></a>.<br>';
                 $controls->messages .= '<a href="https://www.thenewsletterplugin.com/documentation/email-sending-issues" target="_blank"><strong>' . __('Read more about delivery issues', 'newsletter') . '</strong></a>.';
@@ -522,6 +525,8 @@ class NewsletterEmailsAdmin extends NewsletterModuleAdmin {
 
         $messages .= ' ' . esc_html($email_address);
         $messages .= '.<br>';
+        $messages .= 'If the message does not shows up on the mailbox, check the spam folder and run a test from the '
+                . '<a href="?page=newsletter_system_delivery" target="_blank"><strong>System/Delivery panel</strong></a>.<br>';
         $messages .= '<a href="https://www.thenewsletterplugin.com/documentation/email-sending-issues" target="_blank">' . __('Read more about delivery issues', 'newsletter') . '</a>.';
 
         return $messages;
