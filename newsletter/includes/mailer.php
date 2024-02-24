@@ -51,7 +51,6 @@ class NewsletterMailer {
         if (!empty($this->options['turbo'])) {
             $this->batch_size = max(1, (int) $this->options['turbo']);
         }
-        //$this->get_logger()->debug($options);
     }
 
     public function get_name() {

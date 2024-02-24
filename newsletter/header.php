@@ -16,7 +16,7 @@ function newsletter_print_entries($group) {
     }
 
     foreach ($entries as &$entry) {
-        echo '<li><a href="', esc_attr($entry['url']), '">', esc_html($entry['label']), '</a></li>';
+        echo '<li><a href="', esc_attr($entry['url']), '">', $entry['label'], '</a></li>';
     }
 }
 
