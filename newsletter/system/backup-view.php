@@ -14,7 +14,7 @@ ksort($options);
 
 <div class="wrap tnp-system tnp-system-logs" id="tnp-wrap">
 
-    <?php include NEWSLETTER_DIR . '/header.php'; ?>
+    <?php include NEWSLETTER_ADMIN_HEADER; ?>
 
     <div id="tnp-heading">
 
@@ -40,16 +40,16 @@ ksort($options);
                             <tr>
                                 <th>Key</th>
                                 <th>Value</th>
-                            </tr> 
+                            </tr>
                         </thead>
                         <tbody
-                        <?php foreach ($options as $k => $v) { ?> 
+                        <?php foreach ($options as $k => $v) { ?>
 
                                 <?php if (is_array($v)) { ?>
                                     <?php
                                     ksort($v);
                                     ?>
-                                    <?php foreach ($v as $k2 => $v2) { ?> 
+                                    <?php foreach ($v as $k2 => $v2) { ?>
                                         <tr>
                                     <th><?php echo esc_html($k), '.', esc_html($k2) ?></th>
                                     <td><?php echo esc_html($v2) ?></td>
@@ -74,6 +74,6 @@ ksort($options);
         </form>
     </div>
 
-    <?php include NEWSLETTER_DIR . '/tnp-footer.php'; ?>
+    <?php include NEWSLETTER_ADMIN_FOOTER; ?>
 
 </div>

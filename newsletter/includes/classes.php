@@ -159,7 +159,7 @@ class TNP_Subscription_Data {
     var $country = null;
     var $region = null;
     var $city = null;
-    var $flow = '';
+    var $wp_user_id = 0;
 
     /**
      * Associative array id=>value of lists chosen by the subscriber. A list can be set to
@@ -194,8 +194,8 @@ class TNP_Subscription_Data {
             $subscriber->region = $this->region;
         if (!empty($this->city))
             $subscriber->city = $this->city;
-        if (!empty($this->source))
-            $subscriber->source = $this->source;
+        if (!empty($this->wp_user_id))
+            $subscriber->wp_user_id = $this->wp_user_id;
 
 
         foreach ($this->lists as $id => $value) {
@@ -215,9 +215,8 @@ class TNP_Subscription_Data {
      * @param array $list_ids Array of list IDs
      */
     function add_lists($list_ids) {
-        if (empty($list_ids) || !is_array($list_ids)) {
-            return;
-        }
+        $list_ids = wp_parse_list($list_ids);
+        
         foreach ($list_ids as $list_id) {
             $list_id = (int) $list_id;
             if ($list_id <= 0 || $list_id > NEWSLETTER_LIST_MAX) {

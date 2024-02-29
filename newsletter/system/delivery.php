@@ -6,6 +6,7 @@
 defined('ABSPATH') || exit;
 
 $newsletter = Newsletter::instance();
+$mailer = $newsletter->get_mailer();
 
 if ($controls->is_action('test')) {
 
@@ -55,9 +56,18 @@ if ($controls->is_action('test')) {
     }
 }
 
+// Compute the number of newsletters ongoing and other stats
+$emails = $wpdb->get_results("select * from " . NEWSLETTER_EMAILS_TABLE . " where status='sending' and send_on<" . time() . " order by id asc");
+$total = 0;
+$queued = 0;
+foreach ($emails as $email) {
+    $total += $email->total;
+    $queued += $email->total - $email->sent;
+}
+$speed = $newsletter->get_send_speed();
+
 $options = $this->get_options('status');
 
-$mailer = Newsletter::instance()->get_mailer();
 $functions = $this->get_hook_functions('phpmailer_init');
 $icon = 'fas fa-plug';
 if ($mailer instanceof NewsletterDefaultMailer) {
@@ -79,20 +89,19 @@ if ($mailer instanceof NewsletterDefaultMailer) {
 }
 
 $speed = Newsletter::instance()->get_send_speed();
-
 ?>
 
 <style>
-   <?php include __DIR__ . '/css/system.css' ?>
+<?php include __DIR__ . '/css/system.css' ?>
 </style>
 
 <div class="wrap tnp-system tnp-system-delivery" id="tnp-wrap">
 
-    <?php include NEWSLETTER_ADMIN_HEADER ?>
+    <?php include NEWSLETTER_ADMIN_HEADER; ?>
 
     <div id="tnp-heading">
 
-         <h2><?php _e('System', 'newsletter') ?></h2>
+        <h2><?php _e('System', 'newsletter') ?></h2>
         <?php include __DIR__ . '/nav.php' ?>
 
     </div>
@@ -103,65 +112,284 @@ $speed = Newsletter::instance()->get_send_speed();
 
         <form method="post" action="">
             <?php $controls->init(); ?>
-            <h3>Test</h3>
 
-            <p>
-                <?php $controls->text_email('test_email', ['required' => true]) ?>
-                <?php $controls->button('test', __('Send')) ?>
-                <?php if (empty($options['mail'])) { ?>
-                    <span class="tnp-ko">KO</span>
-                <?php } else { ?>
-                    <span class="tnp-ok">OK</span>
-                <?php } ?>
-            </p>
-
-            <p>
-                <?php if (empty($options['mail'])) { ?>
-                    <?php if (empty($options['mail_error'])) { ?>
-                    <p>A test has never run.</p>
-                <?php } else { ?>
-                    <p>Last test failed with error "<?php echo esc_html($options['mail_error']) ?>".</p>
-
-                <?php } ?>
-            <?php } else { ?>
-                <p>Last test was successful. If you didn't receive the test email:</p>
-                <ol>
-                    <li>If you're using an third party SMTP plugin, do a test from that plugin configuration panel</li>
-                    <li>If you're using a Newsletter Delivery Addon, do a test from that addon configuration panel</li>
-                    <li>If previous points do not apply to you, ask for support to your provider reporting the emails from your blog are not delivered</li>
-                </ol>
-            <?php } ?>
-            <p><a href="https://www.thenewsletterplugin.com/documentation/email-sending-issues" target="_blank">Read more to solve your issues, if any</a></p>
+            <div class="tnp-dashboard">
+                <div class="tnp-cards-container">
+                    <div class="tnp-card">
+                        <?php
+                        $condition = empty($options['mail']) ? 0 : 1;
+                        if (!$condition && empty($options['mail_error']))
+                            $condition = 2;
+                        ?>
+                        <div class="tnp-card-title">Test <?php $this->condition_flag($condition) ?></div>
+                        <p>
+                            <?php $controls->text_email('test_email', ['required' => true]) ?>
+                            <?php $controls->button('test', __('Send')) ?>
+                        </p>
 
 
+                        <?php if (!empty($options['mail_error'])) { ?>
+                            <p style="font-weight: bold">Last test failed with error "<?php echo esc_html($options['mail_error']) ?>".</p>
+                        <?php } ?>
+
+
+                        <p>If you didn't receive the test email:</p>
+                        <ol>
+                            <li>If you're using an third party SMTP plugin, do a test from that plugin configuration panel</li>
+                            <li>If you're using a Newsletter Delivery Addon, do a test from that addon configuration panel</li>
+                            <li>If previous points do not apply to you, ask for support to your provider reporting the emails from your blog are not delivered</li>
+                        </ol>
+
+                        <p><a href="https://www.thenewsletterplugin.com/documentation/email-sending-issues" target="_blank">Read more to solve your issues, if any</a></p>
+
+                    </div>
+                    <div class="tnp-card">
+                        <div class="tnp-card-title">Parameters</div>
+                        <table class="widefat">
+
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th></th>
+                                    <th>Note</th>
+                                </tr>
+
+                            </thead>
+
+                            <tbody>
+                                <tr>
+                                    <td>Speed</td>
+                                    <td class="status">
+                                        &nbsp;
+                                    </td>
+                                    <td>
+                                        <strong><?php echo $speed ?></strong> emails per hour<br>
+                                        can be set on
+                                        <a href="admin.php?page=newsletter_main_main" target="_blank">Settings/General</a>
+                                        or on installed delivery addon if available
+                                    </td>
+
+                                </tr>
+                                <tr>
+                                    <td>Delivering</td>
+                                    <td class="status">
+                                        &nbsp;
+                                    </td>
+                                    <td>
+                                        <?php if (count($emails)) { ?>
+                                            Delivering <?php echo count($emails) ?> newsletters to about <?php echo $queued ?> recipients.
+                                            At speed of <?php echo $speed ?> emails per hour it will take <?php printf('%.1f', $queued / $speed) ?> hours to finish.
+
+                                        <?php } else { ?>
+                                            Nothing delivering right now
+                                        <?php } ?>
+                                    </td>
+
+                                </tr>
+                                <tr>
+                                    <td>Mailer</td>
+                                    <td>
+                                        &nbsp;
+                                    </td>
+                                    <td>
+                                        <?php echo esc_html($mailer->get_description()) ?>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td>
+                                        Engine lock
+                                    </td>
+                                    <td>
+                                        &nbsp;
+                                    </td>
+                                    <td>
+                                        <?php echo esc_html(get_option('newsletter_lock_engine')) ?>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        NEWSLETTER_CRON_INTERVAL
+                                    </td>
+                                    <td>
+                                        &nbsp;
+                                    </td>
+                                    <td>
+                                        <?php echo esc_html(NEWSLETTER_CRON_INTERVAL) ?> seconds
+                                    </td>
+                                </tr>
+
+
+                                <tr>
+                                    <td>
+                                        NEWSLETTER_SEND_DELAY
+                                    </td>
+                                    <td>
+                                        &nbsp;
+                                    </td>
+                                    <td>
+                                        <?php echo esc_html(NEWSLETTER_SEND_DELAY) ?> milliseconds
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+
+
+                <div class="tnp-cards-container">
+
+                    <div class="tnp-card">
+                        <?php
+                        $stats = $this->get_send_stats();
+                        $condition = 1;
+                        if ($stats) {
+                            $condition = $stats->mean > 5 ? 2 : 1;
+                        }
+                        ?>
+                        <div class="tnp-card-title">Statistics <?php $this->condition_flag($condition) ?></div>
+
+                        <?php if (!$stats) { ?>
+
+                            <p>Not enough data available.</p>
+
+                        <?php } else { ?>
+
+                            <?php if ($condition == 2) { ?>
+                                <p>
+                                    <strong>Sending a single email is taking more than 5 seconds (by mean), too slow.</strong>
+                                    <a href="https://www.thenewsletterplugin.com/documentation/installation/status-panel/#email-speed" target="_blank">Read more</a>.
+                                </p>
+                            <?php } ?>
+
+
+                            <p>
+                                Average time to send an email: <?php echo $stats->mean ?> seconds<br>
+                                <?php if ($stats->mean > 0) { ?>
+                                    Max speed: <?php echo sprintf("%.2f", 1.0 / $stats->mean * 3600) ?> emails per hour<br>
+                                <?php } ?>
+
+                                Max mean time measured: <?php echo $stats->max ?> seconds<br>
+                                Min mean time measured: <?php echo $stats->min ?> seconds<br>
+                                Total emails in the sample: <?php echo $stats->total_emails ?><br>
+                                Total sending time: <?php echo $stats->total_time ?> seconds<br>
+                                Runs in the sample: <?php echo $stats->total_runs ?><br>
+                                Runs prematurely interrupted: <?php echo $stats->interrupted ?><br>
+                            </p>
+
+                            <canvas id="tnp-send-chart" style="width: 100%; height: 200px"></canvas>
+                            <canvas id="tnp-send-speed" style="width: 100%; height: 200px"></canvas>
+                            <script>
+                                jQuery(function () {
+                                    var sendChartData = {
+                                        labels: <?php echo json_encode(range(1, count($stats->means))) ?>,
+                                        datasets: [
+                                            {
+                                                label: "Seconds to complete a batch",
+                                                data: <?php echo json_encode($stats->means) ?>,
+                                                borderColor: '#2980b9',
+                                                fill: false
+                                            }
+                                        ]
+                                    };
+                                    var sendChartConfig = {
+                                        type: "line",
+                                        data: sendChartData,
+                                        options: {
+                                            responsive: false,
+                                            maintainAspectRatio: false,
+                                            scales: {
+                                                yAxes: [{
+                                                        type: "linear",
+                                                        ticks: {
+                                                            beginAtZero: true
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    };
+                                    new Chart('tnp-send-chart', sendChartConfig);
+
+
+                                    var sendSpeedData = {
+                                        labels: <?php echo json_encode(range(1, count($stats->speeds))) ?>,
+                                        datasets: [
+                                            {
+                                                label: "Emails per second",
+                                                data: <?php echo json_encode($stats->speeds) ?>,
+                                                borderColor: '#2980b9',
+                                                fill: false
+                                            }
+                                        ]
+                                    };
+                                    var sendSpeedConfig = {
+                                        type: "line",
+                                        data: sendSpeedData,
+                                        options: {
+                                            responsive: false,
+                                            maintainAspectRatio: false,
+                                            scales: {
+                                                yAxes: [{
+                                                        type: "linear",
+                                                        ticks: {
+                                                            beginAtZero: true
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    };
+                                    new Chart('tnp-send-speed', sendSpeedConfig);
+                                });
+                            </script>
+
+                            <p><?php $controls->button_reset('reset_send_stats') ?></p>
+                        <?php } ?>
+                    </div>
+                </div>
+
+
+                <div class="tnp-cards-container">
+
+                    <div class="tnp-card">
+                        <div class="tnp-card-title">How are messages delivered by Newsletter to your subscribers?</div>
+                        <div class="tnp-flow tnp-flow-row">
+                            <div class="tnp-mail"><i class="fas fa-envelope"></i><br><br>Newsletter<br>
+                                (max: <?php echo esc_html($speed) ?> emails per hour)
+                            </div>
+                            <div class="tnp-arrow">&rightarrow;</div>
+                            <div class="tnp-addon"><i class="<?php echo $icon ?>"></i><br><br><?php echo $mailer_name ?></div>
+                            <div class="tnp-arrow">&rightarrow;</div>
+                            <div class="tnp-service"><i class="fas fa-cog"></i><br><br>
+                                <?php echo esc_html($service_name) ?>
+                            </div>
+                            <div class="tnp-arrow">&rightarrow;</div>
+                            <div class="tnp-user"><i class="fas fa-user"></i><br><br>Subscriber</div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="tnp-cards-container">
+
+                    <div class="tnp-card">
+                        <div class="tnp-card-title">Filters applied to WP mailing system</div>
+                        <?php if (empty($functions)) { ?>
+                            <p>None.</p>
+                        <?php } else { ?>
+
+                            <p><?php echo $functions ?></p>
+                        <?php } ?>
+
+
+                    </div>
+                </div>
+
+            </div>
         </form>
 
-        <h3>
-            How are messages delivered by Newsletter to your subscribers?
-        </h3>
-
-        <div class="tnp-flow tnp-flow-row">
-            <div class="tnp-mail"><i class="fas fa-envelope"></i><br><br>Newsletter<br>
-                (max: <?php echo esc_html($speed) ?> emails per hour)
-            </div>
-            <div class="tnp-arrow">&rightarrow;</div>
-            <div class="tnp-addon"><i class="<?php echo $icon ?>"></i><br><br><?php echo $mailer_name ?></div>
-            <div class="tnp-arrow">&rightarrow;</div>
-            <div class="tnp-service"><i class="fas fa-cog"></i><br><br>
-                <?php echo esc_html($service_name) ?>
-            </div>
-            <div class="tnp-arrow">&rightarrow;</div>
-            <div class="tnp-user"><i class="fas fa-user"></i><br><br>Subscriber</div>
-        </div>
-
-
-        <?php if (!empty($functions)) { ?>
-            <br><br>
-            <h3>Functions that are changing the default WordPress delivery system</h3>
-            <p><?php echo $functions ?></p>
-        <?php } ?>
-
-
     </div>
-    <?php include NEWSLETTER_ADMIN_FOOTER ?>
+    <?php include NEWSLETTER_ADMIN_FOOTER; ?>
 </div>

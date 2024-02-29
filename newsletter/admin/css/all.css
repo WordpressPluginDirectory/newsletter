@@ -108,6 +108,7 @@
     --tnp-led-green: hsl(140, 70%, 40%);
     --tnp-led-gray: #ccc;
 
+    --tnp-card-radius: 5px;
 }
 
 #wpwrap {
@@ -229,6 +230,8 @@
     text-shadow: none;
     width: auto;
     vertical-align: bottom;
+    font-weight: normal;
+    font-size: .9rem;
 }
 
 #tnp-body .button-secondary,
@@ -331,7 +334,7 @@
 }*/
 
 #tnp-body .widefat td a {
-    color: var(--tnp-text);
+    color: var(--tnp-blue);
 }
 
 table.clicks td {
@@ -381,6 +384,10 @@ table.clicks {
     color: var(--tnp-blue-dark);
     text-decoration: none;
     font-weight: bold;
+}
+
+#tnp-wrap .tnp-notice a.tnpc-button {
+    font-weight: normal;
 }
 
 #tnp-wrap .tnp-notice.tnp-notice-warning {
@@ -1399,6 +1406,20 @@ span.tnp-user-status {
 
 #tnp-heading h2 span.tnp-badge-orange {
     background-color: var(--tnp-orange);
+    /*border: 1px solid #999;*/
+    font-weight: normal;
+    color: #fff;
+}
+
+#tnp-heading h2 span.tnp-badge-blue {
+    background-color: var(--tnp-blue);
+    /*border: 1px solid #999;*/
+    font-weight: normal;
+    color: #fff;
+}
+
+#tnp-heading h2 span.tnp-badge-gray {
+    background-color: var(--tnp-gray-dark);
     /*border: 1px solid #999;*/
     font-weight: normal;
     color: #fff;

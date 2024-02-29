@@ -27,7 +27,7 @@
     align-content: flex-start;
     margin: 15px;
     /*font-family: soleil, sans-serif;*/
-    border-radius: 15px;
+    border-radius: var(--tnp-card-radius);
     background-color: #fff;
     -webkit-box-shadow: 1px 1px 7px 0px rgb(0 0 0 / 15%);
     -moz-box-shadow: 1px 1px 7px 0px rgba(0, 0, 0, 0.15);

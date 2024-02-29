@@ -37,8 +37,12 @@ $controls->warnings[] = 'Warnings example with long text';
 
     </div>
     <div id="tnp-body">
-        
+
         <?php $controls->show()?>
+
+        <div class="tnp-notice">
+            A notice to be added at start of the body.
+        </div>
 
         <form method="post" action="">
             <?php $controls->init(); ?>
@@ -84,7 +88,7 @@ $controls->warnings[] = 'Warnings example with long text';
                             <td>
                                 <div class="tnpc-checkboxes">
                                     <label><input type="checkbox" id="options_sex" name="options[options_sex][]" value="f">&nbsp;Women</label><label><input type="checkbox" id="options_sex" name="options[options_sex][]" value="m">&nbsp;Men</label><label><input type="checkbox" id="options_sex" name="options[options_sex][]" value="n">&nbsp;Not specified</label>
-                                    <div style="clear: both"></div>                            
+                                    <div style="clear: both"></div>
                                 </div>
                             </td>
                         </tr>

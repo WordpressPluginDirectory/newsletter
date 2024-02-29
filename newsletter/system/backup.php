@@ -12,7 +12,7 @@ if (isset($_GET['id'])) {
 $items = $wpdb->get_results("select option_name from {$wpdb->options} where option_name like 'newsletter_backup_%' order by option_name");
 
 if ($controls->is_action('delete_logs')) {
-    
+
 }
 ?>
 
@@ -22,11 +22,11 @@ if ($controls->is_action('delete_logs')) {
 
 <div class="wrap tnp-system tnp-system-logs" id="tnp-wrap">
 
-    <?php include NEWSLETTER_DIR . '/header.php'; ?>
+    <?php include NEWSLETTER_ADMIN_HEADER; ?>
 
     <div id="tnp-heading">
 
-        <h2><?php _e('System', 'newsletter') ?></h2>
+        <h2><?php esc_html_e('Settings backup', 'newsletter') ?></h2>
         <?php include __DIR__ . '/nav.php' ?>
 
     </div>
@@ -39,13 +39,13 @@ if ($controls->is_action('delete_logs')) {
 
             <div class="tnp-tabs">
                 <ul>
-                    <li><a href="#tabs-logs"><?php _e('Options backup', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-logs"><?php esc_html_e('Settings backup', 'newsletter') ?></a></li>
                 </ul>
 
                 <div id="tabs-logs">
                     <ul class="tnp-log-files">
                         <?php
-                        foreach ($items as $item) { 
+                        foreach ($items as $item) {
                             $version = substr($item->option_name, -5);
                             echo '<li><a href="?page=newsletter_system_backup&id=', esc_attr($version), '">', esc_html($version), '</a></li>';
                         }
@@ -61,6 +61,6 @@ if ($controls->is_action('delete_logs')) {
         </form>
     </div>
 
-    <?php include NEWSLETTER_DIR . '/tnp-footer.php'; ?>
+    <?php include NEWSLETTER_ADMIN_FOOTER; ?>
 
 </div>

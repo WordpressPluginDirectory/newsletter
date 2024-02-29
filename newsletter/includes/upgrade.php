@@ -195,6 +195,15 @@ class NewsletterUpgrade {
             update_option('newsletter_show_welcome', '1');
         }
 
+        // Delete old backup
+        $items = $wpdb->get_results("select option_name from {$wpdb->options} where option_name like 'newsletter_backup_%' order by option_name");
+        if ($items) {
+            for ($i = 0; $i < count($items) - 3; $i++) {
+                $this->logger->info('Deleting settings backup ' . $items[$i]->option_name);
+                delete_option($items[$i]->option_name);
+            }
+        }
+
         // Do not overwrite an existing backup
         if (!get_option('newsletter_backup_' . $this->old_version)) {
             $this->logger->info('Backing up options of ' . $this->old_version);
@@ -516,7 +525,6 @@ class NewsletterUpgrade {
         }
         $this->logger->info('End');
     }
-
 }
 
 (new NewsletterUpgrade())->run();

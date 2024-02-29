@@ -148,34 +148,31 @@ $system_warnings = NewsletterSystemAdmin::instance()->get_warnings_count();
                     <?php } else { ?>
                         <i class="fas fa-thermometer"></i>
                     <?php } ?>
-                    <?php _e('System', 'newsletter') ?>
+                    <?php esc_html_e('Help', 'newsletter') ?>
                 </a>
                 <ul>
                     <li>
-                        <a href="<?php echo admin_url('site-health.php') ?>"><?php _e('WP Site Health') ?></a>
+                        <a href="<?php echo esc_attr(admin_url('site-health.php')) ?>"><?php esc_html_e('WP Site Health') ?></a>
                     </li>
                     <li>
-                        <a href="?page=newsletter_system_delivery"><?php _e('Delivery', 'newsletter') ?></a>
-                    </li>
-                    <li>
-                        <a href="?page=newsletter_system_scheduler"><?php _e('Scheduler', 'newsletter') ?>
-                            <?php if ($system_warnings['scheduler']) { ?>
-                                <i class="fas fa-exclamation-triangle tnp-menu-warning" style="color: red;"></i>
-                            <?php } ?>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="?page=newsletter_system_status"><?php _e('Status', 'newsletter') ?>
+                        <a href="?page=newsletter_system_status"><?php esc_html_e('System', 'newsletter') ?>
                             <?php if ($system_warnings['status']) { ?>
                                 <i class="fas fa-exclamation-triangle tnp-menu-warning" style="color: red;"></i>
                             <?php } ?>
                         </a>
                     </li>
 
-                    <li>
-                        <a href="?page=newsletter_system_logs"><?php _e('Logs', 'newsletter') ?></a>
+                    <li><a href="?page=newsletter_system_delivery"><?php esc_html_e('Delivery', 'newsletter') ?></a></li>
 
-                    </li>
+                    <?php if (class_exists('NewsletterExtensions')) { ?>
+                        <li>
+                            <a href="?page=newsletter_extensions_support"><?php esc_html_e('Support', 'newsletter') ?></a>
+                        </li>
+                    <?php } else { ?>
+                        <li>
+                            <a href="?page=newsletter_system_support"><?php esc_html_e('Support', 'newsletter') ?></a>
+                        </li>
+                    <?php } ?>
                     <li>
                         <a href="https://www.thenewsletterplugin.com/documentation/developers/backup-recovery/" target="_blank"><?php _e('Backup', 'newsletter') ?></a>
                     </li>

@@ -28,7 +28,7 @@ class NewsletterAddon {
         load_plugin_textdomain('newsletter-' . $this->name, false, 'newsletter-' . $this->name . '/languages/');
 
         if (is_admin() && !wp_next_scheduled('newsletter_addon_' . $this->name)) {
-            wp_schedule_event(time(), 'weekly', 'newsletter_addon_' . $this->name);
+            wp_schedule_event(time() + HOUR_IN_SECONDS, 'weekly', 'newsletter_addon_' . $this->name);
         }
 
         add_action('newsletter_addon_' . $this->name, [$this, 'weekly_check']);
@@ -287,7 +287,7 @@ class NewsletterMailerAddon extends NewsletterAddon {
     }
 
     function hook_newsletter_menu_settings($entries) {
-        $entries[] = array('label' => '<i class="fas fa-envelope"></i> ' . $this->menu_title, 'url' => '?page=newsletter_' . $this->name . '_index', 'description' => $this->menu_description);
+        $entries[] = ['label' => $this->menu_title, 'url' => '?page=newsletter_' . $this->name . '_index'];
         return $entries;
     }
 

@@ -2,31 +2,19 @@
 header('Content-Type: text/html;charset=UTF-8');
 header('X-Robots-Tag: noindex,nofollow,noarchive');
 header('Cache-Control: no-cache,no-store,private');
+
+// set cookie?
 ?><!DOCTYPE html>
 <html>
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style type="text/css">
-            body {
-                    background-image: url(<?php echo plugins_url('images/click.png', NEWSLETTER_DIR . '/plugin-php'); ?>);
-                    background-repeat: no-repeat;
-                    background-position: center center;
-                    min-height: 300px;
-                }
-            @media all and (max-width: 1024px) {
-                body {
-                    background-image: url(<?php echo plugins_url('images/hand.png', NEWSLETTER_DIR . '/plugin-php'); ?>);
-                    background-repeat: no-repeat;
-                    background-position: center center;
-                    min-height: 300px;
-                }
-            }
             .tnp-captcha {
                 text-align: center;
                 margin: 200px auto 0 auto !important;
                 max-width: 300px !important;
                 padding: 10px !important;
-                font-family: "Open Sans", sans-serif;
+                font-family: sans-serif;
                 background: #ECF0F1;
                 border-radius: 5px;
                 padding: 50px !important;
@@ -43,7 +31,7 @@ header('Cache-Control: no-cache,no-store,private');
                 text-align: center;
                 border: none;
                 padding: 10px 15px;
-                font-family: "Open Sans", sans-serif;
+                font-family: sans-serif;
                 background-color: #27AE60;
                 color: white;
                 cursor: pointer;
@@ -51,9 +39,14 @@ header('Cache-Control: no-cache,no-store,private');
         </style>
         <script>
             var captcha = <?php echo $captcha ? 'true' : 'false'; ?>;
-            var count = 0;
-            var count2 = 0;
-            function m(ev) {
+
+            if (!captcha) {
+                addEventListener("DOMContentLoaded", (event) => {
+                    m();
+                });
+            }
+
+            function m() {
                 let e = new Date();
                 e.setTime(e.getTime() + 300 * 1000);
                 document.cookie = "tnpab=1; expires=" + e.toGMTString() + "; path=/";
@@ -61,31 +54,6 @@ header('Cache-Control: no-cache,no-store,private');
                 f.action = location.pathname;
                 f.method = 'POST';
                 f.submit();
-            }
-            if (!captcha) {
-                window.setTimeout(() => {
-                    window.addEventListener("mousemove", (ev) => {
-                        if (count++ === 10)
-                            m();
-                    });
-                    window.addEventListener("touchend", (ev) => {
-                        if (++count === 1)
-                            m();
-                    });
-                }, 500);
-            }
-            function go() {
-                if (!captcha)
-                    return;
-                window.addEventListener("mousemove", (ev) => {
-                    if (++count2 === 2)
-                        m();
-
-                });
-                window.addEventListener("touchend", (ev) => {
-                    if (++count2 === 1)
-                        m();
-                });
             }
         </script>
     </head>
@@ -108,11 +76,8 @@ header('Cache-Control: no-cache,no-store,private');
                     echo '<input type="hidden" name="', esc_attr($name), '" value="', esc_attr(stripslashes($value)), '">';
                 }
             }
-            if (isset($_SERVER['HTTP_REFERER'])) {
-                echo '<input type="hidden" name="nhr" value="' . esc_attr(sanitize_url($_SERVER['HTTP_REFERER'])) . '">';
-            }
+
             echo '<input type="hidden" name="ts" value="' . time() . '">';
-            echo '</div>';
 
             if ($captcha) {
                 echo '<div class="tnp-captcha">';
@@ -122,7 +87,7 @@ header('Cache-Control: no-cache,no-store,private');
                 echo '=';
                 echo '<input type="text" name="n3" value="" placeholder="?" style="width: 50px">';
                 echo '<br><br>';
-                echo '<input type="button" value="&gt;" onclick="go(); return false;">';
+                echo '<input type="button" value="&gt;" onclick="m(); return false;">';
                 echo '</div>';
             }
             ?>

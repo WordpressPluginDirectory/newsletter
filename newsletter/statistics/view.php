@@ -7,6 +7,12 @@ defined('ABSPATH') || exit;
 wp_enqueue_script('tnp-chart');
 
 $email = $this->get_email($_GET['id']);
+
+if (empty($email)) {
+    echo 'Newsletter not found';
+    return;
+}
+
 $report = $this->get_statistics($email);
 
 if ($email->status == 'new') {
@@ -18,93 +24,163 @@ if ($email->status == 'new') {
 if (empty($email->track)) {
     $controls->warnings[] = __('This newsletter has the tracking disabled. No statistics will be available.', 'newsletter');
 }
-
 ?>
+
+<style>
+<?php include __DIR__ . '/style.css'; ?>
+</style>
 
 <div class="wrap tnp-statistics tnp-statistics-view" id="tnp-wrap">
     <?php include NEWSLETTER_ADMIN_HEADER ?>
-    <div id="tnp-heading">
-        <h2><?php echo esc_html($email->subject) ?></h2>
-        <?php include __DIR__ . '/nav.php'?>
-    </div>
+    
+    <?php include __DIR__ . '/view-heading.php' ?>
+
 
     <div id="tnp-body" style="min-width: 500px">
-        
+
         <?php $controls->show() ?>
 
-        <div class="row">
-            <div class="col-md-3">
-                <div class="tnp-widget tnp-number">
-                    <h3><?php _e('Reach', 'newsletter') ?></h3>
-                    <div class="tnp-icon"><i class="fas fa-users"></i></div>
-                    <div class="tnp-value"><?php echo number_format_i18n($report->total, 0) ?></div>
+        <div class="tnp-cards-container">
+            <div class="tnp-card">
+                <div class="tnp-card-title">Reach</div>
+                <div class="tnp-card-value">
+                    <span class="tnp-counter-animationx"><?php echo $report->total ?></span>
+                    <div class="tnp-card-description">Total people that got your email</div>
                 </div>
-            </div>
+                <div class="tnp-card-icon"><div class="tnp-card-icon-business-contact"></div></div>
 
-            <div class="col-md-3">
-                <div class="tnp-widget tnp-number">
-                    <h3><?php _e('Opens', 'newsletter') ?></h3>
-                    <div class="tnp-icon tnp-blue"><i class="fas fa-envelope-open"></i></div>
-                    <div class="tnp-value"><?php echo $report->open_rate; ?>%</div>
-                    <div class="tnp-value-2">(<?php echo $report->open_count; ?>)</div>
-                </div>
             </div>
-
-            <div class="col-md-3">
-                <div class="tnp-widget tnp-number">
-                    <h3><?php _e('Clicks', 'newsletter') ?></h3>
-                    <div class="tnp-icon tnp-orange"><i class="fas fa-mouse-pointer"></i></div>
-                    <div class="tnp-value"><?php echo $report->click_rate; ?>%</div>
-                    <div class="tnp-value-2">(<?php echo $report->click_count; ?>)</div>
+            <div class="tnp-card">
+                <div class="tnp-card-title">Opens</div>
+                <div class="tnp-card-value">
+                    <span class="tnp-counter-animationx percentage"><?php echo $report->open_rate; ?></span>%
+                    <div class="tnp-card-description">
+                        <span class="value"><?php echo $report->open_count ?></span> total people that
+                        opened your email
+                    </div>
                 </div>
+                <div class="tnp-card-icon"><div class="tnp-card-icon-preview"></div></div>
+
             </div>
-
-            <div class="col-md-3">
-                <div class="tnp-widget tnp-number tnp-inactive">
-                    <h3>Reactivity</h3>
-                    <div class="tnp-icon tnp-gray"><i class="fas fa-star"></i></div>
-                    <div class="tnp-value">-%</div>
+            <div class="tnp-card">
+                <div class="tnp-card-title">Clicks</div>
+                <div class="tnp-card-value">
+                    <span class="tnp-counter-animationx percentage"><?php echo $report->click_rate; ?></span>%
+                    <div class="tnp-card-description">
+                        <span class="value"><?php echo $report->click_count ?></span> total people that
+                        clicked a link in your email
+                    </div>
                 </div>
+                <div class="tnp-card-icon"><div class="tnp-card-icon-mouse"></div></div>
+
+            </div>
+            <div class="tnp-card">
+                <div class="tnp-card-title">Reactivity</div>
+                <div class="tnp-card-value">
+                    <span class="tnp-counter-animationx percentage"><?php echo $report->reactivity ?></span>%
+                    <div class="tnp-card-description">
+                        <span class="value"><?php echo $report->click_count ?></span> clicks out of
+                        <span class="value"><?php echo $report->open_count ?></span> opens
+                    </div>
+                </div>
+                <div class="tnp-card-icon"><div class="tnp-card-icon-rabbit"></div></div>
             </div>
         </div>
-
-        <div class="row">
-            <div class="col-md-4">
-                <div class="tnp-widget tnp-inactive">
-                    <h3>Clicked URLs</h3>
-                    <div class="tnp-placeholder">
-                        <a href="https://www.thenewsletterplugin.com/premium?utm_source=reports&utm_medium=urls&utm_campaign=plugin" target="_blank">
-                            <img src="<?php echo plugins_url('newsletter') ?>/statistics/images/clicked-urls@2x.png">
-                        </a>
-                    </div>
+        <div class="tnp-cards-container">
+            <div class="tnp-card">
+                <div class="tnp-card-title">Opens/Sent</div>
+                <div class="tnp-card-chart">
+                    <canvas id="tnp-opens-sent-chart" class="mini-chart"></canvas>
                 </div>
             </div>
-
-            <div class="col-md-4">
-                <div class="tnp-widget tnp-inactive">
-                    <h3>World Map</h3>
-                    <div class="tnp-placeholder">
-                        <a href="https://www.thenewsletterplugin.com/premium?utm_source=reports&utm_medium=map&utm_campaign=plugin" target="_blank">
-                            <img src="<?php echo plugins_url('newsletter') ?>/statistics/images/world-map@2x.png">
-                        </a>
+            <div class="tnp-card">
+                <div class="tnp-card-title">Clicks/Opens</div>
+                <div class="tnp-card-chart">
+                    <canvas id="tnp-clicks-opens-chart" class="mini-chart"></canvas>
+                </div>
+            </div>
+            <div class="tnp-card" style="opacity: 50%">
+                <div class="tnp-card-title">Unsubscribed</div>
+                <div class="tnp-card-value">
+                    <span class="">-</span>
+                    <div class="tnp-card-description">
+                        Cancellations started from this newsletter (cannot always be tracked)
+                    </div>
+                </div>
+                <div class="tnp-card-icon"><div class="tnp-card-icon-filter-remove"></div></div>
+            </div>
+            <div class="tnp-card" style="opacity: 50%">
+                <div class="tnp-card-title">Errors</div>
+                <div class="tnp-card-value">
+                    <span class="">-</span>
+                    <div class="tnp-card-description">
+                        Errors encountered while delivery, usually due to a faulty mailing service.
                     </div>
 
                 </div>
+                <div class="tnp-card-icon"><div class="tnp-card-icon-remove"></div></div>
             </div>
-
-            <div class="col-md-4">
-                <div class="tnp-widget tnp-inactive">
-                    <h3>Interactions</h3>
-                    <div class="tnp-placeholder">
-                        <a href="https://www.thenewsletterplugin.com/premium?utm_source=reports&utm_medium=interactions&utm_campaign=plugin" target="_blank">
-                            <img src="<?php echo plugins_url('newsletter') ?>/statistics/images/interactions@2x.png">
-                        </a>
-                    </div>
-                </div>
-            </div>
-
         </div>
 
     </div>
-    <?php include NEWSLETTER_DIR . '/tnp-footer.php' ?>
+    <?php include NEWSLETTER_ADMIN_FOOTER; ?>
 </div>
+
+<script>
+    jQuery(document).ready(function ($) {
+
+    var opensSentChartData = {
+    labels: [
+            "Sent",
+            "Opens"
+    ],
+            datasets: [
+            {
+            data: [<?php echo $report->total - $report->open_count; ?>, <?php echo $report->open_count ?>],
+                    backgroundColor: [
+                            "#49a0e9",
+                            "#27AE60",
+                    ]
+            }]
+    };
+            var opensSentChartConfig = {
+            type: "doughnut",
+                    data: opensSentChartData,
+                    options: {
+                    responsive: true,
+                            legend: {display: false},
+                            elements: {
+                            arc: {borderWidth: 0}
+                            }
+                    }
+            };
+            new Chart('tnp-opens-sent-chart', opensSentChartConfig);
+            var clicksOpensChartData = {
+            labels: [
+                    "Opens",
+                    "Clicks"
+            ],
+                    datasets: [
+                    {
+                    data: [<?php echo $report->open_count - $report->click_count; ?>, <?php echo $report->click_count ?>],
+                            backgroundColor: [
+                                    "#49a0e9",
+                                    "#27AE60",
+                            ]
+                    }]
+            };
+            var clicksOpensChartConfig = {
+            type: "doughnut",
+                    data: clicksOpensChartData,
+                    options: {
+                    responsive: true,
+                            legend: {display: false},
+                            elements: {
+                            arc: {borderWidth: 0}
+                            }
+                    }
+            };
+            new Chart('tnp-clicks-opens-chart', clicksOpensChartConfig);
+    });
+
+</script>

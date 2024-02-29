@@ -29,12 +29,12 @@ class NewsletterStatisticsAdmin extends NewsletterModuleAdmin {
         $this->add_admin_page('view', 'Statistics');
         $this->add_admin_page('users', 'Statistics');
         $this->add_admin_page('urls', 'Statistics');
-        
+
         //$this->add_admin_page('newsletters', 'Statistics');
         $this->add_admin_page('settings', 'Statistics');
         //$this->add_admin_page('view_retarget', 'Statistics');
-        //$this->add_admin_page('view_urls', 'Statistics');
-        //$this->add_admin_page('view_users', 'Statistics');
+        $this->add_admin_page('view-urls', 'Statistics');
+        $this->add_admin_page('view-users', 'Statistics');
     }
 
     function get_statistics_url($email_id) {
@@ -49,7 +49,7 @@ class NewsletterStatisticsAdmin extends NewsletterModuleAdmin {
 
     /**
      * @deprecated
-     * 
+     *
      * @param type $email_id
      * @return type
      */
@@ -60,7 +60,7 @@ class NewsletterStatisticsAdmin extends NewsletterModuleAdmin {
 
     /**
      * @deprecated
-     * 
+     *
      * @param type $email_id
      * @return type
      */
@@ -71,7 +71,7 @@ class NewsletterStatisticsAdmin extends NewsletterModuleAdmin {
 
     /**
      * @deprecated
-     * 
+     *
      * @param type $email_id
      * @return type
      */
@@ -81,7 +81,7 @@ class NewsletterStatisticsAdmin extends NewsletterModuleAdmin {
 
     /**
      * @deprecated
-     * 
+     *
      * @param type $email_id
      * @return type
      */
@@ -91,8 +91,8 @@ class NewsletterStatisticsAdmin extends NewsletterModuleAdmin {
     }
 
     /**
-     * @deprecated 
-     * 
+     * @deprecated
+     *
      * @global wpdb $wpdb
      * @param TNP_Email $email
      */
@@ -162,7 +162,7 @@ class NewsletterStatisticsAdmin extends NewsletterModuleAdmin {
 
     /**
      * Returns an object with statistics values
-     * 
+     *
      * @global wpdb $wpdb
      * @param TNP_Email $email
      * @return TNP_Report
@@ -179,7 +179,7 @@ class NewsletterStatisticsAdmin extends NewsletterModuleAdmin {
         $report->email_id = $email->id;
 
         if ($email->status != 'new') {
-            $data = $wpdb->get_row($wpdb->prepare("SELECT COUNT(*) as total, 
+            $data = $wpdb->get_row($wpdb->prepare("SELECT COUNT(*) as total,
             count(case when status>0 then 1 else null end) as `errors`,
             count(case when open>0 then 1 else null end) as `opens`,
             count(case when open>1 then 1 else null end) as `clicks`
@@ -195,6 +195,13 @@ class NewsletterStatisticsAdmin extends NewsletterModuleAdmin {
         return $report;
     }
 
+    public function get_date_badge($email) {
+        if (!$email->send_on) {
+            return '';
+        } else {
+            return '<span>' . esc_html(date_i18n(get_option('date_format') . ' ' . get_option('time_format'), $email->send_on)) . '</span>';
+        }
+    }
 }
 
 class TNP_Statistics {
@@ -205,6 +212,7 @@ class TNP_Statistics {
     var $open_rate = 0;
     var $click_count = 0;
     var $click_rate = 0;
+    var $reactivity = 0;
 
     /**
      * Recomputes the rates using the absolute values already set.
@@ -217,8 +225,9 @@ class TNP_Statistics {
             $this->open_rate = 0;
             $this->click_rate = 0;
         }
+
+        if ($this->open_count > 0) {
+            $this->reactivity = round($this->click_count / $this->open_count * 100, 2);
+        }
     }
-
 }
-
-

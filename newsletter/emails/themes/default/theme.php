@@ -20,7 +20,7 @@ $color = $theme_options['theme_color'];
 $background = $theme_options['theme_background'];
 $logo = false;
 
-if ($theme_options['main_header_logo']['id']) {
+if (!empty($theme_options['main_header_logo']['id'])) {
     $logo = tnp_media_resize($theme_options['main_header_logo']['id'], array(600, 200));
 }
 
@@ -48,7 +48,7 @@ if (isset($theme_options['theme_posts'])) {
 
     if (!isset($theme_options['theme_language'])) $theme_options['theme_language'] = '';
     $posts = Newsletter::instance()->get_posts($filters, $theme_options['theme_language']);
-    
+
     $this->switch_language($theme_options['theme_language']);
 }
 
@@ -119,7 +119,7 @@ if (isset($theme_options['theme_posts'])) {
     </o:OfficeDocumentSettings>
     </xml>
     <![endif]-->
-    
+
     <!--[if lte mso 11]>
     <style type="text/css">
         .mj-outlook-group-fix { width:100% !important; }
@@ -130,13 +130,13 @@ if (isset($theme_options['theme_posts'])) {
 <body style="margin: 0!important; padding: 0!important; background-color: <?php echo $background ?>;">
 
 <div style="background-color: <?php echo $background ?>;">
-    
+
     <br>
-    
-<div style="background-color: #ffffff; margin:0px auto;max-width:600px;font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 14px; color: #666; padding: 0; border: 0">    
+
+<div style="background-color: #ffffff; margin:0px auto;max-width:600px;font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 14px; color: #666; padding: 0; border: 0">
 
     <?php echo tnp_outlook_wrapper_open() ?>
-    
+
     <table align="center" bgcolor="#ffffff" width="100%" style="max-width: 600px; width: 100%; border-collapse: collapse;" cellpadding="0" cellspacing="0" border="0">
         <tr>
             <td valign="top" bgcolor="#ffffff" width="100%" align="left" style="text-align: left; font-family: Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 14px; color: #666;">
@@ -153,7 +153,7 @@ if (isset($theme_options['theme_posts'])) {
                             <div style="padding: 10px 0; color: #000; font-size: 16px; text-align: center;">
                                 <?php echo esc_html($theme_options['main_header_sub']) ?>
                             </div>
-                        <?php } ?>    
+                        <?php } ?>
                     <?php } ?>
 
                 </div>
@@ -177,7 +177,7 @@ if (isset($theme_options['theme_posts'])) {
                                     // Will be replaces with the new media resizer
                                     $image = tnp_post_thumbnail_src($post, $theme_options['theme_image_size']);
                                 }
-                                
+
                                 if ($theme_options['theme_image_size'] == 'thumbnail') {
                                     $image_width = 150;
                             } else {
@@ -199,7 +199,7 @@ if (isset($theme_options['theme_posts'])) {
                                             <?php } ?>
                                         </td>
                                     <?php } ?>
-                                    
+
                                     <td valign="top">
                                         <a target="_blank"  href="<?php echo $url ?>" style="font-size: 20px; line-height: 26px"><?php the_title(); ?></a>
                                         <?php echo $excerpt ?>
@@ -222,6 +222,6 @@ if (isset($theme_options['theme_posts'])) {
 </div>
 
 </div>
-    
+
 </body>
 </html>

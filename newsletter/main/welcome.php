@@ -125,7 +125,7 @@ if (empty($this->get_option('page'))) {
                 <li class="tnp-first-slide visible">
                     <div>
                         <img class="tnp-logo-big" src="<?php echo plugins_url('newsletter') ?>/admin/images/logo-white.png">
-                        <p><?php _e('Welcome to The Newsletter Plugin and thank your for choosing the best mail management system for Wordpress!', 'newsletter'); ?><br><br>
+                        <p><?php _e('Welcome to The Newsletter Plugin and thank you for choosing the best mail management system for Wordpress!', 'newsletter'); ?><br><br>
                             <?php _e('In this short tutorial we will guide you through some of the basic settings to get the most out of our plugin. ', 'newsletter'); ?></p>
                     </div>
                 </li>

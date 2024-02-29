@@ -457,27 +457,26 @@ class NewsletterModule extends NewsletterModuleBase {
     function get_customfields() {
 
         //static $customfields = null;
-
         //if (is_null($customfields)) {
-            $customfields = [];
-            $options = $this->get_options('customfields');
-            $main_options = $this->get_options('customfields', '');
-            for ($i = 1; $i <= NEWSLETTER_PROFILE_MAX; $i++) {
-                $prefix = 'profile_' . $i;
-                if (!empty($main_options[$prefix])) {
-                    $name = empty($options[$prefix]) ? $main_options[$prefix] : $options[$prefix];
-                    $field = new TNP_Profile($i, $name);
-                    $field->type = $main_options[$prefix . '_type'];
-                    $values = empty($options[$prefix . '_options']) ? $main_options[$prefix . '_options'] : $options[$prefix . '_options'];
-                    $items = array_map('trim', explode(',', $values));
-                    $items = array_combine($items, $items);
-                    $field->options = $items;
-                    $field->placeholder = empty($options[$prefix . '_placeholder']) ? $main_options[$prefix . '_placeholder'] : $options[$prefix . '_placeholder'];
-                    $field->rule = $options[$prefix . '_rules'];
-                    $field->status = (int) $options[$prefix . '_status'];
-                    $customfields['' . $i] = $field;
-                }
+        $customfields = [];
+        $options = $this->get_options('customfields');
+        $main_options = $this->get_options('customfields', '');
+        for ($i = 1; $i <= NEWSLETTER_PROFILE_MAX; $i++) {
+            $prefix = 'profile_' . $i;
+            if (!empty($main_options[$prefix])) {
+                $name = empty($options[$prefix]) ? $main_options[$prefix] : $options[$prefix];
+                $field = new TNP_Profile($i, $name);
+                $field->type = $main_options[$prefix . '_type'];
+                $values = empty($options[$prefix . '_options']) ? $main_options[$prefix . '_options'] : $options[$prefix . '_options'];
+                $items = array_map('trim', explode(',', $values));
+                $items = array_combine($items, $items);
+                $field->options = $items;
+                $field->placeholder = empty($options[$prefix . '_placeholder']) ? $main_options[$prefix . '_placeholder'] : $options[$prefix . '_placeholder'];
+                $field->rule = $options[$prefix . '_rules'];
+                $field->status = (int) $options[$prefix . '_status'];
+                $customfields['' . $i] = $field;
             }
+        }
         //}
         return $customfields;
     }
@@ -507,12 +506,12 @@ class NewsletterModule extends NewsletterModuleBase {
     function get_customfields_public() {
         //static $customfields = null;
         //if (is_null($customfields)) {
-            $customfields = [];
-            foreach ($this->get_customfields() as $customfield) {
-                if ($customfield->is_public()) {
-                    $customfields['' . $customfield->id] = $customfield;
-                }
+        $customfields = [];
+        foreach ($this->get_customfields() as $customfield) {
+            if ($customfield->is_public()) {
+                $customfields['' . $customfield->id] = $customfield;
             }
+        }
         //}
 
         return $customfields;
@@ -741,7 +740,8 @@ class NewsletterModule extends NewsletterModuleBase {
     function replace($text, $user = null, $email = null, $referrer = null) {
         global $wpdb;
 
-        if (empty($text)) return $text;
+        if (empty($text))
+            return $text;
 
         if (strpos($text, '<p') !== false) {
             $esc_html = true;
@@ -873,18 +873,18 @@ class NewsletterModule extends NewsletterModuleBase {
         }
 
         /*
-        Moved to the subscription module
-        if (strpos($text, '{subscription_form}') !== false) {
-            $text = str_replace('{subscription_form}', NewsletterSubscription::instance()->get_subscription_form($referrer), $text);
-        } else {
-            for ($i = 1; $i <= 10; $i++) {
-                if (strpos($text, "{subscription_form_$i}") !== false) {
-                    $text = str_replace("{subscription_form_$i}", NewsletterSubscription::instance()->get_form($i), $text);
-                    break;
-                }
-            }
-        }
-        */
+          Moved to the subscription module
+          if (strpos($text, '{subscription_form}') !== false) {
+          $text = str_replace('{subscription_form}', NewsletterSubscription::instance()->get_subscription_form($referrer), $text);
+          } else {
+          for ($i = 1; $i <= 10; $i++) {
+          if (strpos($text, "{subscription_form_$i}") !== false) {
+          $text = str_replace("{subscription_form_$i}", NewsletterSubscription::instance()->get_form($i), $text);
+          break;
+          }
+          }
+          }
+         */
 
 // Company info
 // TODO: Move to another module
@@ -901,7 +901,7 @@ class NewsletterModule extends NewsletterModuleBase {
 
     function replace_date($text, $timestamp = false) {
         if ($timestamp) {
-            $timestamp  += (int)(get_option( 'gmt_offset' ) * 3600);
+            $timestamp += (int) (get_option('gmt_offset') * 3600);
         }
 
         $text = str_replace('{date}', date_i18n(get_option('date_format'), $timestamp), $text);
@@ -942,6 +942,10 @@ class NewsletterModule extends NewsletterModuleBase {
     }
 
     public static function antibot_form_check($captcha = false) {
+
+        if (is_user_logged_in()) {
+            return true;
+        }
 
         if (defined('NEWSLETTER_ANTIBOT') && !NEWSLETTER_ANTIBOT) {
             return true;
@@ -1146,7 +1150,6 @@ class NewsletterModule extends NewsletterModuleBase {
     function is_admin_page() {
         NewsletterAdmin::instance()->is_admin_page();
     }
-
 }
 
 /**

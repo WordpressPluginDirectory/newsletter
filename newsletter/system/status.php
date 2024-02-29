@@ -63,15 +63,6 @@ if ($controls->is_action('stats_email_column_upgrade')) {
     update_option('newsletter_stats_email_column_upgraded', true);
 }
 
-// Compute the number of newsletters ongoing and other stats
-$emails = $wpdb->get_results("select * from " . NEWSLETTER_EMAILS_TABLE . " where status='sending' and send_on<" . time() . " order by id asc");
-$total = 0;
-$queued = 0;
-foreach ($emails as $email) {
-    $total += $email->total;
-    $queued += $email->total - $email->sent;
-}
-$speed = $newsletter->get_send_speed();
 
 // Trick to access the private function (!)
 class TNP_WPDB extends wpdb {
@@ -124,11 +115,11 @@ function tnp_describe_table($table) {
 
 <div class="wrap tnp-system tnp-system-status" id="tnp-wrap">
 
-    <?php include NEWSLETTER_DIR . '/header.php'; ?>
+    <?php include NEWSLETTER_ADMIN_HEADER; ?>
 
     <div id="tnp-heading">
 
-        <h2><?php _e('System', 'newsletter') ?></h2>
+        <h2><?php esc_html_e('System', 'newsletter') ?></h2>
         <?php include __DIR__ . '/nav.php' ?>
     </div>
 
@@ -145,186 +136,6 @@ function tnp_describe_table($table) {
                     <?php $controls->btn('reset_news', __('Reset news', 'newsletter')) ?>
                 <?php } ?>
             </p>
-            <h3>Delivery</h3>
-            <table class="widefat" id="tnp-status-table">
-
-                <thead>
-                    <tr>
-                        <th>Parameter</th>
-                        <th></th>
-                        <th>Note</th>
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    <tr>
-                        <td>Delivering</td>
-                        <td class="status">
-                            &nbsp;
-                        </td>
-                        <td>
-                            <?php if (count($emails)) { ?>
-                                Delivering <?php echo count($emails) ?> newsletters to about <?php echo $queued ?> recipients.
-                                At speed of <?php echo $speed ?> emails per hour it will take <?php printf('%.1f', $queued / $speed) ?> hours to finish.
-
-                            <?php } else { ?>
-                                Nothing delivering right now
-                            <?php } ?>
-                        </td>
-
-                    </tr>
-                    <tr>
-                        <td>Mailer</td>
-                        <td>
-                            &nbsp;
-                        </td>
-                        <td>
-                            <?php echo esc_html($mailer->get_description()) ?>
-                        </td>
-                    </tr>
-                    <?php
-                    $stats = $this->get_send_stats();
-
-                    if ($stats) {
-                        $condition = $stats->mean > 5 ? 2 : 1;
-                        ?>
-                        <tr>
-                            <td id="tnp-speed">
-                                Send details
-                            </td>
-                            <td class="status">
-                                <?php $this->condition_flag($condition) ?>
-
-                            </td>
-                            <td>
-                                <?php if ($condition == 2) { ?>
-                                    <strong>Sending a single email is taking more than 5 seconds (by mean), too slow.</strong>
-                                    <a href="https://www.thenewsletterplugin.com/documentation/installation/status-panel/#email-speed" target="_blank">Read more</a>.
-                                    <br>
-                                <?php } ?>
-                                Average time to send an email: <?php echo $stats->mean ?> seconds<br>
-                                <?php if ($stats->mean > 0) { ?>
-                                    Max speed: <?php echo sprintf("%.2f", 1.0 / $stats->mean * 3600) ?> emails per hour<br>
-                                <?php } ?>
-
-                                Max mean time measured: <?php echo $stats->max ?> seconds<br>
-                                Min mean time measured: <?php echo $stats->min ?> seconds<br>
-                                Total emails in the sample: <?php echo $stats->total_emails ?><br>
-                                Total sending time: <?php echo $stats->total_time ?> seconds<br>
-                                Runs in the sample: <?php echo $stats->total_runs ?><br>
-                                Runs prematurely interrupted: <?php echo $stats->interrupted ?><br>
-
-
-                                <canvas id="tnp-send-chart" style="width: 100%; height: 200px"></canvas>
-                                <canvas id="tnp-send-speed" style="width: 100%; height: 200px"></canvas>
-                                <script>
-                                    jQuery(function () {
-                                        var sendChartData = {
-                                            labels: <?php echo json_encode(range(1, count($stats->means))) ?>,
-                                            datasets: [
-                                                {
-                                                    label: "Seconds to complete a batch",
-                                                    data: <?php echo json_encode($stats->means) ?>,
-                                                    borderColor: '#2980b9',
-                                                    fill: false
-                                                }
-                                            ]
-                                        };
-                                        var sendChartConfig = {
-                                            type: "line",
-                                            data: sendChartData,
-                                            options: {
-                                                responsive: false,
-                                                maintainAspectRatio: false,
-                                                scales: {
-                                                    yAxes: [{
-                                                            type: "linear",
-                                                            ticks: {
-                                                                beginAtZero: true
-                                                            }
-                                                        }
-                                                    ]
-                                                }
-                                            }
-                                        };
-                                        new Chart('tnp-send-chart', sendChartConfig);
-
-
-                                        var sendSpeedData = {
-                                            labels: <?php echo json_encode(range(1, count($stats->speeds))) ?>,
-                                            datasets: [
-                                                {
-                                                    label: "Emails per second",
-                                                    data: <?php echo json_encode($stats->speeds) ?>,
-                                                    borderColor: '#2980b9',
-                                                    fill: false
-                                                }
-                                            ]
-                                        };
-                                        var sendSpeedConfig = {
-                                            type: "line",
-                                            data: sendSpeedData,
-                                            options: {
-                                                responsive: false,
-                                                maintainAspectRatio: false,
-                                                scales: {
-                                                    yAxes: [{
-                                                            type: "linear",
-                                                            ticks: {
-                                                                beginAtZero: true
-                                                            }
-                                                        }
-                                                    ]
-                                                }
-                                            }
-                                        };
-                                        new Chart('tnp-send-speed', sendSpeedConfig);
-                                    });
-                                </script>
-                                <br>
-                                <?php $controls->button_reset('reset_send_stats') ?>
-                            </td>
-                        </tr>
-                    <?php } else { ?>
-                        <tr>
-                            <td>
-                                Sending statistics
-                            </td>
-                            <td>
-                                &nbsp;
-                            </td>
-                            <td>
-                                Not enough data available.
-                                <?php $controls->button_reset('reset_send_stats') ?>
-                            </td>
-                        </tr>
-                    <?php } ?>
-                    <tr>
-                        <td>
-                            Engine lock
-                        </td>
-                        <td>
-                            &nbsp;
-                        </td>
-                        <td>
-                            <?php echo esc_html(get_option('newsletter_lock_engine')) ?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            NEWSLETTER_SEND_DELAY
-                        </td>
-                        <td>
-                            &nbsp;
-                        </td>
-                        <td>
-                            <?php echo esc_html(NEWSLETTER_SEND_DELAY) ?> milliseconds
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
 
             <h3>General checks</h3>
             <table class="widefat" id="tnp-status-table">
@@ -1437,6 +1248,6 @@ function tnp_describe_table($table) {
         </form>
     </div>
 
-    <?php include NEWSLETTER_DIR . '/tnp-footer.php'; ?>
+    <?php include NEWSLETTER_ADMIN_FOOTER; ?>
 
 </div>

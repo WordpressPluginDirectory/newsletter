@@ -192,9 +192,7 @@ class NewsletterEmails extends NewsletterModule {
                 break;
 
             case 'json':
-                if (!$this->is_allowed()) {
-
-
+                if (!current_user_can('administrator')) {
                     header("HTTP/1.0 404 Not Found");
                     die('Not sent yet');
                 }

@@ -408,9 +408,17 @@ class NewsletterControls {
         $shown = true;
 
         if (!empty($this->errors)) {
-            echo '<div class="tnpc-error">';
-            echo $this->errors;
-            echo '</div>';
+            if (is_array($this->errors)) {
+                foreach ((array) $this->errors as $text) {
+                    echo '<div class="tnpc-error">';
+                    echo $text;
+                    echo '</div>';
+                }
+            } else {
+                echo '<div class="tnpc-error">';
+                echo $this->errors;
+                echo '</div>';
+            }
         }
         if (!empty($this->warnings)) {
             foreach ((array) $this->warnings as $warning) {
@@ -444,10 +452,7 @@ class NewsletterControls {
     }
 
     function add_toast($text) {
-        if (!empty($this->toasts)) {
-            $this->toasts .= '<br><br>';
-        }
-        $this->toasts .= $text;
+        $this->toasts[] = $text;
     }
 
     function add_message($text) {
@@ -734,7 +739,7 @@ class NewsletterControls {
                 $label .= ' (' . $page->post_status . ')';
             }
             if ($show_id) {
-                $label .= ' [' . $page->ID . ']';
+                $label .= ' [#' . $page->ID . ']';
             }
             $options[$page->ID] = $label;
         }
@@ -988,6 +993,11 @@ class NewsletterControls {
         if (isset($attrs['id'])) {
             echo ' id="', esc_attrs($attrs['id']), '"';
         }
+
+        if (isset($attrs['disabled']) && $attrs['disabled']) {
+            echo ' disabled';
+        }
+
         $onclick = "this.form.act.value='" . esc_attr(esc_js(trim($action))) . "';";
         if (!empty($attrs['data'])) {
             $onclick .= "this.form.btn.value='" . esc_attr(esc_js($attrs['data'])) . "';";
@@ -999,7 +1009,7 @@ class NewsletterControls {
                 $onclick .= "if (!confirm('" . esc_attr(esc_js(__('Proceed?', 'newsletter'))) . "')) return false;";
             }
         }
-        echo 'onclick="', $onclick, '"';
+        echo ' onclick="', $onclick, '"';
         if (!empty($attrs['title'])) {
             echo ' title="', esc_attr($attrs['title']), '"';
         }

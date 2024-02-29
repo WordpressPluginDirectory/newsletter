@@ -50,7 +50,7 @@ class NewsletterThemes {
         $this->is_extension = $is_extension;
     }
 
-    /** 
+    /**
      * Build an associative array which represent a theme starting from the theme
      * parsing the files in the theme folder.<br>
      * dir - the full path to the theme folder<br>
@@ -58,10 +58,10 @@ class NewsletterThemes {
      * id - the folder name, used as unique identifier<br>
      * screenshot - url to an image representing the theme (400x400)<br>
      * name - the readable theme name extracted from the theme.php<br>
-     * 
+     *
      * description - not used
      * type - not used
-     * 
+     *
      * @param string $dir
      * @return array
      */
@@ -70,7 +70,7 @@ class NewsletterThemes {
         if (!is_dir($dir)) {
             return null;
         }
-        
+
         if (!is_file($dir . '/theme.php')) {
             return null;
         }
@@ -81,7 +81,7 @@ class NewsletterThemes {
         if (empty($data['name'])) {
             $data['name'] = $data['id'];
         }
-        
+
         if (empty($data['type'])) {
             $data['type'] = 'standard';
         }
@@ -124,7 +124,7 @@ class NewsletterThemes {
             }
             closedir($handle);
         }
-        
+
         // Registered themes
         do_action('newsletter_register_themes');
 
@@ -142,7 +142,7 @@ class NewsletterThemes {
 
     /**
      * Returns a data structure containing the theme details.
-     * 
+     *
      * @param string $id
      * @return array
      */
@@ -174,11 +174,11 @@ class NewsletterThemes {
         $options = get_option('newsletter_' . $this->module . '_theme_' . $theme_id);
         // To avoid merge problems.
         if (!is_array($options)) {
-            $options = array();
+            $options = [];
         }
-        
+
         $theme = $this->get_theme($theme_id);
-        
+
         $file = $theme['dir'] . '/theme-defaults.php';
         if (is_file($file)) {
             @include $file;
@@ -186,18 +186,12 @@ class NewsletterThemes {
         if (isset($theme_defaults) && is_array($theme_defaults)) {
             $options = array_merge($theme_defaults, $options);
         }
-        
-        // main options merge
-        $main_options = Newsletter::instance()->options;
-        foreach ($main_options as $key => $value) {
-            $options['main_' . $key] = $value;
-        }
-        
+
         $info_options = Newsletter::instance()->get_options('info');
         foreach ($info_options as $key => $value) {
             $options['main_' . $key] = $value;
         }
-        
+
         return $options;
     }
 }

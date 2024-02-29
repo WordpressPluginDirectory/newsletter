@@ -22,7 +22,7 @@ if ($controls->is_action('delete_logs')) {
 
 <div class="wrap tnp-system tnp-system-logs" id="tnp-wrap">
 
-    <?php include NEWSLETTER_DIR . '/header.php'; ?>
+    <?php include NEWSLETTER_ADMIN_HEADER; ?>
 
     <div id="tnp-heading">
 
@@ -63,6 +63,6 @@ if ($controls->is_action('delete_logs')) {
         </form>
     </div>
 
-    <?php include NEWSLETTER_DIR . '/tnp-footer.php'; ?>
+    <?php include NEWSLETTER_ADMIN_FOOTER; ?>
 
 </div>

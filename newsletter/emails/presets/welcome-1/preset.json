@@ -19,7 +19,7 @@
         "button_background_color": "#256f9c"
     },
     "subject": "Welcome to {blog_title}",
-    "name": "Welcome", 
+    "name": "Welcome",
     "blocks": [
         {
             "block_padding_top": 40,
@@ -28,8 +28,8 @@
             "block_padding_left": 15,
             "text": "Welcome to {blog_title}",
             "align": "center",
-            "font_family": "Verdana, Geneva, sans-serif",
-            "font_size": "30",
+            "font_family": "Garamond, serif",
+            "font_size": "40",
             "font_color": "#ffffff",
             "font_weight": "bold",
             "block_background": "#16537e",

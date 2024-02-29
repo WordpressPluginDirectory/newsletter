@@ -70,7 +70,15 @@ $advanced = !empty($controls->data['advanced']);
             <?php $controls->init(); ?>
 
             <p>
-                <?php $controls->select('mode', ['1' => 'One Click Unsubscribe', '2' => 'Two Click Unsubscribe'], null, ['onchange' => 'this.form.act.value="change";this.form.submit()']); ?>
+                <?php $controls->select('mode', ['1' => 'Single step (not recommended)', '2' => 'Two steps (recommended)'], null, ['onchange' => 'this.form.act.value="change";this.form.submit()']); ?>
+            <?php if ($one_step) { ?>
+            <div class="tnpc-hint">
+                Single step lowers the protection against mail scanner and unwanted unsubscriptions. You're always conformant
+                to the One-Click-Un subscribe standard since the Newsletter plugin implements the
+                <a href="https://www.rfc-editor.org/rfc/rfc8058.txt" target="_blank">RFC 8058</a> and the
+                <a href="https://support.google.com/a/answer/14229414" target="_blank">Google Guidelines</a>.
+            </div>
+                <?php } ?>
             </p>
 
 

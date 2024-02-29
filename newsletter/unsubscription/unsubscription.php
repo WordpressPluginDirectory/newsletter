@@ -69,7 +69,7 @@ class NewsletterUnsubscription extends NewsletterModule {
 
         // Show the antibot and stop
         if (in_array($action, ['u', 'uc', 'reactivate'])) {
-            if (!$this->antibot_form_check()) {
+            if (!$this->antibot_form_check(false)) {
                 $this->antibot_unsubscription('');
             }
         }
@@ -97,8 +97,8 @@ class NewsletterUnsubscription extends NewsletterModule {
 
             case 'reactivate':
                 $this->reactivate($user);
-                $url = $this->build_message_url(null, 'reactivated', $user);
                 setcookie('newsletter', $user->id . '-' . $user->token, time() + 60 * 60 * 24 * 365, '/');
+                $url = $this->build_message_url(null, 'reactivated', $user);
                 $this->redirect($url);
                 break;
         }
@@ -116,7 +116,6 @@ class NewsletterUnsubscription extends NewsletterModule {
             return $user;
         }
 
-        //$this->refresh_user_token($user);
         $this->set_user_status($user, TNP_User::STATUS_UNSUBSCRIBED);
 
         $this->add_user_log($user, $type);
@@ -197,19 +196,19 @@ class NewsletterUnsubscription extends NewsletterModule {
      * @return type
      */
     function hook_newsletter_page_text($text, $key, $user = null) {
-        if ($key == 'unsubscribe') {
+        if ($key === 'unsubscribe') {
             if (!$user) {
                 return $this->get_text('error_text');
             }
             return $this->get_text('unsubscribe_text');
         }
-        if ($key == 'unsubscribed') {
+        if ($key === 'unsubscribed') {
             if (!$user) {
                 return $this->get_text('error_text');
             }
             return $this->get_text('unsubscribed_text');
         }
-        if ($key == 'reactivated') {
+        if ($key === 'reactivated') {
             if (!$user) {
                 return $this->get_text('error_text');
             }

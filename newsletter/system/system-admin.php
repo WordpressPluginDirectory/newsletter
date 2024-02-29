@@ -3,7 +3,7 @@
 defined('ABSPATH') || exit;
 
 class NewsletterSystemAdmin extends NewsletterModuleAdmin {
-    
+
     static $instance;
 
     const JOB_OK = 0;
@@ -34,6 +34,7 @@ class NewsletterSystemAdmin extends NewsletterModuleAdmin {
             $this->add_admin_page('diagnostic', __('Diagnostic', 'newsletter'));
             $this->add_admin_page('test', __('Test', 'newsletter'));
             $this->add_admin_page('backup', __('Backup', 'newsletter'));
+            $this->add_admin_page('support', __('Support', 'newsletter'));
         }
     }
 
@@ -43,7 +44,7 @@ class NewsletterSystemAdmin extends NewsletterModuleAdmin {
     }
 
     /**
-     * 
+     *
      * @param type $calls
      * @return \TNP_Cron_Stats
      */
@@ -94,7 +95,7 @@ class NewsletterSystemAdmin extends NewsletterModuleAdmin {
     }
 
     /**
-     * 
+     *
      * @return boolean|int
      */
     function get_job_delay() {
@@ -136,7 +137,7 @@ class NewsletterSystemAdmin extends NewsletterModuleAdmin {
     function get_send_stats() {
         // Send calls stats
         $send_calls = $this->get_option_array('newsletter_diagnostic_send_calls', []);
-        
+
         if (!$send_calls) {
             // It clean up possible scrambled data
             $this->reset_send_stats();
@@ -201,18 +202,19 @@ class NewsletterSystemAdmin extends NewsletterModuleAdmin {
 
     /**
      * Returns a list of functions attached to the prvoded filter or action name.
-     * 
+     *
      * @global array $wp_filter
      * @param string $tag
      * @return string
      */
-    function get_hook_functions($tag) {
+    function get_hook_functions($tag, $html = true) {
         global $wp_filter;
-        $b = '';
+        $list = [];
         if (isset($wp_filter[$tag])) {
             foreach ($wp_filter[$tag]->callbacks as $priority => $functions) {
 
                 foreach ($functions as $function) {
+                    $b = '';
                     $b .= '[' . $priority . '] ';
                     if (is_array($function['function'])) {
                         if (is_object($function['function'][0])) {
@@ -222,18 +224,29 @@ class NewsletterSystemAdmin extends NewsletterModuleAdmin {
                         }
                     } else {
                         if (is_object($function['function'])) {
-                            //$fn = new ReflectionFunction($function['function']);
+                            //var_dump($function['function']);
+
+                            $r = new ReflectionFunction($function['function']);
                             //$b .= get_class($fn->getClosureThis()) . '(closure)';
-                            $b .= 'Closure';
+                            if ($r) {
+                                $b .= 'Closure (' . $r->getFileName() . ')';
+                            } else {
+                                $b .= 'Closure';
+                            }
                         } else {
                             $b .= $function['function'];
                         }
                     }
-                    $b .= "<br>";
+                    //$b .= "<br>";
+                    $list[] = $b;
                 }
             }
         }
-        return $b;
+
+        if ($html) {
+            return implode('<br>', $list);
+        }
+        return $list;
     }
 
     function condition_flag($condition, $url = '') {

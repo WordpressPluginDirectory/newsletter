@@ -6,6 +6,10 @@ defined('ABSPATH') || exit;
 
 class Integrations {
 
+    static function is_addon_manager_active() {
+        return class_exists('NewsletterExtensions');
+    }
+
     static function is_leads_active() {
         return class_exists('NewsletterLeads');
     }

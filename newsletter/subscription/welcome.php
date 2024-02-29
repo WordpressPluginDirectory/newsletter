@@ -9,11 +9,13 @@ if (!$controls->is_action()) {
 
     $controls->data = $this->get_options('', $language);
 
-    if (empty($controls->data['welcome_email_id'])) {
+    $email = Newsletter::instance()->get_email($controls->data['welcome_email_id'] ?? 0);
+
+    if (!$email) {
         $email = [];
         $email['type'] = 'welcome';
         $email['editor'] = NewsletterEmails::EDITOR_COMPOSER;
-        $email['message'] = '';
+        $email['message'] = NewsletterComposer::instance()->get_preset_content('welcome-1');
         $email['track'] = Newsletter::instance()->get_option('track');
         $email['subject'] = 'Welcome';
         $email['status'] = 'sent';
@@ -133,6 +135,9 @@ foreach (['confirmed_message'] as $key) {
                 $controls->button_icon_statistics(NewsletterStatisticsAdmin::instance()->get_statistics_url($controls->data['welcome_email_id']),
                         ['secondary' => true, 'id' => 'tnp-stats-button', 'target' => '_blank'])
                 ?>
+                <?php if (NEWSLETTER_DEBUG) { ?>
+                                <?php $controls->btn_link(home_url('/') . '?na=json&id=' . $email->id, '{}') ?>
+                                <?php } ?>
             </p>
 
             <?php $controls->composer_fields_v2() ?>

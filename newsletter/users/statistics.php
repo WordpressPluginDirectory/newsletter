@@ -37,14 +37,14 @@ $referres = $wpdb->get_results("select referrer, count(*) as total, SUM(if(statu
         <div id="tabs">
 
             <ul>
-                <li><a href="#tabs-overview"><?php esc_html_e('By Status', 'newesletter'); ?></a></li>
-                <li><a href="#tabs-lists"><?php esc_html_e('By Lists', 'newesletter'); ?></a></li>
-                <li><a href="#tabs-language"><?php esc_html_e('By Language', 'newesletter'); ?></a></li>
-                <li><a href="#tabs-countries"><?php esc_html_e('By location', 'newesletter'); ?></a></li>
-                <li><a href="#tabs-referrers"><?php esc_html_e('By Referrer', 'newesletter'); ?></a></li>
-                <li><a href="#tabs-sources"><?php esc_html_e('By URL', 'newesletter'); ?></a></li>
-                <li><a href="#tabs-gender"><?php esc_html_e('By Gender', 'newesletter'); ?></a></li>
-                <li><a href="#tabs-time"><?php esc_html_e('By Time', 'newesletter'); ?></a></li>
+                <li><a href="#tabs-overview"><?php esc_html_e('By Status', 'newsletter'); ?></a></li>
+                <li><a href="#tabs-lists"><?php esc_html_e('By Lists', 'newsletter'); ?></a></li>
+                <li><a href="#tabs-language"><?php esc_html_e('By Language', 'newsletter'); ?></a></li>
+                <li><a href="#tabs-countries"><?php esc_html_e('By location', 'newsletter'); ?></a></li>
+                <li><a href="#tabs-referrers"><?php esc_html_e('By Referrer', 'newsletter'); ?></a></li>
+                <li><a href="#tabs-sources"><?php esc_html_e('By URL', 'newsletter'); ?></a></li>
+                <li><a href="#tabs-gender"><?php esc_html_e('By Gender', 'newsletter'); ?></a></li>
+                <li><a href="#tabs-time"><?php esc_html_e('By Time', 'newsletter'); ?></a></li>
             </ul>
 
             <div id="tabs-overview">
@@ -320,7 +320,7 @@ $referres = $wpdb->get_results("select referrer, count(*) as total, SUM(if(statu
                 $none_count = $wpdb->get_row("select SUM(if(status='C', 1, 0)) as confirmed, SUM(if(status='S', 1, 0)) as unconfirmed, SUM(if(status='B', 1, 0)) as bounced, SUM(if(status='U', 1, 0)) as unsubscribed, SUM(if(status='P', 1, 0)) as complained from " . NEWSLETTER_USERS_TABLE . " where sex='n'");
                 ?>
 
-                <table class="widefat">
+                <table class="widefat" style="width: auto">
                     <thead>
                         <tr>
                             <th><?php esc_html_e('Gender', 'newsletter') ?></th>
