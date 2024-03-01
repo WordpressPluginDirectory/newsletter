@@ -102,6 +102,11 @@ foreach (['confirmed_text', 'confirmed_message', 'confirmation_text', 'confirmat
 
         <form method="post" action="">
             <?php $controls->init(); ?>
+            <?php $controls->hidden('welcome_email_id'); ?>
+            <?php $controls->hidden('welcome_email'); ?>
+            <?php $controls->hidden('confirmed_message'); ?>
+            <?php $controls->hidden('confirmed_subject'); ?>
+            
             <div id="tabs">
                 <ul>
                     <li><a href="#tabs-subscription"><?php esc_html_e('Subscription', 'newsletter') ?></a></li>
