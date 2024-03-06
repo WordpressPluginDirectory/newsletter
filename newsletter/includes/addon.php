@@ -253,13 +253,17 @@ class NewsletterMailerAddon extends NewsletterAddon {
     var $enabled = false;
     var $menu_title = null;
     var $menu_description = null;
+    var $menu_slug = null;
     var $dir = '';
+    var $index_page = null;
+    var $logs_page = null;
 
     function __construct($name, $version = '0.0.0', $dir = '') {
         parent::__construct($name, $version, $dir);
         $this->dir = $dir;
         $this->setup_options();
         $this->enabled = !empty($this->options['enabled']);
+        $this->menu_slug = $this->name;
     }
 
     /**
@@ -274,6 +278,8 @@ class NewsletterMailerAddon extends NewsletterAddon {
         });
 
         if (is_admin() && !empty($this->menu_title) && !empty($this->dir) && current_user_can('administrator')) {
+            $this->index_page = 'newsletter_' . $this->menu_slug . '_index';
+            $this->logs_page = 'newsletter_' . $this->menu_slug . '_logs';
             add_action('admin_menu', [$this, 'hook_admin_menu'], 101);
             add_filter('newsletter_menu_settings', [$this, 'hook_newsletter_menu_settings']);
         }
@@ -287,16 +293,29 @@ class NewsletterMailerAddon extends NewsletterAddon {
     }
 
     function hook_newsletter_menu_settings($entries) {
-        $entries[] = ['label' => $this->menu_title, 'url' => '?page=newsletter_' . $this->name . '_index'];
+        $entries[] = ['label' => $this->menu_title, 'url' => '?page=' . $this->index_page];
         return $entries;
     }
 
     function hook_admin_menu() {
-        add_submenu_page('newsletter_main_index', $this->menu_title, '<span class="tnp-side-menu">' . $this->menu_title . '</span>', 'manage_options', 'newsletter_' . $this->name . '_index',
+
+        add_submenu_page('newsletter_main_index', $this->menu_title, '<span class="tnp-side-menu">' . $this->menu_title . '</span>', 'manage_options', $this->index_page,
                 function () {
-                    require $this->dir . '/index.php';
+                    if (file_exists($this->dir . '/admin/index.php')) {
+                        require $this->dir . '/admin/index.php';
+                    } else {
+                        require $this->dir . '/index.php';
+                    }
                 }
         );
+
+        if (file_exists($this->dir . '/admin/logs.php')) {
+            add_submenu_page('admin.php', 'Logs', 'Logs', 'manage_options', $this->logs_page,
+                    function () {
+                        require $this->dir . '/admin/logs.php';
+                    }
+            );
+        }
     }
 
     function set_warnings($controls) {
@@ -389,7 +408,7 @@ class NewsletterMailerAddon extends NewsletterAddon {
             $message->body_text = 'This is the TEXT version of a test message. You should see this message only if you email client does not support the rich text (HTML) version.';
         }
 
-        $message->headers['X-Newsletter-Email-Id'] = '0';
+        //$message->headers['X-Newsletter-Email-Id'] = '0';
 
         if (empty($subject)) {
             $message->subject = '[' . get_option('blogname') . '] Test message from Newsletter (' . date(DATE_ISO8601) . ')';

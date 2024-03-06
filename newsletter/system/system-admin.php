@@ -224,8 +224,6 @@ class NewsletterSystemAdmin extends NewsletterModuleAdmin {
                         }
                     } else {
                         if (is_object($function['function'])) {
-                            //var_dump($function['function']);
-
                             $r = new ReflectionFunction($function['function']);
                             //$b .= get_class($fn->getClosureThis()) . '(closure)';
                             if ($r) {
@@ -237,7 +235,6 @@ class NewsletterSystemAdmin extends NewsletterModuleAdmin {
                             $b .= $function['function'];
                         }
                     }
-                    //$b .= "<br>";
                     $list[] = $b;
                 }
             }

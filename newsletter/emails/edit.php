@@ -103,6 +103,15 @@ if ($controls->is_action('html')) {
     unset($data['options']['composer']);
     // End backward compatibility
 
+    $data['message'] = preg_replace('/data-json=".*?"/is', '', $email['message']);
+    $data['message'] = str_replace('</table>', "</table>\n", $data['message']);
+    $data['message'] = str_replace('</td></tr>', "</td>\n</tr>", $data['message']);
+    $data['message'] = str_replace('</td></tr>', "</td>\n</tr>", $data['message']);
+    $data['message'] = str_replace('</tr></tbody>', "</tr>\n</tbody>", $data['message']);
+    $data['message'] = str_replace('</tbody></table>', "</tbody>\n</table>", $data['message']);
+    $data['message'] = str_replace('<tbody><tr>', "<tbody>\n<tr>", $data['message']);
+    $data['message'] = str_replace('<tr><td ', "<tr>\n<td ", $data['message']);
+
     $email = $this->save_email($data, ARRAY_A);
     $controls->messages = 'You can now edit the newsletter as pure HTML';
 
@@ -252,11 +261,11 @@ if ($controls->is_action('test') || $controls->is_action('save') || $controls->i
 
         $email = Newsletter::instance()->save_email($email, ARRAY_A);
 
-        tnp_prepare_controls($email, $controls);
-
         if ($email === false) {
             $controls->errors = 'Unable to save. Try to deactivate and reactivate the plugin may be the database is out of sync.';
         }
+
+        tnp_prepare_controls($email, $controls);
 
         $controls->add_toast_saved();
     }
@@ -274,6 +283,9 @@ if (empty($controls->errors) && ($controls->is_action('send') || $controls->is_a
             $controls->messages = __('Now sending.', 'newsletter');
         } else {
             $controls->messages = __('Scheduled.', 'newsletter');
+        }
+        if ($controls->is_action('send') && $email['total'] < 20) {
+            Newsletter::instance()->hook_newsletter();
         }
     }
 }
@@ -303,7 +315,7 @@ if ($email['status'] != 'sent') {
 
 <div class="wrap tnp-emails tnp-emails-edit" id="tnp-wrap">
 
-    <?php include NEWSLETTER_ADMIN_HEADER ?>
+    <?php include NEWSLETTER_ADMIN_HEADER; ?>
 
     <div id="tnp-heading">
         <?php $controls->title_help('/newsletter-targeting') ?>
@@ -608,6 +620,16 @@ if ($email['status'] != 'sent') {
                             <th>Token (tech)</th>
                             <td><?php echo esc_html($email['token']); ?></td>
                         </tr>
+
+                        <?php if ($editor_type != NewsletterEmails::EDITOR_HTML && $email['status'] != 'sending' && $email['status'] != 'sent') { ?>
+                            <tr>
+                                <th>Convert to HTML</th>
+                                <td>
+                                    <?php $controls->button_confirm('html', __('Convert', 'newsletter'), 'No way back!'); ?>
+                                </td>
+                            </tr>
+                        <?php } ?>
+
                     </table>
                 </div>
 
@@ -616,6 +638,6 @@ if ($email['status'] != 'sent') {
         </form>
     </div>
 
-    <?php include NEWSLETTER_DIR . '/tnp-footer.php'; ?>
+    <?php include NEWSLETTER_ADMIN_FOOTER; ?>
 
 </div>

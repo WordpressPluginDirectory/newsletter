@@ -70,15 +70,18 @@ $advanced = !empty($controls->data['advanced']);
             <?php $controls->init(); ?>
 
             <p>
-                <?php $controls->select('mode', ['1' => 'Single step (not recommended)', '2' => 'Two steps (recommended)'], null, ['onchange' => 'this.form.act.value="change";this.form.submit()']); ?>
-            <?php if ($one_step) { ?>
-            <div class="tnpc-hint">
-                Single step lowers the protection against mail scanner and unwanted unsubscriptions. You're always conformant
-                to the One-Click-Un subscribe standard since the Newsletter plugin implements the
-                <a href="https://www.rfc-editor.org/rfc/rfc8058.txt" target="_blank">RFC 8058</a> and the
-                <a href="https://support.google.com/a/answer/14229414" target="_blank">Google Guidelines</a>.
-            </div>
+                <?php $controls->select('mode', ['1' => 'One-step', '2' => 'Two-step (recommended)'], null, ['onchange' => 'this.form.act.value="change";this.form.submit()']); ?>
+                <?php if (current_user_can('administrator')) { ?>
+                <a href="<?php echo esc_attr($this->build_action_url('u')); ?>&nk=0-0" target="_blank">Preview online</a>
                 <?php } ?>
+                <?php if ($one_step) { ?>
+                <div class="tnpc-hint">
+                    Single step lowers the protection against mail scanner and unwanted unsubscriptions. You're always conformant
+                    to the One-Click-Un subscribe standard since the Newsletter plugin implements the
+                    <a href="https://www.rfc-editor.org/rfc/rfc8058.txt" target="_blank">RFC 8058</a> and the
+                    <a href="https://support.google.com/a/answer/14229414" target="_blank">Google Guidelines</a>.
+                </div>
+            <?php } ?>
             </p>
 
 
@@ -89,7 +92,7 @@ $advanced = !empty($controls->data['advanced']);
                         <li><a href="#tabs-cancellation"><?php _e('Confirm', 'newsletter') ?></a></li>
                     <?php } ?>
                     <li><a href="#tabs-goodbye"><?php _e('Goodbye', 'newsletter') ?></a></li>
-                    <li><a href="#tabs-reactivation"><?php _e('Reactivation', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-reactivation"><?php _e('Resubscribe', 'newsletter') ?></a></li>
                     <li><a href="#tabs-advanced" style="font-style: italic"><?php _e('Advanced', 'newsletter') ?></a></li>
                         <?php if (NEWSLETTER_DEBUG) { ?>
                         <li><a href="#tabs-debug">Debug</a></li>
@@ -137,6 +140,7 @@ $advanced = !empty($controls->data['advanced']);
                                 <div data-bind="!options-unsubscribed_text_custom" class="tnpc-default-text">
                                     <?php echo wp_kses_post($this->get_default_text('unsubscribed_text')) ?>
                                 </div>
+
                             </td>
                         </tr>
 
@@ -175,6 +179,8 @@ $advanced = !empty($controls->data['advanced']);
                                 <div data-bind="!options-reactivated_text_custom" class="tnpc-default-text">
                                     <?php echo wp_kses_post($this->get_default_text('reactivated_text')) ?>
                                 </div>
+
+
                             </td>
                         </tr>
                     </table>

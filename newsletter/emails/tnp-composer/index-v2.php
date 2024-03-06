@@ -92,9 +92,9 @@ $rev_dir = is_rtl() ? 'ltr' : 'rlt';
                         <i class="far fa-file"></i>
                     </span>
 
-                    <a class="button-primary" href="#tnpc-placeholders" rel="modal:open"><i class="fas fa-user"></i></a>
+                    <a class="button-primary" href="#tnpc-placeholders" rel="modal:open" title="<?php esc_attr_e('Placeholders', 'newsletter') ?>"><i class="fas fa-user"></i></a>
 
-                    <a class="button-primary" href="#tnpc-attachment-modal" rel="modal:open"><i class="fas fa-paperclip"></i></a>
+                    <a class="button-primary" href="#tnpc-attachment-modal" rel="modal:open" title="<?php esc_attr_e('Attachments', 'newsletter') ?>"><i class="fas fa-paperclip"></i></a>
 
                     <?php if ($show_test) { ?>
                         <span class="button-primary" data-tnp-modal-target="#test-newsletter-modal" title="<?php esc_attr_e('Test', 'newsletter') ?>">
@@ -102,7 +102,7 @@ $rev_dir = is_rtl() ? 'ltr' : 'rlt';
                         </span>
                     <?php } ?>
 
-                    <span class="button-primary" id="tnpc-view-mode">
+                    <span class="button-primary" id="tnpc-view-mode" title="<?php esc_attr_e('Switch preview mode', 'newsletter') ?>">
                         <i id="tnpc-view-mode-icon" class="fas fa-desktop"></i>
                     </span>
 

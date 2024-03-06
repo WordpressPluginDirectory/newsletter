@@ -46,7 +46,9 @@
     height: auto !important;
 }
 
-#tnpb-content.tnp-view-mobile .max-width-100 { max-width: 100%!important; }
+#tnpb-content.tnp-view-mobile .max-width-100 {
+    max-width: 100%!important;
+}
 
 /* Text block */
 #tnpb-content td .text a {
@@ -64,6 +66,35 @@
 }
 
 /* TinyMCE of WP */
-#tnpb-content td .text .alignleft { float: left; margin: 7px 15px 7px 0px; }
-#tnpb-content td .text .alignright { float: right; margin: 7px 0px 7px 15px; }
-#tnpb-content td .text .aligncenter { display: block; margin-left: auto; margin-right: auto; }
+#tnpb-content td .text .alignleft {
+    float: left;
+    margin: 7px 15px 7px 0px;
+}
+#tnpb-content td .text .alignright {
+    float: right;
+    margin: 7px 0px 7px 15px;
+}
+#tnpb-content td .text .aligncenter {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#tnpb-content td .text ul
+{
+    margin-left: 20px;
+    list-style-type: initial;
+    list-style-position: inside;
+}
+
+#tnpb-content td .text ol
+{
+    margin-left: 20px;
+    list-style-position: inside;
+}
+
+#tnpb-content td .text ul li,
+#tnpb-content td .text ol li
+{
+    margin-left: 0px !important;
+}

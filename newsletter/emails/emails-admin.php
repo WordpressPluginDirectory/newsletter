@@ -507,7 +507,7 @@ class NewsletterEmailsAdmin extends NewsletterModuleAdmin {
         $dummy_subscriber = $this->get_user($email_address);
 
         if (!$dummy_subscriber) {
-            $dummy_subscriber = $this->make_dummy_subscriber();
+            $dummy_subscriber = $this->get_dummy_user();
             $dummy_subscriber->email = $email_address;
         }
 

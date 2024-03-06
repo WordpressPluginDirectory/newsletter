@@ -274,6 +274,24 @@ class NewsletterModuleBase {
         return $r;
     }
 
+    function get_dummy_user() {
+        $dummy_user = new TNP_User();
+        $dummy_user->id = 0;
+        $dummy_user->token = 0;
+        $dummy_user->email = 'john.doe@example.org';
+        $dummy_user->name = 'John';
+        $dummy_user->surname = 'Doe';
+        $dummy_user->sex = 'n';
+        $dummy_user->language = '';
+
+        for ($i = 1; $i <= NEWSLETTER_PROFILE_MAX; $i++) {
+            $profile_key = "profile_$i";
+            $dummy_user->$profile_key = 'Dummy profile ' . $i;
+        }
+
+        return $dummy_user;
+    }
+
     function get_user_meta($user_id, $key) {
         global $wpdb;
 
@@ -425,6 +443,11 @@ class NewsletterModuleBase {
      */
     function refresh_user_token($user) {
         global $wpdb;
+
+        // Dummy user
+        if ($user->id == 0) {
+            return;
+        }
 
         $token = $this->get_token();
 

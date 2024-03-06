@@ -179,7 +179,7 @@ class NewsletterSubscription extends NewsletterModule {
 
                     if (is_wp_error($user)) {
                         if ($user->get_error_code() === 'exists') {
-                            $this->show_message('error', $user);
+                            $this->show_message('error');
                             //$this->dienow($this->get_text('error_text'), $user->get_error_message(), 200);
                         }
                         $this->dienow(__('Registration failed.', 'newsletter'), $user->get_error_message(), 400);
@@ -412,8 +412,10 @@ class NewsletterSubscription extends NewsletterModule {
             // TODO: Use autoload
             require_once NEWSLETTER_INCLUDES_DIR . '/antispam.php';
             $antispam = NewsletterAntispam::instance();
-            if ($antispam->is_spam($subscription)) {
-                return new WP_Error('spam', __('This looks like a spam subscription', 'newsletter'));
+            $res = $antispam->is_spam($subscription, true);
+            if (is_wp_error($res)) {
+                Newsletter\Logs::add('antispam', $res->get_error_code() . ' - ' . $res->get_error_message());
+                return new WP_Error('spam', $res->get_error_message());
             }
         }
 
@@ -1142,9 +1144,7 @@ class NewsletterSubscription extends NewsletterModule {
         }
 
         if (!empty($label)) {
-            $buffer .= '<div class="tnp-field tnp-field-button">';
-            $buffer .= '<input class="tnp-submit" type="submit" value="' . esc_attr($label) . '">';
-            $buffer .= '</div>';
+            $buffer .= $this->get_button($attrs);
         }
 
         $buffer .= '</form>';
@@ -1213,7 +1213,7 @@ class NewsletterSubscription extends NewsletterModule {
         }
 
         if (isset($attrs['referrer'])) {
-            $b .= '<input type="hidden" name="nr" value="' . esc_attr($attrs['referrer']) . '">';
+            $b .= '<input type="hidden" name="nr" value="' . esc_attr($attrs['referrer']) . '">' . "\n";
         }
 
         if (isset($attrs['confirmation_url'])) {
@@ -1221,7 +1221,7 @@ class NewsletterSubscription extends NewsletterModule {
                 $attrs['confirmation_url'] = esc_url_raw($_SERVER['REQUEST_URI']);
             }
 
-            $b .= '<input type="hidden" name="ncu" value="' . esc_attr($attrs['confirmation_url']) . '">';
+            $b .= '<input type="hidden" name="ncu" value="' . esc_attr($attrs['confirmation_url']) . '">' . "\n";
         }
 
         if (isset($attrs['optin'])) {
@@ -1232,12 +1232,12 @@ class NewsletterSubscription extends NewsletterModule {
                 if ($optin !== 'double' && $this->is_double_optin() && empty($this->get_main_option('optin_override'))) {
                     $b .= $this->build_field_admin_notice('The optin is specified but cannot be overridden (see the subscription configiraton page).');
                 } else {
-                    $b .= '<input type="hidden" name="optin" value="' . esc_attr($optin) . '">';
+                    $b .= '<input type="hidden" name="optin" value="' . esc_attr($optin) . '">' . "\n";
                 }
             }
         }
 
-        $b .= '<input type="hidden" name="nlang" value="' . esc_attr($this->language()) . '">';
+        $b .= '<input type="hidden" name="nlang" value="' . esc_attr($this->language()) . '">' . "\n";
 
         // Beta
 //        if (isset($attrs['welcome_email_id'])) {
@@ -1252,7 +1252,9 @@ class NewsletterSubscription extends NewsletterModule {
         if (isset($attrs['welcome_page_id'])) {
             $page = get_post($attrs['welcome_page_id']);
             if ($page && $page->post_status === 'publish') {
-                $b .= '<input type="hidden" name="welcome_page_id" value="' . esc_attr($page->ID) . '">';
+                $b .= '<input type="hidden" name="welcome_page_id" value="' . esc_attr($page->ID) . '">' . "\n";
+            } else {
+                $b .= $this->build_field_admin_notice('The welcome page ID is not correct.');
             }
         }
 
@@ -1544,6 +1546,10 @@ class NewsletterSubscription extends NewsletterModule {
 
             return $buffer;
         }
+
+        if ($name === 'button') {
+
+        }
     }
 
     /**
@@ -1575,6 +1581,44 @@ class NewsletterSubscription extends NewsletterModule {
         return $pre_html . $buffer . $post_html;
     }
 
+    function get_button($attrs, $wrapper = true) {
+        // Prepare the button attrbutes
+        $button_style = '';
+        if (!empty($attrs['button_color'])) {
+            $button_style = 'background-color:' . $attrs['button_color'] . ';';
+        }
+        if (!empty($attrs['button_radius'])) {
+            $button_style = 'border-radius:' . $attrs['button_radius'] . ';';
+        }
+        $button_label = $this->get_text('subscribe', 'form');
+        if (!empty($attrs['button_label'])) {
+            $button_label = $attrs['button_label'];
+        } else if (!empty($attrs['button'])) { // Old attribute
+            $button_label = $attrs['button'];
+        }
+        // For the button container
+        $button_div_style = '';
+        if (!empty($attrs['button_align'])) {
+            $button_div_style = 'text-align: ' . $attrs['button_align'];
+        } else {
+            if (is_rtl()) {
+                $button_div_style = 'text-align: right';
+            } else {
+                $button_div_style = 'text-align: left';
+            }
+        }
+
+        $b = '';
+        if ($wrapper) {
+            $b .= '<div class="tnp-field tnp-field-button" style="' . esc_attr($button_div_style) . '">';
+        }
+        $b .= '<input class="tnp-submit" type="submit" value="' . esc_attr($button_label) . '" style="' . esc_attr($button_style) . '">' . "\n";
+        if ($wrapper) {
+            $b .= "</div>\n";
+        }
+        return $b;
+    }
+
     /**
      * The new standard form.
      *
@@ -1588,8 +1632,7 @@ class NewsletterSubscription extends NewsletterModule {
         if (!is_array($attrs)) {
             $attrs = [];
         }
-        $attrs = array_merge(['class' => '', 'button' => $this->get_text('subscribe', 'form'), 'button_color' => '', 'show_labels' => 'true',
-            'show_placeholders' => 'true'], $attrs);
+        $attrs = array_merge(['class' => '', 'show_labels' => 'true', 'show_placeholders' => 'true'], $attrs);
 
         $buffer = '';
 
@@ -1609,7 +1652,7 @@ class NewsletterSubscription extends NewsletterModule {
             $buffer .= ' id="' . esc_attr($attrs['id']) . '"';
         }
 
-        $buffer .= '>' . "\n\n";
+        $buffer .= '>' . "\n";
 
         $buffer .= $this->get_form_hidden_fields($attrs);
 
@@ -1642,136 +1685,69 @@ class NewsletterSubscription extends NewsletterModule {
             }
         }
 
-        if (!empty($fields)) {
 
-            if (!in_array('email', $fields)) {
-                $field_attrs['name'] = 'email';
-                $buffer .= $this->shortcode_newsletter_field($field_attrs);
-            }
-
-            foreach ($fields as $field) {
-                switch ($field) {
-                    case 'email':
-                        $field_attrs['name'] = 'email';
-                        $buffer .= $this->shortcode_newsletter_field($field_attrs);
-                        break;
-
-                    case 'first_name':
-                        $field_attrs['name'] = 'first_name';
-                        $buffer .= $this->shortcode_newsletter_field($field_attrs);
-                        break;
-
-                    case 'last_name':
-                        $field_attrs['name'] = 'last_name';
-                        $buffer .= $this->shortcode_newsletter_field($field_attrs);
-                        break;
-
-                    case 'gender':
-                        $field_attrs['name'] = 'gender';
-                        $buffer .= $this->shortcode_newsletter_field($field_attrs);
-                        break;
-
-                    case 'customfields':
-                        $ids = $this->get_form_option('customfields');
-                        if (is_array($ids)) {
-                            $field_attrs['name'] = 'customfield';
-                            foreach ($ids as $id) {
-                                $field_attrs['number'] = $id;
-                                $buffer .= $this->shortcode_newsletter_field($field_attrs);
-                            }
-                        }
-                        break;
-
-                    case 'lists':
-                        if (empty($attrs['lists_field_label'])) {
-                            $attrs['lists_field_label'] = '';
-                        }
-                        if (!empty($attrs['lists_field_layout']) && $attrs['lists_field_layout'] === 'dropdown') {
-                            if (empty($attrs['lists_field_empty_label'])) {
-                                $attrs['lists_field_empty_label'] = '';
-                            }
-                            $buffer .= $this->shortcode_newsletter_field(['name' => 'lists', 'layout' => 'dropdown', 'first_option_label' => $attrs['lists_field_empty_label'], 'label' => $attrs['lists_field_label']]);
-                        } else {
-                            $buffer .= $this->shortcode_newsletter_field(['name' => 'lists', 'label' => $attrs['lists_field_label']]);
-                        }
-
-                        break;
-
-                    case 'privacy':
-                        $buffer .= $this->get_privacy_field('<div class="tnp-field tnp-privacy-field">', '</div>');
-                        break;
-                }
-            }
-
-            $buffer .= '<div class="tnp-field tnp-field-button">';
-
-            $button_style = '';
-            if (!empty($attrs['button_color'])) {
-                $button_style = 'style="background-color:' . esc_attr($attrs['button_color']) . '"';
-            }
-
-            $buffer .= '<input class="tnp-submit" type="submit" value="' . esc_attr($attrs['button']) . '" ' . $button_style . '>' . "\n";
-
-            $buffer .= "</div>\n</form>\n";
-
-            $buffer .= "</div>\n";
-
-            return $buffer;
-        }
-
-        if (!empty($this->get_form_option('name_status'))) {
-            $field_attrs['name'] = 'first_name';
+        if (!in_array('email', $fields)) {
+            $field_attrs['name'] = 'email';
             $buffer .= $this->shortcode_newsletter_field($field_attrs);
         }
 
-        if ($this->get_form_option('surname_status')) {
-            $field_attrs['name'] = 'last_name';
-            $buffer .= $this->shortcode_newsletter_field($field_attrs);
-        }
+        foreach ($fields as $field) {
+            switch ($field) {
+                case 'email':
+                    $field_attrs['name'] = 'email';
+                    $buffer .= $this->shortcode_newsletter_field($field_attrs);
+                    break;
 
-        $field_attrs['name'] = 'email';
-        $buffer .= $this->shortcode_newsletter_field($field_attrs);
+                case 'first_name':
+                    $field_attrs['name'] = 'first_name';
+                    $buffer .= $this->shortcode_newsletter_field($field_attrs);
+                    break;
 
-        if ($this->get_form_option('sex_status')) {
-            $field_attrs['name'] = 'gender';
-            $buffer .= $this->shortcode_newsletter_field(['name' => 'gender']);
-        }
+                case 'last_name':
+                    $field_attrs['name'] = 'last_name';
+                    $buffer .= $this->shortcode_newsletter_field($field_attrs);
+                    break;
 
-        // Custom fields
-        $ids = $this->get_form_option('customfields');
-        if (is_array($ids)) {
-            $field_attrs['name'] = 'customfield';
-            foreach ($ids as $id) {
-                $field_attrs['number'] = $id;
-                $buffer .= $this->shortcode_newsletter_field($field_attrs);
+                case 'gender':
+                    $field_attrs['name'] = 'gender';
+                    $buffer .= $this->shortcode_newsletter_field($field_attrs);
+                    break;
+
+                case 'customfields':
+                    $ids = $this->get_form_option('customfields');
+                    if (is_array($ids)) {
+                        $field_attrs['name'] = 'customfield';
+                        foreach ($ids as $id) {
+                            $field_attrs['number'] = $id;
+                            $buffer .= $this->shortcode_newsletter_field($field_attrs);
+                        }
+                    }
+                    break;
+
+                case 'lists':
+                    if (empty($attrs['lists_field_label'])) {
+                        $attrs['lists_field_label'] = '';
+                    }
+                    if (!empty($attrs['lists_field_layout']) && $attrs['lists_field_layout'] === 'dropdown') {
+                        if (empty($attrs['lists_field_empty_label'])) {
+                            $attrs['lists_field_empty_label'] = '';
+                        }
+                        $buffer .= $this->shortcode_newsletter_field(['name' => 'lists', 'layout' => 'dropdown', 'first_option_label' => $attrs['lists_field_empty_label'], 'label' => $attrs['lists_field_label']]);
+                    } else {
+                        $buffer .= $this->shortcode_newsletter_field(['name' => 'lists', 'label' => $attrs['lists_field_label']]);
+                    }
+
+                    break;
+
+                case 'privacy':
+                    $buffer .= $this->get_privacy_field('<div class="tnp-field tnp-privacy-field">', '</div>');
+                    break;
             }
         }
 
-        if (empty($attrs['lists_field_label'])) {
-            $attrs['lists_field_label'] = '';
-        }
-        if (!empty($attrs['lists_field_layout']) && $attrs['lists_field_layout'] === 'dropdown') {
-            if (empty($attrs['lists_field_empty_label'])) {
-                $attrs['lists_field_empty_label'] = '';
-            }
-            $buffer .= $this->shortcode_newsletter_field(['name' => 'lists', 'layout' => 'dropdown', 'first_option_label' => $attrs['lists_field_empty_label'], 'label' => $attrs['lists_field_label']]);
-        } else {
-            $buffer .= $this->shortcode_newsletter_field(['name' => 'lists', 'label' => $attrs['lists_field_label']]);
-        }
+        $buffer .= $this->get_button($attrs);
 
-        $buffer .= $this->get_privacy_field('<div class="tnp-field tnp-privacy-field">', '</div>');
-
-        $buffer .= '<div class="tnp-field tnp-field-button">';
-
-        $button_style = '';
-        if (!empty($attrs['button_color'])) {
-            $button_style = 'style="background-color:' . esc_attr($attrs['button_color']) . '"';
-        }
-
-        $buffer .= '<input class="tnp-submit" type="submit" value="' . esc_attr($attrs['button']) . '" ' . $button_style . '>' . "\n";
-
-        $buffer .= "</div>\n</form>\n";
-
+        $buffer .= "</form>\n";
         $buffer .= "</div>\n";
 
         return $buffer;
@@ -1875,8 +1851,10 @@ class NewsletterSubscription extends NewsletterModule {
             $form .= '<input class="tnp-name" type="text" required name="nn" value="" placeholder="' . esc_attr($attrs['name_placeholder']) . '">';
         }
 
-        $form .= '<input class="tnp-submit" type="submit" value="' . esc_attr($attrs['button']) . '"'
-                . ' style="background-color:' . esc_attr($attrs['button_color']) . '">';
+//        $form .= '<input class="tnp-submit" type="submit" value="' . esc_attr($attrs['button']) . '"'
+//                . ' style="background-color:' . esc_attr($attrs['button_color']) . '">';
+
+        $form .= $this->get_button($attrs, false);
 
         $form .= $this->get_privacy_field('<div class="tnp-field tnp-privacy-field">', '</div>');
 
@@ -1892,7 +1870,7 @@ class NewsletterSubscription extends NewsletterModule {
      * @param string $content
      * @return string
      */
-    function shortcode_newsletter_form($attrs, $content) {
+    function shortcode_newsletter_form($attrs, $content = '') {
 
         if (isset($attrs['type']) && $attrs['type'] === 'minimal') {
             return $this->get_subscription_form_minimal($attrs);
@@ -1943,7 +1921,12 @@ class NewsletterSubscription extends NewsletterModule {
             $text .= '</div>';
         }
 
-        return $text;
+        $admin_notice = '';
+        if (current_user_can('administrator')) {
+            $admin_notice = '<p style="background-color: #eee; color: #000; padding: 1rem; margin: 1rem 0"><strong>Visible only to administrators</strong>. <a href="' . admin_url('admin.php?page=newsletter_subscription_options') . '" target="_blank">Edit this content</a>.</p>';
+        }
+
+        return $admin_notice . $text;
     }
 }
 

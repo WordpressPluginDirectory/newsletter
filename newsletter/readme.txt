@@ -1,7 +1,7 @@
 === Newsletter - Send awesome emails from WordPress ===
 Tags: newsletter, subscription, email marketing, welcome email, signup forms
 Tested up to: 6.4.3
-Stable tag: 8.1.9
+Stable tag: 8.2.0
 Contributors: satollo,webagile
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -127,6 +127,24 @@ Thank you, The Newsletter Team
 3. The Reports extension
 
 == Changelog ==
+
+= 8.2.0 =
+
+* New unsubscribe button shortcode (see the unsubscription panel)
+* New resubscribe button shortcode (see the unsubscription panel)
+* New default unsubscribe confirm message
+* Autoset of the alternative text for medias on image block
+* Added messages and link on online tests
+* Added the dummy subscriber to test the functionalities
+* Immediate trigger of the first batch when sending a newsletter
+* Added preview of the profile page with dummy subscriber
+* Added preview of the unsubscription process with dummy subscriber
+* Fixed date formatting on newsletters
+* Reactivated the convert to HTML button
+* Added logging support to the antispam filter
+* Improved the spam filter error reporting
+* New submit button attributes for all form shortcodes (see our documentation)
+* New "fields" attribute for the newsletter_form shortcode (see our documentation)
 
 = 8.1.9 =
 

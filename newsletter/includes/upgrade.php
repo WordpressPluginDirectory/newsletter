@@ -183,6 +183,18 @@ class NewsletterUpgrade {
 
         $this->db_delta($sql);
 
+        $sql = "CREATE TABLE `" . $wpdb->prefix . "newsletter_logs` (
+            `id` int(11) NOT NULL AUTO_INCREMENT,
+            `status` int NOT NULL DEFAULT 0,
+            `source` varchar(100) NOT NULL DEFAULT '',
+            `description` varchar(255) NOT NULL DEFAULT '',
+            `data` longtext,
+            `created` int(11) NOT NULL DEFAULT 0,
+            PRIMARY KEY (`id`)
+            ) $charset_collate;";
+
+        $this->db_delta($sql);
+
         delete_option('newsletter_system_warnings');
         delete_option('newsletter_promotion');
         delete_option('newsletter_main_status');

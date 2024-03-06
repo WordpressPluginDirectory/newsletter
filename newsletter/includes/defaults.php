@@ -230,9 +230,9 @@ class NewsletterDefaults {
 
         if ($sub === 'unsubscription') {
             switch ($key) {
-                case 'unsubscribe_text': return '<p>' . __('Please confirm you want to unsubscribe <a href="{unsubscription_confirm_url}">clicking here</a>.', 'newsletter') . '</p>';
+                case 'unsubscribe_text': return '<p>' . __('Please confirm you want to unsubscribe.', 'newsletter') . '</p><p>[newsletter_unsubscribe_button label=""]</p>';
                 case 'error_text': return '<p>' . __("Subscriber not found, it probably has already been removed. No further actions are required.", 'newsletter') . '</p>';
-                case 'unsubscribed_text': return "<p>" . __('Your subscription has been deleted. If that was an error you can <a href="{reactivate_url}">subscribe again here</a>.', 'newsletter') . "</p>";
+                case 'unsubscribed_text': return "<p>" . __('Your subscription has been deleted. If that was an error you can subscribe again.', 'newsletter') . '</p><p>[newsletter_resubscribe_button label=""]</p>';
                 case 'unsubscribed_subject': return __("Goodbye", 'newsletter');
                 case 'unsubscribed_message': return '<p>' . __('This message confirms that you have unsubscribed from our newsletter. Thank you.', 'newsletter') . '</p>';
                 case 'reactivated_text': return '<p>' . __('Your subscription has been reactivated.', 'newsletter') . '</p>';

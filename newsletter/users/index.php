@@ -117,7 +117,7 @@ $controls->data['search_page']++;
 
 <div class="wrap tnp-users tnp-users-index" id="tnp-wrap">
 
-    <?php include NEWSLETTER_DIR . '/header.php'; ?>
+    <?php include NEWSLETTER_ADMIN_HEADER; ?>
 
     <div id="tnp-heading">
 

@@ -1853,7 +1853,7 @@ tnp_controls_init();
             var media = tnp_uploader.state().get("selection").first();
             document.getElementById(name + "_id").value = media.id;
             jQuery("#" + name + "_id").trigger("change");
-            //alert(media.attributes.url);
+            console.log(media.attributes);
             if (media.attributes.url.substring(0, 0) == "/") {
                 media.attributes.url = "' . site_url('/') . '" + media.attributes.url;
             }
@@ -1865,6 +1865,10 @@ tnp_controls_init();
                 img_url = "' . site_url('/') . '" + img_url;
             }
             document.getElementById(name + "_img").src = img_url;
+            var alt = document.getElementById("options-" + name + "_alt");
+            if (alt) {
+                alt.value = media.attributes.alt;
+            }
         }).open();
     }
     function newsletter_media_remove(name) {
@@ -1872,6 +1876,10 @@ tnp_controls_init();
             document.getElementById(name + "_id").value = "";
             document.getElementById(name + "_url").value = "";
             document.getElementById(name + "_img").src = "' . plugins_url('newsletter') . '/images/nomedia.png";
+            var alt = document.getElementById("options-" + name + "_alt");
+            if (alt) {
+                alt.value = "";
+            }
         }
     }
     function newsletter_textarea_preview(id, header, footer) {
@@ -2344,5 +2352,9 @@ tnp_controls_init();
         esc_html_e('Lists to deactivate', 'newsletter');
         echo '<br>';
         $this->select2($name . '_off', $lists, null, true, null, __('None', 'newsletter'));
+    }
+
+    function logs($source) {
+        include __DIR__ . '/controls-logs.php';
     }
 }

@@ -24,6 +24,81 @@ class NewsletterUnsubscription extends NewsletterModule {
         add_filter('newsletter_message', [$this, 'hook_newsletter_message'], 9, 3);
 
         add_action('newsletter_action', [$this, 'hook_newsletter_action'], 11, 3);
+        add_action('newsletter_action_dummy', [$this, 'hook_newsletter_action_dummy'], 11, 3);
+
+        if (!is_admin() || defined('DOING_AJAX') && DOING_AJAX) {
+            add_shortcode('newsletter_unsubscribe_button', [$this, 'shortcode_newsletter_unsubscribe_button']);
+            add_shortcode('newsletter_resubscribe_button', [$this, 'shortcode_newsletter_resubscribe_button']);
+        }
+    }
+
+    function shortcode_newsletter_unsubscribe_button($attrs, $content = '') {
+        if ($this->is_current_user_dummy()) {
+            $user = $this->get_dummy_user();
+        } else {
+            $user = $this->check_user();
+
+            if (empty($user)) {
+                if (empty($content)) {
+                    return __('Subscriber not found.', 'newsletter');
+                } else {
+                    return $content;
+                }
+            }
+        }
+        $label = empty($attrs['label']) ? __('Unsubscribe', 'newsletter') : $attrs['label'];
+
+        $b = '<form action="' . esc_attr($this->build_action_url('uc')) . '" method="post" class="tnp-unsubscribe">';
+        $b .= '<input type="hidden" name="nk" value="' . esc_attr($this->get_user_key($user)) . '">';
+        $b .= '<button class="tnp-submit">' . esc_html($label) . '</button>';
+        $b .= '</form>';
+        return $b;
+    }
+
+    function shortcode_newsletter_resubscribe_button($attrs, $content = '') {
+        if ($this->is_current_user_dummy()) {
+            $user = $this->get_dummy_user();
+        } else {
+            $user = $this->check_user();
+
+            if (empty($user)) {
+                if (empty($content)) {
+                    return __('Subscriber not found.', 'newsletter');
+                } else {
+                    return $content;
+                }
+            }
+        }
+
+        $label = empty($attrs['label']) ? __('Resubscribe', 'newsletter') : $attrs['label'];
+        $b = '<form action="' . esc_attr($this->build_action_url('reactivate')) . '" method="post" class="tnp-reactivate">';
+        $b .= '<input type="hidden" name="nk" value="' . esc_attr($this->get_user_key($user)) . '">';
+        $b .= '<button class="tnp-submit">' . esc_html($label) . '</button>';
+        $b .= '</form>';
+        return $b;
+    }
+
+    function hook_newsletter_action_dummy($action, $user, $email) {
+        if (!in_array($action, ['u', 'uc', 'ocu', 'reactivate'])) {
+            return;
+        }
+
+        switch ($action) {
+            case 'u':
+                $url = $this->build_message_url(null, 'unsubscribe', $user, $email);
+                $this->redirect($url);
+                break;
+
+            case 'uc':
+                $url = $this->build_message_url(null, 'unsubscribed', $user, $email);
+                $this->redirect($url);
+                break;
+
+            case 'reactivate':
+                $url = $this->build_message_url(null, 'reactivated', $user);
+                $this->redirect($url);
+                break;
+        }
     }
 
     function hook_newsletter_action($action, $user, $email) {
@@ -196,23 +271,32 @@ class NewsletterUnsubscription extends NewsletterModule {
      * @return type
      */
     function hook_newsletter_page_text($text, $key, $user = null) {
+        $message = '';
         if ($key === 'unsubscribe') {
             if (!$user) {
-                return $this->get_text('error_text');
+                $message = $this->get_text('error_text');
             }
-            return $this->get_text('unsubscribe_text');
+            $message = $this->get_text('unsubscribe_text');
         }
         if ($key === 'unsubscribed') {
             if (!$user) {
-                return $this->get_text('error_text');
+                $message = $this->get_text('error_text');
             }
-            return $this->get_text('unsubscribed_text');
+            $message = $this->get_text('unsubscribed_text');
         }
         if ($key === 'reactivated') {
             if (!$user) {
-                return $this->get_text('error_text');
+                $message = $this->get_text('error_text');
             }
-            return $this->get_text('reactivated_text');
+            $message = $this->get_text('reactivated_text');
+        }
+
+        if ($message) {
+            if ($user && $user->id === 0 && current_user_can('administrator')) {
+                return '<p style="background-color: #eee; color: #000; padding: 1rem; margin: 1rem 0"><strong>Visible only to administrator</strong>. Preview of the content with a dummy subscriber. <a href="' . admin_url('admin.php?page=newsletter_unsubscription_index') . '" target="_blank">Edit this content</a>.</p>'
+                        . $message;
+            }
+            return $message;
         }
 
         return $text;

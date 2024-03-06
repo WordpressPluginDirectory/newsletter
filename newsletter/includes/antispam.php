@@ -23,41 +23,55 @@ class NewsletterAntispam {
      *
      * @param TNP_Subscription $subscription
      */
-    function is_spam($subscription) {
+    function is_spam($subscription, $return_wp_error = false) {
 
         $email = $subscription->data->email;
         $ip = $subscription->data->ip;
 
-
         $full_name = $subscription->data->name . ' ' . $subscription->data->surname;
         if ($this->is_spam_text($full_name)) {
             $this->logger->fatal($email . ' - ' . $ip . ' - Name with http: ' . $full_name);
-            return true;
+            if ($return_wp_error)
+                return new WP_Error('spam-text', 'Spam text detected on name: ' . $full_name);
+            else
+                return true;
         }
 
         if ($this->is_ip_blacklisted($ip)) {
             $this->logger->fatal($email . ' - ' . $ip . ' - IP blacklisted');
-            return true;
+            if ($return_wp_error)
+                return new WP_Error('ip-blacklist', 'The IP is blacklisted: ' . $ip);
+            else
+                return true;
         }
 
         if ($this->is_address_blacklisted($email)) {
             $this->logger->fatal($email . ' - ' . $ip . ' - Address blacklisted');
-            return true;
+            if ($return_wp_error)
+                return new WP_Error('email-blacklist', 'The email is blacklisted: ' . $email);
+            else
+                return true;
         }
 
         // Akismet check
-	    $user_agent = isset( $_SERVER['HTTP_USER_AGENT'] ) ? $_SERVER['HTTP_USER_AGENT'] : '';
-	    $referrer   = isset( $_SERVER['HTTP_REFERER'] ) ? $_SERVER['HTTP_REFERER'] : '';
-	    if ( $this->is_spam_by_akismet( $email, $full_name, $ip, $user_agent, $referrer ) ) {
-		    $this->logger->fatal( $email . ' - ' . $ip . ' - Akismet blocked' );
+        $user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
+        $referrer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
+        if ($this->is_spam_by_akismet($email, $full_name, $ip, $user_agent, $referrer)) {
+            $this->logger->fatal($email . ' - ' . $ip . ' - Akismet blocked');
 
-		    return true;
-	    }
+            if ($return_wp_error)
+                return new WP_Error('akismet', 'Spam detected by Akismet');
+            else
+                return true;
+        }
 
         // Flood check
         if ($this->is_flood($email, $ip)) {
             $this->logger->fatal($email . ' - ' . $ip . ' - Antiflood triggered');
-            return true;
+            if ($return_wp_error)
+                return new WP_Error('akismet', 'Flood detected for: ' . $ip . ' or ' . $email);
+            else
+                return true;
         }
 
 //        if ($this->is_missing_domain_mx($email)) {
@@ -75,7 +89,6 @@ class NewsletterAntispam {
             return false;
         }
 
-        $this->logger->debug('Address blacklist check');
         $rev_email = strrev($email);
         foreach ($this->options['address_blacklist'] as $item) {
             if (strpos($rev_email, strrev($item)) === 0) {
@@ -86,7 +99,7 @@ class NewsletterAntispam {
     }
 
     function is_ip_blacklisted($ip) {
-        
+
         if ($ip === '::1' || $ip === '127.0.0.1') {
             return false;
         }
@@ -94,7 +107,6 @@ class NewsletterAntispam {
         if (empty($this->options['ip_blacklist'])) {
             return false;
         }
-        $this->logger->debug('IP blacklist check');
         foreach ($this->options['ip_blacklist'] as $item) {
             if (substr($item, 0, 1) === '#') {
                 continue;
@@ -112,7 +124,6 @@ class NewsletterAntispam {
             return false;
         }
 
-        $this->logger->debug('Domain MX check');
         list($local, $domain) = explode('@', $email);
 
         $hosts = array();
@@ -128,8 +139,6 @@ class NewsletterAntispam {
         if (empty($this->options['antiflood'])) {
             return false;
         }
-
-        $this->logger->debug('Antiflood check');
 
         $updated = $wpdb->get_var($wpdb->prepare("select updated from " . NEWSLETTER_USERS_TABLE . " where ip=%s or email=%s order by updated desc limit 1", $ip, $email));
 
@@ -164,7 +173,6 @@ class NewsletterAntispam {
             return false;
         }
 
-        $this->logger->debug('Akismet check');
         $request = 'blog=' . urlencode(home_url()) . '&referrer=' . urlencode($referrer) .
                 '&user_agent=' . urlencode($agent) .
                 '&comment_type=signup' .
@@ -197,5 +205,4 @@ class NewsletterAntispam {
             return strpos($range, $ip) === 0;
         }
     }
-
 }

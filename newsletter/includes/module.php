@@ -406,6 +406,17 @@ class NewsletterModule extends NewsletterModuleBase {
         setcookie('newsletter', '', time() - YEAR_IN_SECONDS, COOKIEPATH, COOKIE_DOMAIN, is_ssl());
     }
 
+    function is_current_user_dummy() {
+        if (!current_user_can('administrator')) return false;
+        if (isset($_REQUEST['nk'])) {
+            list($id, $token) = explode('-', $_REQUEST['nk'], 2);
+        } else if (isset($_COOKIE['newsletter'])) {
+            list ($id, $token) = explode('-', $_COOKIE['newsletter'], 2);
+        }
+
+        return $id === '0';
+    }
+
     function get_current_user() {
 
         $id = 0;
@@ -913,7 +924,7 @@ class NewsletterModule extends NewsletterModuleBase {
             if ($y === false)
                 continue;
             $f = substr($text, $x + 6, $y - $x - 6);
-            $text = substr($text, 0, $x) . date_i18n($f) . substr($text, $y + 1);
+            $text = substr($text, 0, $x) . date_i18n($f, $timestamp) . substr($text, $y + 1);
         }
         return $text;
     }

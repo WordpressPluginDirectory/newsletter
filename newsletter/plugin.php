@@ -4,7 +4,7 @@
   Plugin Name: Newsletter
   Plugin URI: https://www.thenewsletterplugin.com
   Description: Newsletter is a cool plugin to create your own subscriber list, to send newsletters, to build your business. <strong>Before update give a look to <a href="https://www.thenewsletterplugin.com/category/release">this page</a> to know what's changed.</strong>
-  Version: 8.1.9
+  Version: 8.2.0
   Author: Stefano Lissa & The Newsletter Team
   Author URI: https://www.thenewsletterplugin.com
   Disclaimer: Use at your own risk. No warranty expressed or implied is provided.
@@ -37,7 +37,7 @@ if (version_compare(phpversion(), '7.0', '<')) {
     return;
 }
 
-define('NEWSLETTER_VERSION', '8.1.9');
+define('NEWSLETTER_VERSION', '8.2.0');
 
 global $newsletter, $wpdb;
 
@@ -162,6 +162,21 @@ class Newsletter extends NewsletterModule {
         add_action('wp_ajax_tnp', [$this, 'action']);
         add_action('wp_ajax_nopriv_tnp', [$this, 'action']);
 
+        if (is_admin()) {
+            add_action('wp_ajax_newsletter-log', function() {
+                check_ajax_referer('newsletter-log');
+                if (!current_user_can('administrator'))
+                {
+                    die('no admin');
+                }
+                $log = Newsletter\Logs::get((int)$_GET['id']);
+                header('Content-Type: text/plain;charset=utf-8');
+                if (empty($log->data)) echo '[no data]';
+                else echo $log->data;
+                die();
+            });
+        }
+
         register_activation_hook(__FILE__, [$this, 'hook_activate']);
         register_deactivation_hook(__FILE__, [$this, 'hook_deactivate']);
     }
@@ -210,6 +225,15 @@ class Newsletter extends NewsletterModule {
         add_action('wp_enqueue_scripts', [$this, 'hook_wp_enqueue_scripts']);
 
         do_action('newsletter_init');
+
+        if (is_admin() && !wp_next_scheduled('newsletter_clean')) {
+            wp_schedule_event(time() + HOUR_IN_SECONDS, 'weekly', 'newsletter_clean');
+        }
+        add_action('newsletter_clean', [$this, 'newsletter_clean']);
+    }
+
+    function newsletter_clean() {
+        Newsletter\Logs::clean();
     }
 
     function hook_wp_loaded() {
@@ -255,6 +279,12 @@ class Newsletter extends NewsletterModule {
 
         if ($this->action === 'nul') {
             $this->dienow('This link is not active on newsletter preview', 'You can send a test message to test subscriber to have the real working link.');
+        }
+
+        if ($this->is_current_user_dummy()) {
+            $user = $this->get_dummy_user();
+            $email = $this->get_email_from_request();
+            do_action('newsletter_action_dummy', $this->action, $user, $email);
         }
 
         $user = $this->get_current_user();
@@ -390,10 +420,15 @@ class Newsletter extends NewsletterModule {
         $executing = true;
 
         $message_key = $this->get_message_key_from_request();
-        if ($message_key === 'confirmation') {
-            $user = $this->get_user_from_request(false, 'preconfirm');
+
+        if ($this->is_current_user_dummy()) {
+            $user = $this->get_dummy_user();
         } else {
-            $user = $this->get_user_from_request();
+            if ($message_key === 'confirmation') {
+                $user = $this->get_user_from_request(false, 'preconfirm');
+            } else {
+                $user = $this->get_user_from_request();
+            }
         }
 
         // Lets modules to provie its own text
@@ -402,6 +437,11 @@ class Newsletter extends NewsletterModule {
 
         $email = $this->get_email_from_request();
         $message = $this->replace($message, $user, $email, 'page');
+
+//        if ($user && $user->id === 0 && current_user_can('administrator')) {
+//            $message = '<div style="border:1px solid #ddd; padding: 1rem; line-height: normal; background-color: #eee; margin-bottom: 1rem;"><strong>Visible only to administrators</strong>. Preview of the content with a dummy subscriber.</div>'
+//                    .$message;
+//        }
 
         if (isset($_REQUEST['alert'])) {
             // slashes are already added by wordpress!
@@ -434,7 +474,7 @@ class Newsletter extends NewsletterModule {
             return;
         }
 
-        $emails = $this->get_results("select * from " . NEWSLETTER_EMAILS_TABLE . " where status='sending' and send_on<" . time() . " order by id asc");
+        $emails = $this->get_results("select * from " . NEWSLETTER_EMAILS_TABLE . " where status='sending' and send_on<=" . time() . " order by id asc");
 
         $this->logger->debug(__METHOD__ . '> ' . count($emails) . ' newsletter to be processed');
 

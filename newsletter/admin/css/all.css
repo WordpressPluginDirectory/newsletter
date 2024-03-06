@@ -157,6 +157,7 @@
     -moz-osx-font-smoothing: grayscale; /* Firefox */
     color: var(--tnp-text);
     font-weight: normal;
+    text-decoration: none;
 }
 
 .tnp-row-padded {
@@ -2130,6 +2131,13 @@ span.tnp-user-status {
     width: 400px;
     max-width: 100%;
     background-color: #eee;
+    margin-bottom: .5rem;
+    padding: .5rem;
+    border-radius: 5px;
+}
+
+#tnp-body .tnpc-media img {
+    display: block;
 }
 
 #tnp-body .tnpc-media-remove {

@@ -1,6 +1,7 @@
 <?php
 /* @var $this NewsletterMainAdmin */
 /* @var $controls NewsletterControls */
+
 use Newsletter\License;
 
 defined('ABSPATH') || exit;
@@ -117,13 +118,21 @@ if (!empty($return_path)) {
     <div id="tnp-heading">
         <?php $controls->title_help('https://www.thenewsletterplugin.com/plugins/newsletter/newsletter-configuration') ?>
 
-        <h2><?php esc_html_e('Settings', 'newsletter'); ?> <?php echo License::get_badge()?></h2>
-        <?php include __DIR__ . '/nav.php'?>
+        <h2><?php esc_html_e('Settings', 'newsletter'); ?> <?php echo License::get_badge() ?></h2>
+        <?php include __DIR__ . '/nav.php' ?>
 
     </div>
     <div id="tnp-body" class="tnp-main-main">
 
         <?php $controls->show() ?>
+
+        <?php if (!empty($controls->data['contract_key']) && !class_exists('NewsletterExtensions')) { ?>
+            <div class="tnp-notice">
+                Please, install the <a href="?page=newsletter_main_extensions">Addons Manager</a> to access all professional addons and features.
+            </div>
+        <?php } ?>
+
+
         <form method="post" action="">
             <?php $controls->init(); ?>
 
@@ -176,9 +185,9 @@ if (!empty($return_path)) {
                                     }
                                     ?>
 
-                                <p class="description">
-                                    <?php esc_html_e('The page content should be only the shortcode [newsletter]', 'newsletter')?>.
-                                </p>
+                                    <p class="description">
+                                        <?php esc_html_e('The page content should be only the shortcode [newsletter]', 'newsletter') ?>.
+                                    </p>
 
                                     <?php if (Newsletter::$is_multilanguage) { ?>
                                         <p class="description">
@@ -243,6 +252,7 @@ if (!empty($return_path)) {
                                 <?php $controls->text('scheduler_max', 5); ?> (min. 10)
                                 <p class="description">
                                     <a href="?page=newsletter_system_status#tnp-speed">See the collected statistics</a>
+                                </p>
                             </td>
                         </tr>
                     </table>
@@ -322,6 +332,9 @@ if (!empty($return_path)) {
                             </th>
                             <td>
                                 <?php $controls->yesno('debug', 40); ?>
+                                <span class="description">
+                                    If PHP errors are intercepted they are logged <a href="?page=newsletter_system_logs">here</a>.
+                                </span>
                             </td>
                         </tr>
 

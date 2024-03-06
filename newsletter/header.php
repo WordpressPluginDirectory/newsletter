@@ -40,7 +40,7 @@ $system_warnings = NewsletterSystemAdmin::instance()->get_warnings_count();
                 </li>
 
                 <li>
-                    <a href="?page=newsletter_unsubscription_index"><?php _e('Unsubscribe', 'newsletter') ?></a>
+                    <a href="?page=newsletter_unsubscription_index"><?php _e('Unsubscription', 'newsletter') ?></a>
                 </li>
 
                 <?php newsletter_print_entries('subscribers') ?>
@@ -89,7 +89,7 @@ $system_warnings = NewsletterSystemAdmin::instance()->get_warnings_count();
                 </li>
 
                 <li>
-                    <a href="?page=newsletter_unsubscription_index"><?php _e('Unsubscribe', 'newsletter') ?></a>
+                    <a href="?page=newsletter_unsubscription_index"><?php _e('Unsubscription', 'newsletter') ?></a>
                 </li>
 
                 <?php newsletter_print_entries('subscription') ?>
@@ -173,6 +173,8 @@ $system_warnings = NewsletterSystemAdmin::instance()->get_warnings_count();
                             <a href="?page=newsletter_system_support"><?php esc_html_e('Support', 'newsletter') ?></a>
                         </li>
                     <?php } ?>
+
+                        <li><a href="?page=newsletter_system_logs"><?php esc_html_e('Logs', 'newsletter') ?></a></li>
                     <li>
                         <a href="https://www.thenewsletterplugin.com/documentation/developers/backup-recovery/" target="_blank"><?php _e('Backup', 'newsletter') ?></a>
                     </li>

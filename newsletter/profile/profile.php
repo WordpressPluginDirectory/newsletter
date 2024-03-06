@@ -22,10 +22,30 @@ class NewsletterProfile extends NewsletterModule {
         add_filter('newsletter_replace', [$this, 'hook_newsletter_replace'], 10, 4);
         add_filter('newsletter_page_text', [$this, 'hook_newsletter_page_text'], 10, 3);
         add_action('newsletter_action', [$this, 'hook_newsletter_action'], 12, 3);
+        add_action('newsletter_action_dummy', [$this, 'hook_newsletter_action_dummy'], 12, 3);
     }
 
     function message_url($user = null, $email = null, $alert = '') {
         return parent::build_message_url($this->get_option('url'), 'profile', $user, $email, $alert);
+    }
+
+    function hook_newsletter_action_dummy($action, $user, $email) {
+        if (!in_array($action, ['p', 'profile', 'pe', 'profile-save', 'profile_export', 'ps'])) {
+            return;
+        }
+
+        switch ($action) {
+            case 'profile':
+            case 'p':
+                $profile_url = $this->message_url($user, $email);
+                $this->redirect($profile_url);
+                break;
+
+            case 'profile-save':
+            case 'ps':
+                $this->redirect($this->message_url($user, $email, $this->get_text('saved')));
+                break;
+        }
     }
 
     function hook_newsletter_action($action, $user, $email) {
@@ -35,7 +55,7 @@ class NewsletterProfile extends NewsletterModule {
         }
 
         if (!$user || $user->status != TNP_User::STATUS_CONFIRMED) {
-                $this->dienow(__('Subscriber not found or not confirmed or started from a test newsletter.', 'newsletter'), 'From a test newsletter or subscriber key not valid or subscriber not confirmed', 404);
+            $this->dienow(__('Subscriber not found or not confirmed or started from a test newsletter.', 'newsletter'), 'From a test newsletter or subscriber key not valid or subscriber not confirmed', 404);
         }
 
         switch ($action) {
@@ -119,22 +139,29 @@ class NewsletterProfile extends NewsletterModule {
             return $text;
         }
 
-        if (!$user || $user->status === TNP_User::STATUS_UNSUBSCRIBED) {
-            return __('Subscriber not found.', 'newsletter');
+        if (!$this->is_current_user_dummy()) {
+            if (!$user || $user->status === TNP_User::STATUS_UNSUBSCRIBED) {
+                return __('Subscriber not found.', 'newsletter');
+            }
         }
+
         $text = $this->get_text('text');
         $text = str_replace('{profile_form}', '[newsletter_profile]', $text);
 
         // Admin notice
         $admin_notice = '';
-        if (current_user_can('administrator')) {
-            $admin_notice = '<p style="background-color: #eee; color: #000; padding: 1rem; margin: 1rem 0"><a href="' . admin_url('admin.php?page=newsletter_profile_index') . '" target="_blank">Edit this form</a>. <span style="color: #999; font-style: italic">Shown only to blog administrators</span></p>';
+        if ($user && $user->id === 0 && current_user_can('administrator')) {
+            $admin_notice = '<p style="background-color: #eee; color: #000; padding: 1rem; margin: 1rem 0"><strong>Visible only to administrators</strong>. Preview of the content with a dummy subscriber. <a href="' . admin_url('admin.php?page=newsletter_profile_index') . '" target="_blank">Edit this content</a>.</p>';
         }
         return $admin_notice . $text;
     }
 
     function shortcode_newsletter_profile($attrs, $content = '') {
-        $user = $this->check_user();
+        if ($this->is_current_user_dummy()) {
+            $user = $this->get_dummy_user();
+        } else {
+            $user = $this->check_user();
+        }
 
         if (empty($user)) {
             if (empty($content)) {
@@ -188,7 +215,8 @@ class NewsletterProfile extends NewsletterModule {
         }
 
         if (!empty($options['sex'])) {
-            if (empty($user->sex)) $user->sex = 'n';
+            if (empty($user->sex))
+                $user->sex = 'n';
             $buffer .= '<div class="tnp-field tnp-field-gender">';
             $buffer .= '<label>' . esc_html($subscription->get_form_text('sex')) . '</label>';
             $buffer .= '<select name="nx" class="tnp-gender"';
@@ -268,7 +296,8 @@ class NewsletterProfile extends NewsletterModule {
                 $tmp .= '<div class="tnp-field tnp-field-list">';
                 $tmp .= '<label><input class="tnp-list tnp-list-' . $list->id . '" type="checkbox" name="nl[]" value="' . $list->id . '"';
                 $field = 'list_' . $list->id;
-                if ($user->$field == 1) {
+                // isset() for dummy subscribers
+                if (isset($user->$field) && $user->$field == 1) {
                     $tmp .= ' checked';
                 }
                 $tmp .= '><span class="tnp-list-label">' . esc_html($list->name) . '</span></label>';
@@ -424,10 +453,6 @@ class NewsletterProfile extends NewsletterModule {
         return $this->get_text('saved');
     }
 
-    function admin_menu() {
-
-    }
-
     // Patch to avoid conflicts with the "newsletter_profile" option of the subscription module
     // TODO: Fix it
     public function get_prefix($sub = '', $language = '') {
@@ -474,7 +499,6 @@ class NewsletterProfile extends NewsletterModule {
 
         return json_encode($data, JSON_PRETTY_PRINT);
     }
-
 }
 
 NewsletterProfile::instance();

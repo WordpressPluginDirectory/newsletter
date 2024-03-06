@@ -90,6 +90,7 @@ class TNP_Media {
  * @property string $type Field type: text or select
  * @property array $options Field options (usually the select items)
  */
+#[\AllowDynamicProperties]
 class TNP_Profile {
 
     const STATUS_PRIVATE = 0;
@@ -197,7 +198,6 @@ class TNP_Subscription_Data {
         if (!empty($this->wp_user_id))
             $subscriber->wp_user_id = $this->wp_user_id;
 
-
         foreach ($this->lists as $id => $value) {
             $key = 'list_' . $id;
             $subscriber->$key = $value;
@@ -206,7 +206,7 @@ class TNP_Subscription_Data {
         // Profile
         foreach ($this->profiles as $id => $value) {
             $key = 'profile_' . $id;
-            $subscriber->$key = $value;
+            $subscriber->$key = trim($value);
         }
     }
 
@@ -216,7 +216,7 @@ class TNP_Subscription_Data {
      */
     function add_lists($list_ids) {
         $list_ids = wp_parse_list($list_ids);
-        
+
         foreach ($list_ids as $list_id) {
             $list_id = (int) $list_id;
             if ($list_id <= 0 || $list_id > NEWSLETTER_LIST_MAX) {
@@ -293,6 +293,7 @@ class TNP_Subscription {
  * @property string $token The subscriber secret token
  * @property string $country The subscriber country code 2 chars uppercase
  */
+#[\AllowDynamicProperties]
 class TNP_User {
 
     const STATUS_CONFIRMED = 'C';

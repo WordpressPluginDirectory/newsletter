@@ -9,7 +9,7 @@ if ($controls->is_action()) {
 
     if ($controls->is_action('save')) {
         // Processing IPs
-        $list = $this->to_array($controls->data['ip_blacklist']);
+        $list = wp_parse_list($controls->data['ip_blacklist']);
         $controls->data['ip_blacklist'] = [];
         foreach ($list as $item) {
             $item = trim($item);
@@ -33,13 +33,13 @@ if ($controls->is_action()) {
             $controls->data['ip_blacklist'][] = $item;
         }
 
-        $controls->data['address_blacklist'] = $this->to_array($controls->data['address_blacklist']);
+        $controls->data['address_blacklist'] = wp_parse_list($controls->data['address_blacklist']);
 
         $this->save_main_options($controls->data, 'antispam');
-        $controls->add_message_saved();
+        $controls->add_toast_saved();
     }
 } else {
-    $controls->data = $this->get_options('antispam');
+    $controls->data = $this->get_main_options('antispam');
 }
 
 ?>
@@ -66,6 +66,7 @@ if ($controls->is_action()) {
                 <ul>
                     <li><a href="#tabs-general"><?php esc_html_e('General', 'newsletter') ?></a></li>
                     <li><a href="#tabs-blacklists"><?php esc_html_e('Blacklists', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-logs"><?php esc_html_e('Logs', 'newsletter') ?></a></li>
                     <?php if (NEWSLETTER_DEBUG) { ?>
                         <li><a href="#tabs-debug">Debug</a></li>
                     <?php } ?>
@@ -91,10 +92,10 @@ if ($controls->is_action()) {
                             <th><?php $controls->label('Akismet', '/subscription/antiflood#akismet') ?></th>
                             <td>
                                 <?php
-                                $controls->select('akismet', array(
+                                $controls->select('akismet', [
                                     0 => __('Disabled', 'newsletter'),
                                     1 => __('Enabled', 'newsletter')
-                                ));
+                                ]);
                                 ?>
                             </td>
                         </tr>
@@ -126,6 +127,9 @@ if ($controls->is_action()) {
                             </th>
                             <td>
                                 <?php $controls->enabled('captcha'); ?>
+                                <span class="description">
+                                    <?php esc_html_e('Shown after the form submission as a confirmation step', 'newsletter'); ?>
+                                </span>
                             </td>
                         </tr>
                         <?php /*
@@ -171,6 +175,10 @@ if ($controls->is_action()) {
                     </table>
                 </div>
 
+                <div id="tabs-logs">
+                    <?php $controls->logs('antispam'); ?>
+                </div>
+
                 <?php if (NEWSLETTER_DEBUG) { ?>
                     <div id="tabs-debug">
                         <pre><?php echo esc_html(json_encode($this->get_db_options('antispam'), JSON_PRETTY_PRINT)) ?></pre>
@@ -187,6 +195,6 @@ if ($controls->is_action()) {
 
     </div>
 
-    <?php include NEWSLETTER_ADMIN_FOOTER ?>
+    <?php include NEWSLETTER_ADMIN_FOOTER; ?>
 
 </div>

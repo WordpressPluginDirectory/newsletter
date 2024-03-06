@@ -132,7 +132,7 @@ $emails = $pagination_controller->get_items();
                             <td style="white-space: nowrap">
                                 <?php $controls->button_icon_copy($email->id); ?>
                                 <?php $controls->button_icon_delete($email->id, ['secondary'=>true]); ?>
-                                <?php $controls->btn('template', 'T', ['data'=>$email->id, 'tertiary'=>true, 'confirm'=>'Create a template from this newsletter?']); ?>
+                                <?php $controls->btn('template', 'T', ['data'=>$email->id, 'tertiary'=>true, 'confirm'=>'Create a template from this newsletter?', 'title' => 'Create a template']); ?>
                                 <?php if (NEWSLETTER_DEBUG) { ?>
                                 <?php $controls->btn_link(home_url('/') . '?na=json&id=' . $email->id, '{}') ?>
                                 <?php } ?>

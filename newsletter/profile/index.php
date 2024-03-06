@@ -43,7 +43,12 @@ foreach (['text'] as $key) {
     <div id="tnp-body">
 
         <?php $controls->show() ?>
-        <p>Where your subscribers can change their data.</p>
+        <p>
+            Where your subscribers can change their data.
+            <?php if (current_user_can('administrator')) { ?>
+                <a href="<?php echo esc_attr($this->build_action_url('p')); ?>&nk=0-0" target="_blank">Preview online</a>
+            <?php } ?>
+        </p>
 
         <form id="channel" method="post" action="">
             <?php $controls->init(); ?>

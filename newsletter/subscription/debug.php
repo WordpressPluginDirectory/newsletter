@@ -44,6 +44,6 @@ $items = $wpdb->get_results("select * from {$wpdb->options} where option_name li
 
     </div>
 
-    <?php include NEWSLETTER_ADMIN_FOOTER ?>
+    <?php include NEWSLETTER_ADMIN_FOOTER; ?>
 
 </div>

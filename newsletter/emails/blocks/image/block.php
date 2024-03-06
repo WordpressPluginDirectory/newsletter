@@ -11,6 +11,7 @@
 $defaults = array(
     'image' => '',
     'image-alt' => '',
+    'image_alt' => '',
     'url' => '',
     'width' => 0,
     'align' => 'center',
@@ -22,6 +23,10 @@ $defaults = array(
 );
 
 $options = array_merge($defaults, $options);
+
+if (isset($options['image-alt']) && empty($options['image_alt'])) {
+    $options['image_alt'] = $options['image-alt'];
+}
 
 if (empty($options['image']['id'])) {
     if (!empty($options['image-url'])) {
@@ -53,7 +58,7 @@ if (!empty($options['width'])) {
     $media->set_width($options['width']);
 }
 $media->link = $options['url'];
-$media->alt = $options['image-alt'];
+$media->alt = $options['image_alt'];
 
 echo '<table width="100%" cellpadding="0" cellspacing="0" border="0" width="100%"><tr><td align="', esc_attr($options['align']), '">';
 

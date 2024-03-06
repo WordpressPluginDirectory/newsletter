@@ -6,12 +6,19 @@ CUSTOM CSS RULES.
 
 */
 
-div.tnp-subscription, div.tnp-profile,
+div.tnp-subscription,
 form.tnp-subscription, form.tnp-profile {
     display: block;
     margin: 1em auto;
     max-width: 500px;
     width: 100%;
+}
+
+div.tnp-profile {
+    display: block;
+    margin: 1em 0;
+    max-width: 500px;
+    /*width: 100%;*/
 }
 
 /* Generic field wrapper */
@@ -86,13 +93,16 @@ form.tnp-subscription, form.tnp-profile {
 }
 
 .tnp-subscription input.tnp-submit,
-.tnp-profile input.tnp-submit
+.tnp-profile input.tnp-submit,
+.tnp-unsubscribe button.tnp-submit,
+.tnp-reactivate button.tnp-submit
 {
     background-color: #444;
     color: #fff;
     width: auto;
     height: auto;
     margin: 0;
+    display: inline-block;
 }
 
 @media all and (max-width: 480px) {

@@ -106,7 +106,7 @@ foreach (['confirmed_text', 'confirmed_message', 'confirmation_text', 'confirmat
             <?php $controls->hidden('welcome_email'); ?>
             <?php $controls->hidden('confirmed_message'); ?>
             <?php $controls->hidden('confirmed_subject'); ?>
-            
+
             <div id="tabs">
                 <ul>
                     <li><a href="#tabs-subscription"><?php esc_html_e('Subscription', 'newsletter') ?></a></li>
@@ -189,7 +189,7 @@ foreach (['confirmed_text', 'confirmed_message', 'confirmation_text', 'confirmat
 
                     <table class="form-table">
                         <tr>
-                            <th><?php esc_html_e('Activation message', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Activation page content', 'newsletter') ?></th>
                             <td>
                                 <?php $controls->checkbox2('confirmation_text_custom', 'Customize', ['onchange' => 'tnp_refresh_binds()']); ?>
                                 <div data-bind="options-confirmation_text_custom">
@@ -236,7 +236,7 @@ foreach (['confirmed_text', 'confirmed_message', 'confirmation_text', 'confirmat
                     <?php $this->language_notice(); ?>
                     <table class="form-table">
                         <tr>
-                            <th><?php esc_html_e('Welcome message', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Welcome page content', 'newsletter') ?></th>
                             <td>
                                 <?php $controls->checkbox2('confirmed_text_custom', 'Customize', ['onchange' => 'tnp_refresh_binds()']); ?>
                                 <div data-bind="options-confirmed_text_custom">
