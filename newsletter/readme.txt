@@ -1,7 +1,7 @@
 === Newsletter - Send awesome emails from WordPress ===
 Tags: newsletter, subscription, email marketing, welcome email, signup forms
 Tested up to: 6.4.3
-Stable tag: 8.2.0
+Stable tag: 8.2.1
 Contributors: satollo,webagile
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -128,6 +128,11 @@ Thank you, The Newsletter Team
 
 == Changelog ==
 
+= 8.2.1 =
+
+* Removed the antispam IP blacklist since it is not really effective considering the wide use of VPNs, IP forgering, and so on
+* We recommend to use a security plugin or a firewall to block unwanted traffic from specific IPs
+
 = 8.2.0 =
 
 * New unsubscribe button shortcode (see the unsubscription panel)
@@ -143,8 +148,7 @@ Thank you, The Newsletter Team
 * Reactivated the convert to HTML button
 * Added logging support to the antispam filter
 * Improved the spam filter error reporting
-* New submit button attributes for all form shortcodes (see our documentation)
-* New "fields" attribute for the newsletter_form shortcode (see our documentation)
+* New submit button attributes for all form shortcodes
 
 = 8.1.9 =
 

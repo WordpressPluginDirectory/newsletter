@@ -37,13 +37,13 @@ class NewsletterAntispam {
                 return true;
         }
 
-        if ($this->is_ip_blacklisted($ip)) {
-            $this->logger->fatal($email . ' - ' . $ip . ' - IP blacklisted');
-            if ($return_wp_error)
-                return new WP_Error('ip-blacklist', 'The IP is blacklisted: ' . $ip);
-            else
-                return true;
-        }
+//        if ($this->is_ip_blacklisted($ip)) {
+//            $this->logger->fatal($email . ' - ' . $ip . ' - IP blacklisted');
+//            if ($return_wp_error)
+//                return new WP_Error('ip-blacklist', 'The IP is blacklisted: ' . $ip);
+//            else
+//                return true;
+//        }
 
         if ($this->is_address_blacklisted($email)) {
             $this->logger->fatal($email . ' - ' . $ip . ' - Address blacklisted');
@@ -99,6 +99,9 @@ class NewsletterAntispam {
     }
 
     function is_ip_blacklisted($ip) {
+
+        // Not enough reliable, removed.
+        return false;
 
         if ($ip === '::1' || $ip === '127.0.0.1') {
             return false;

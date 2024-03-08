@@ -155,6 +155,10 @@ if ($controls->is_action()) {
                                 <?php $controls->label(__('IP blacklist', 'newsletter'), '/subscription/antiflood/#ip-blacklist') ?>
                             </th>
                             <td>
+                                <p style="font-weight: bold">
+                                    This configuration is no more used, it is kept to preserve the data if you
+                                    want to use on a firewall or similar tools.
+                                </p>
                                 <?php $controls->textarea('ip_blacklist'); ?>
                                 <p class="description">
                                     <?php esc_html_e('One per line', 'newsletter') ?>
