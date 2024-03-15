@@ -49,36 +49,18 @@ if (is_file(WP_CONTENT_DIR . '/extensions/newsletter/subscription/page.php')) {
     <head>
         <style type="text/css">
             body {
-                font-family: verdana;
+                font-family: sans-serif;
                 background-color: #ddd;
-                font-size: 14px;
+                font-size: 1rem;
                 color: #333;
             }
             #container {
                 border: 1px solid #ccc;
                 border-radius: 0px;
                 background-color: #fff;
-                margin: 40px auto;
-                width: 650px;
-                padding: 30px
-            }
-            h1 {
-                font-size: 30px;
-                font-weight: normal;
-                border-bottom: 0px solid #aaa;
-                margin-top: 0;
-            }
-            h2 {
-                font-size: 20px;
-            }
-            th, td {
-                font-size: 12px;
-            }
-            th {
-                padding-right: 10px;
-                text-align: right;
-                vertical-align: middle;
-                font-weight: normal;
+                margin: 3rem auto;
+                width: 50%;
+                padding: 2rem;
             }
 
             #message {
@@ -107,7 +89,6 @@ if (is_file(WP_CONTENT_DIR . '/extensions/newsletter/subscription/page.php')) {
                 the public page (on main settings) is not set or the configured page has been deleted or unpublished.
             </div>
             <?php } ?>
-            <h1><?php echo get_option('blogname'); ?></h1>
             <div id="message">
             <?php echo $message; ?>
             </div>

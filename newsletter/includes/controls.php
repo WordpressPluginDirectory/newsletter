@@ -730,6 +730,32 @@ class NewsletterControls {
         );
 
         $pages = get_posts($args);
+        $options = [];
+        foreach ($pages as $page) {
+            /* @var $page WP_Post */
+            $label = $page->post_title;
+            if ($page->post_status != 'publish') {
+                $label .= ' (' . $page->post_status . ')';
+            }
+            if ($show_id) {
+                $label .= ' [#' . $page->ID . ']';
+            }
+            $options[$page->ID] = $label;
+        }
+        $this->select($name, $options, $first);
+    }
+
+    function page_or_url($name = 'page', $language = '', $show_id = true) {
+        $args = array(
+            'post_type' => 'page',
+            'posts_per_page' => 1000,
+            'offset' => 0,
+            'orderby' => 'post_title',
+            'post_status' => 'any',
+            'suppress_filters' => true
+        );
+
+        $pages = get_posts($args);
         //$pages = get_pages();
         $options = array();
         foreach ($pages as $page) {
@@ -743,7 +769,10 @@ class NewsletterControls {
             }
             $options[$page->ID] = $label;
         }
-        $this->select($name, $options, $first);
+        $options['url'] = 'Custom URL';
+        $this->select($name . '_id', $options, __('None', 'newsletter'), ['onchange'=>'jQuery(\'#options-' . esc_attr($name) . '_url\').toggle(this.value===\'url\');']);
+        echo '<br><br>';
+        $this->text_url($name . '_url', ['visible'=>$this->get_value($name . '_id') === 'url']);
     }
 
     /** Used to create a select which is part of a group of controls identified by $name that will
@@ -958,11 +987,18 @@ class NewsletterControls {
         echo '>';
     }
 
-    function text_url($name, $size = 40) {
+    function text_url($name, $attrs = []) {
+        if (!is_array($attrs)) {
+            $attrs = ['size' => $attrs, 'placeholder' => $placeholder];
+        }
+        $attrs = array_merge(['visible' => true, 'size' => 40], $attrs);
+        $style = '';
+        if (!$attrs['visible']) {
+        $style .= 'display: none;';
+        }
         $value = $this->get_value($name);
-        echo '<input name="options[' . esc_attr($name) . ']" type="url" placeholder="http://..." size="' . esc_attr($size) . '" value="';
-        echo esc_attr($value);
-        echo '"/>';
+        echo '<input id="options-', esc_attr($name), '" name="options[', esc_attr($name), ']" type="url" placeholder="https://..." size="' . esc_attr($attrs['size']) . '" value="';
+        echo esc_attr($value), '" style="', esc_attr($style), '">';
     }
 
     function hidden($name) {
@@ -2354,7 +2390,7 @@ tnp_controls_init();
         $this->select2($name . '_off', $lists, null, true, null, __('None', 'newsletter'));
     }
 
-    function logs($source) {
+    function logs($source, $attrs = []) {
         include __DIR__ . '/controls-logs.php';
     }
 }

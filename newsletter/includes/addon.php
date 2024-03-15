@@ -422,6 +422,7 @@ class NewsletterMailerAddon extends NewsletterAddon {
 
         $message->from = Newsletter::instance()->get_sender_email();
         $message->from_name = Newsletter::instance()->get_sender_name();
+        $message->headers['X-Newsletter'] = 'test';
         return $message;
     }
 
@@ -450,6 +451,7 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
     var $index_page = null;
     var $edit_page = null;
     var $welcome_page = null;
+    var $logs_page = null;
     var $dir = '';
     var $forms = null; // For caching
 
@@ -471,6 +473,7 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
             $this->index_page = 'newsletter_' . $this->menu_slug . '_index';
             $this->edit_page = 'newsletter_' . $this->menu_slug . '_edit';
             $this->welcome_page = 'newsletter_' . $this->menu_slug . '_welcome';
+            $this->logs_page = 'newsletter_' . $this->menu_slug . '_logs';
 
             // Auto add a menu entry
             if (!empty($this->menu_title) && !empty($this->dir)) {
@@ -553,6 +556,22 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
             add_submenu_page('admin.php', $this->menu_title, '<span class="tnp-side-menu">' . $this->menu_title . '</span>', 'exist', $this->welcome_page,
                     function () {
                         require $this->dir . '/admin/welcome.php';
+                    }
+            );
+        }
+
+        if (file_exists($this->dir . '/admin/logs.php')) {
+            add_submenu_page('admin.php', $this->menu_title, $this->menu_title, 'exist', $this->logs_page,
+                    function () {
+                        require_once NEWSLETTER_INCLUDES_DIR . '/controls.php';
+                        $controls = new NewsletterControls();
+
+                        $form = $this->get_form($_GET['id']);
+                        if (!$form) {
+                            echo 'Form not found';
+                            return;
+                        }
+                        require $this->dir . '/admin/logs.php';
                     }
             );
         }

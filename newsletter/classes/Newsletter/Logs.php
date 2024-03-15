@@ -14,7 +14,26 @@ class Logs {
      */
     static function add($source, $description, $status = 0, $data = '') {
         global $wpdb;
+        if (!is_scalar($data)) {
+            $data = wp_json_encode($data, JSON_PRETTY_PRINT);
+        }
         $wpdb->insert($wpdb->prefix . 'newsletter_logs', ['source' => $source, 'description' => $description, 'status' => $status, 'data' => $data, 'created' => time()]);
+    }
+
+    /**
+     *
+     * @param string $source
+     * @param \WP_Error $wp_error
+     */
+    static function add_wp_error($source, $wp_error) {
+        global $wpdb;
+        $data = $wp_error->get_error_data();
+        if (!is_scalar($data)) {
+            $data = wp_json_encode($data, JSON_PRETTY_PRINT);
+        }
+        $wpdb->insert($wpdb->prefix . 'newsletter_logs', ['source' => $source,
+            'description' => $wp_error->get_error_code() . ' - ' . $wp_error->get_error_message(), 'status' => 1,
+            'data' => $data, 'created' => time()]);
     }
 
     static function get($id) {

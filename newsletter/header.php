@@ -174,7 +174,7 @@ $system_warnings = NewsletterSystemAdmin::instance()->get_warnings_count();
                         </li>
                     <?php } ?>
 
-                        <li><a href="?page=newsletter_system_logs"><?php esc_html_e('Logs', 'newsletter') ?></a></li>
+                    <li><a href="?page=newsletter_system_logs"><?php esc_html_e('Logs', 'newsletter') ?></a></li>
                     <li>
                         <a href="https://www.thenewsletterplugin.com/documentation/developers/backup-recovery/" target="_blank"><?php _e('Backup', 'newsletter') ?></a>
                     </li>
@@ -238,33 +238,81 @@ $news = NewsletterMainAdmin::instance()->get_news();
 <?php } ?>
 
 <?php
-if (!empty(NewsletterMainAdmin::instance()->get_option('page'))) {
-    $tnp_page_id = NewsletterMainAdmin::instance()->get_option('page');
-    if (get_post_status($tnp_page_id) !== 'publish') {
-        echo '<div class="tnp-notice tnp-notice-warning">The Newsletter public page is not published. <a href="', esc_attr(admin_url('post.php')) . '?post=', esc_attr($tnp_page_id), '&action=edit"><strong>Edit the page</strong></a> or <a href="admin.php?page=newsletter_main_main"><strong>review the main settings</strong></a>.</div>';
-    } else if (NEWSLETTER_PAGE_WARNING) {
-        $content = get_post_field('post_content', $tnp_page_id);
-        // With and without attributes
-        if (strpos($content, '[newsletter]') === false && strpos($content, '[newsletter ') === false) {
-            ?>
-            <div class="tnp-notice tnp-notice-warning">
-                The Newsletter public page does not contain the <code>[newsletter]</code> shortcode.
-                <a href="<?php echo esc_attr(admin_url('post.php')) ?>?post=<?php echo esc_attr($tnp_page_id) ?>&action=edit"><strong>Edit the page</strong></a>.
-                <br>
-            </div>
-            <?php
+if (NEWSLETTER_DEBUG || NEWSLETTER_PAGE_WARNING) {
+    $last_check = (int) get_option('newsletter_public_page_check', 0);
+    if (NEWSLETTER_DEBUG || $last_check < time() - DAY_IN_SECONDS) {
+        update_option('newsletter_public_page_check', time(), false);
+        if (Newsletter::instance()->is_multilanguage()) {
+            $languages = array_merge(['' => 'All languages'], Newsletter::instance()->get_languages());
+            $missing = [];
+            $missing_publish = [];
+            $missing_shortcode = [];
+
+            foreach ($languages as $l => $label) { // Do NOT use $language!
+                $tnp_page_id = NewsletterMainAdmin::instance()->get_option('page', '', $l);
+                $status = get_post_status($tnp_page_id);
+                if ($status === false) {
+                    $missing[] = '<a href="?page=newsletter_main_main&lang=' . esc_attr($l) . '#tabs-basic">' . esc_html($label) . '</a>';
+                } else {
+                    if ($status !== 'publish') {
+                        $missing_publish[] = '<a href="' . esc_attr(admin_url('post.php')) . '?post=' . esc_attr($tnp_page_id)
+                                . '&action=edit" target="_blank">' . esc_html(get_post_field('post_title', $tnp_page_id)) . '</a>';
+                    }
+
+                    $content = get_post_field('post_content', $tnp_page_id);
+                    if (strpos($content, '[newsletter]') === false && strpos($content, '[newsletter ') === false) {
+                        $missing_shortcode[] = '<a href="' . esc_attr(admin_url('post.php')) . '?post=' . esc_attr($tnp_page_id)
+                                . '&action=edit" target="_blank">' . esc_html(get_post_field('post_title', $tnp_page_id)) . '</a>';
+                    }
+                }
+            }
+
+            if ($missing) {
+                update_option('newsletter_public_page_check', 0, false);
+                ?>
+                <div class="tnp-notice tnp-notice-warning">
+                    The Newsletter public page is missing or not published for <?php echo implode(', ', $missing); ?>
+                </div>
+                <?php
+            }
+            if ($missing_publish) {
+                update_option('newsletter_public_page_check', 0, false);
+                ?>
+                <div class="tnp-notice tnp-notice-warning">
+                    Some Newsletter public page(s) are not published: <?php echo implode(', ', $missing_publish); ?>
+                </div>
+                <?php
+            }
+            if ($missing_shortcode) {
+                update_option('newsletter_public_page_check', 0, false);
+                ?>
+                <div class="tnp-notice tnp-notice-warning">
+                    Some Newsletter public page(s) do not contain the <code>[newsletter]</code> shortcode: <?php echo implode(', ', $missing_shortcode); ?>
+                </div>
+                <?php
+            }
+        } else {
+
+            $tnp_page_id = NewsletterMainAdmin::instance()->get_option('page');
+            if (get_post_status($tnp_page_id) !== 'publish') {
+                update_option('newsletter_public_page_check', 0, false);
+                echo '<div class="tnp-notice tnp-notice-warning">The Newsletter public page is not published. <a href="', esc_attr(admin_url('post.php')) . '?post=', esc_attr($tnp_page_id), '&action=edit"><strong>Edit the page</strong></a> or <a href="admin.php?page=newsletter_main_main"><strong>review the main settings</strong></a>.</div>';
+            } else {
+                $content = get_post_field('post_content', $tnp_page_id);
+                // With and without attributes
+                if (strpos($content, '[newsletter]') === false && strpos($content, '[newsletter ') === false) {
+                    update_option('newsletter_public_page_check', 0, false);
+                    ?>
+                    <div class="tnp-notice tnp-notice-warning">
+                        The Newsletter public page does not contain the <code>[newsletter]</code> shortcode.
+                        <a href="<?php echo esc_attr(admin_url('post.php')) ?>?post=<?php echo esc_attr($tnp_page_id) ?>&action=edit"><strong>Edit the page</strong></a>.
+                        <br>
+                    </div>
+                    <?php
+                }
+            }
         }
     }
-} else {
-    /*
-      <div class="tnp-notice">
-      <a href="<?php echo esc_attr($_SERVER['REQUEST_URI']) . '&noheader=1&dismiss=newsletter-page' ?>" class="tnp-dismiss">&times;</a>
-
-      You should create a blog page to show the subscription form and the subscription messages. Go to the
-      <a href="?page=newsletter_main_main">general settings panel</a> to configure it.
-
-      </div>
-     */
 }
 ?>
 
@@ -322,11 +370,6 @@ if ($_GET['page'] !== 'newsletter_emails_edit') {
 }
 ?>
 
-<?php
-if (!Newsletter::instance()->get_newsletter_page()) {
-    echo '<div class="tnp-notice tnp-notice-warning">The unstyled page option will be removed shortly. Please select a dedicated page on <a href="?page=newsletter_main_main">main settings</a>.</div>';
-}
-?>
 
 
 

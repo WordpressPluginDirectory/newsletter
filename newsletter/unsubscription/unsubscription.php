@@ -218,7 +218,9 @@ class NewsletterUnsubscription extends NewsletterModule {
         $message = do_shortcode($this->get_text('unsubscribed_message'));
         $subject = $this->get_text('unsubscribed_subject');
 
-        return NewsletterSubscription::instance()->mail($user, $subject, $message);
+        $res = NewsletterSubscription::instance()->mail($user, $subject, $message);
+        $this->restore_language();
+        return $res;
     }
 
     function notify_admin($user) {

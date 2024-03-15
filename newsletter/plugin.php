@@ -4,7 +4,7 @@
   Plugin Name: Newsletter
   Plugin URI: https://www.thenewsletterplugin.com
   Description: Newsletter is a cool plugin to create your own subscriber list, to send newsletters, to build your business. <strong>Before update give a look to <a href="https://www.thenewsletterplugin.com/category/release">this page</a> to know what's changed.</strong>
-  Version: 8.2.1
+  Version: 8.2.3
   Author: Stefano Lissa & The Newsletter Team
   Author URI: https://www.thenewsletterplugin.com
   Disclaimer: Use at your own risk. No warranty expressed or implied is provided.
@@ -37,7 +37,7 @@ if (version_compare(phpversion(), '7.0', '<')) {
     return;
 }
 
-define('NEWSLETTER_VERSION', '8.2.1');
+define('NEWSLETTER_VERSION', '8.2.3');
 
 global $newsletter, $wpdb;
 
@@ -62,6 +62,9 @@ if (!defined('NEWSLETTER_STATS_TABLE'))
 
 if (!defined('NEWSLETTER_SENT_TABLE'))
     define('NEWSLETTER_SENT_TABLE', $wpdb->prefix . 'newsletter_sent');
+
+if (!defined('NEWSLETTER_LOGS_TABLE'))
+    define('NEWSLETTER_LOGS_TABLE', $wpdb->prefix . 'newsletter_logs');
 
 if (!defined('NEWSLETTER_SEND_DELAY'))
     define('NEWSLETTER_SEND_DELAY', 0);
@@ -163,16 +166,17 @@ class Newsletter extends NewsletterModule {
         add_action('wp_ajax_nopriv_tnp', [$this, 'action']);
 
         if (is_admin()) {
-            add_action('wp_ajax_newsletter-log', function() {
+            add_action('wp_ajax_newsletter-log', function () {
                 check_ajax_referer('newsletter-log');
-                if (!current_user_can('administrator'))
-                {
+                if (!current_user_can('administrator')) {
                     die('no admin');
                 }
-                $log = Newsletter\Logs::get((int)$_GET['id']);
+                $log = Newsletter\Logs::get((int) $_GET['id']);
                 header('Content-Type: text/plain;charset=utf-8');
-                if (empty($log->data)) echo '[no data]';
-                else echo $log->data;
+                if (empty($log->data))
+                    echo '[no data]';
+                else
+                    echo $log->data;
                 die();
             });
         }
@@ -209,6 +213,21 @@ class Newsletter extends NewsletterModule {
      */
     function hook_init() {
 
+        // Here since there are still newsletter actions used by the admin modules
+        if (current_user_can('administrator')) {
+            self::$is_allowed = true;
+        } else {
+            $roles = $this->get_main_option('roles');
+            if (!empty($roles)) {
+                foreach ($roles as $role) {
+                    if (current_user_can($role)) {
+                        self::$is_allowed = true;
+                        break;
+                    }
+                }
+            }
+        }
+
         if ($this->get_option('debug')) {
             ini_set('log_errors', 1);
             ini_set('error_log', WP_CONTENT_DIR . '/logs/newsletter/php-' . date('Y-m') . '-' . get_option('newsletter_logger_secret') . '.txt');
@@ -242,21 +261,6 @@ class Newsletter extends NewsletterModule {
         self::$plugin_url = plugins_url('newsletter');
 
         $this->setup_language();
-
-        // Here since there are still newsletter actions used by the admin modules
-        if (current_user_can('administrator')) {
-            self::$is_allowed = true;
-        } else {
-            $roles = $this->get_option('roles');
-            if (!empty($roles)) {
-                foreach ($roles as $role) {
-                    if (current_user_can($role)) {
-                        self::$is_allowed = true;
-                        break;
-                    }
-                }
-            }
-        }
 
         // Avoid upgrade during AJAX
         if (!defined('DOING_AJAX')) {
@@ -303,17 +307,7 @@ class Newsletter extends NewsletterModule {
     }
 
     function is_allowed() {
-        if (current_user_can('administrator')) {
-            return true;
-        }
-        if (!empty($this->options['roles'])) {
-            foreach ($this->options['roles'] as $role) {
-                if (current_user_can($role)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return self::$is_allowed;
     }
 
     /**
@@ -499,7 +493,7 @@ class Newsletter extends NewsletterModule {
         $speed = (int) $mailer->get_speed();
         if (!$speed) {
             $this->logger->debug(__METHOD__ . '> Speed not set by mailer, use the default');
-            $speed = (int) $this->get_option('scheduler_max');
+            $speed = (int) $this->get_main_option('scheduler_max');
         } else {
             $this->logger->debug(__METHOD__ . '> Speed set by mailer');
         }
@@ -1180,15 +1174,15 @@ class Newsletter extends NewsletterModule {
     }
 
     function has_license() {
-        return !empty($this->get_option('contract_key'));
+        return !empty($this->get_main_option('contract_key'));
     }
 
     function get_sender_name() {
-        return $this->get_option('sender_name');
+        return $this->get_main_option('sender_name');
     }
 
     function get_sender_email() {
-        return $this->get_option('sender_email');
+        return $this->get_main_option('sender_email');
     }
 
     /**
@@ -1223,23 +1217,16 @@ class Newsletter extends NewsletterModule {
         $page = $this->get_newsletter_page();
 
         if (!$page || $page->post_status !== 'publish') {
-            return $this->build_action_url('m');
+//            if (current_user_can('administrator')) {
+//                $this->dienow('Public page not available. This message is shown only to administrators, user will see the home page.'
+//                        . 'Please review the "public page" setting on the Newsletter\'s main configuration.');
+//            }
+            return home_url();
         }
 
-        $newsletter_page_url = get_permalink($page->ID);
-        if ($language && $newsletter_page_url) {
-            if (class_exists('SitePress')) {
-                $newsletter_page_url = apply_filters('wpml_permalink', $newsletter_page_url, $language, true);
-            }
-            if (function_exists('pll_get_post')) {
-                $translated_page = get_permalink(pll_get_post($page->ID, $language));
-                if ($translated_page) {
-                    $newsletter_page_url = $translated_page;
-                }
-            }
-        }
+        $url = get_permalink($page->ID);
 
-        return $newsletter_page_url;
+        return $url;
     }
 
     function get_license_key() {

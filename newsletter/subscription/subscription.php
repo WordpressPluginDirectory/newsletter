@@ -1054,6 +1054,10 @@ class NewsletterSubscription extends NewsletterModule {
     function show_message($key, $user, $alert = '', $email = null) {
         $url = '';
 
+        if ($user) {
+            $this->switch_language($user->language);
+        }
+
         if ($key === 'confirmed') {
             $welcome_page_id = $this->get_user_meta($user->id, 'welcome_page_id');
             if ($welcome_page_id) {
@@ -1062,10 +1066,17 @@ class NewsletterSubscription extends NewsletterModule {
             } else {
                 if (isset($_REQUEST['ncu'])) {
                     // Custom URL from the form
-                    $url = $_REQUEST['ncu'];
+                    $url = sanitize_url($_REQUEST['ncu']);
                 } else {
                     // Per message custom URL from configuration (language variants could not be supported)
-                    $url = $this->get_option($key . '_url');
+                    $page_id = $this->get_option($key . '_id');
+                    if (!empty($page_id)) {
+                        if ($page_id === 'url') {
+                            $url = trim($this->get_option($key . '_url'));
+                        } else {
+                            $url = get_permalink((int)$page_id);
+                        }
+                    }
                 }
             }
             $url = apply_filters('newsletter_welcome_url', $url, $user);

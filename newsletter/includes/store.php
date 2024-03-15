@@ -119,12 +119,12 @@ class NewsletterStore {
         if (is_object($data)) {
             $data = (array) $data;
         }
-        
+
         // Remove transient fields
         foreach (array_keys($data) as $key) {
             if (substr($key, 0, 1) == '_') unset($data[$key]);
         }
-        
+
         //$this->logger->debug($data);
 
         if (isset($data['id'])) {
@@ -136,7 +136,7 @@ class NewsletterStore {
                     $this->logger->fatal($wpdb->last_error);
                     $this->logger->fatal($wpdb->last_query);
                     $this->logger->debug($data);
-                    die('Database error. If you were saving a newsletter try a table upgrade from the status panel.');
+                    return $r;
                 }
             }
             //$this->logger->debug('save: ' . $wpdb->last_query);
@@ -146,7 +146,7 @@ class NewsletterStore {
                 $this->logger->fatal($wpdb->last_error);
                 $this->logger->fatal($wpdb->last_query);
                 $this->logger->debug($data);
-                die('Database error. If you were saving a newsletter try a table upgrade from the status panel.');
+                return $r;
             }
             $id = $wpdb->insert_id;
         }
@@ -162,7 +162,7 @@ class NewsletterStore {
         global $wpdb;
         $id = (int)$id;
         $field = (string)$field;
-        
+
         if (preg_match('/^[a-zA-Z0-9_]+$/', $field) == 0) {
             $this->logger->error('Invalis field name: ' . $field);
             return false;
@@ -224,7 +224,7 @@ class NewsletterStore {
         $field = (string)$field;
         $id = (int)$id;
         $value = (string)$value;
-        
+
         if (preg_match('/^[a-zA-Z0-9_]+$/', $field) == 0) {
             $this->logger->error('Invalis field name: ' . $field_name);
             return false;

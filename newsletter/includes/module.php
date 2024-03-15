@@ -324,6 +324,10 @@ class NewsletterModule extends NewsletterModuleBase {
 
         if ($user == null && is_user_logged_in()) {
             $user = $this->get_user_by_wp_user_id(get_current_user_id());
+            if (!$user) {
+                $wp_user = wp_get_current_user();
+                $user = $this->get_user($wp_user->user_email);
+            }
         }
         return $user;
     }
@@ -408,10 +412,13 @@ class NewsletterModule extends NewsletterModuleBase {
 
     function is_current_user_dummy() {
         if (!current_user_can('administrator')) return false;
+
         if (isset($_REQUEST['nk'])) {
             list($id, $token) = explode('-', $_REQUEST['nk'], 2);
         } else if (isset($_COOKIE['newsletter'])) {
             list ($id, $token) = explode('-', $_COOKIE['newsletter'], 2);
+        } else {
+            return false;
         }
 
         return $id === '0';

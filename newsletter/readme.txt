@@ -1,7 +1,7 @@
 === Newsletter - Send awesome emails from WordPress ===
 Tags: newsletter, subscription, email marketing, welcome email, signup forms
 Tested up to: 6.4.3
-Stable tag: 8.2.1
+Stable tag: 8.2.3
 Contributors: satollo,webagile
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -128,6 +128,22 @@ Thank you, The Newsletter Team
 
 == Changelog ==
 
+= 8.2.3 =
+
+* Fixed wrong 8.2.2 package
+
+= 8.2.2 =
+
+* [BREAKING CHANGE] Per language selector of the public page
+* [FIX] Fixed the antispam log
+* [NEW] Improved logging
+* [FIX] Fixed welcome page redirection for custom welcome URLs and Polylang
+* [NEW] Added a page selector for the welcome page (the direct URL is still an option)
+* [NEW] Added a page selector for the profile page (the direct URL is still an option)
+* [NEW] Improved profile page on multilanguage installations
+* [NEW] Check for the Newsletter's public page on multilanguage installations
+* [NEW] Added WP User matching by email
+
 = 8.2.1 =
 
 * Removed the antispam IP blacklist since it is not really effective considering the wide use of VPNs, IP forgering, and so on
@@ -148,7 +164,8 @@ Thank you, The Newsletter Team
 * Reactivated the convert to HTML button
 * Added logging support to the antispam filter
 * Improved the spam filter error reporting
-* New submit button attributes for all form shortcodes
+* New submit button attributes for all form shortcodes (see our documentation)
+* New "fields" attribute for the newsletter_form shortcode (see our documentation)
 
 = 8.1.9 =
 

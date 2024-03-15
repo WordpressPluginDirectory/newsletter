@@ -86,9 +86,9 @@ foreach (['text'] as $key) {
                         </tr>
 
                         <tr>
-                            <th><?php esc_html_e('Alternative URL', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Custom profile page', 'newsletter') ?></th>
                             <td>
-                                <?php $controls->text('url', 70); ?>
+                                <?php $controls->page_or_url('page'); ?>
                                 <p class="description">
                                     The specified page must contain the <code>[newsletter]</code> shortcode which will be replaced with the
                                     custom content above.

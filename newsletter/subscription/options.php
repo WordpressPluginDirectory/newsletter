@@ -249,9 +249,9 @@ foreach (['confirmed_text', 'confirmed_message', 'confirmation_text', 'confirmat
                         </tr>
 
                         <tr>
-                            <th><?php esc_html_e('Alternative welcome page URL', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Custom welcome page', 'newsletter') ?></th>
                             <td>
-                                <?php $controls->text('confirmed_url', 70, 'https://...'); ?>
+                                <?php $controls->page_or_url('confirmed'); ?>
                             </td>
                         </tr>
 

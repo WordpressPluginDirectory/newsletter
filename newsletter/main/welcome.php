@@ -135,7 +135,7 @@ if (empty($this->get_option('page'))) {
                         <h2><?php _e('Sender', 'newsletter'); ?></h2>
                         <p><?php _e('Choose which name and email address you\'d like to appear as the sender of your newsletters.', 'newsletter'); ?></p>
                         <input type="text" placeholder="<?php esc_attr_e('Sender name', 'newsletter') ?>" value="<?php echo esc_attr(Newsletter::instance()->get_sender_name()) ?>" name="sender_name">&nbsp;
-                        <input type="text" placeholder="<?php esc_attr_e('Sender email', 'newsletter') ?>" value="<?php echo esc_attr(Newsletter::instance()->get_sender_email()) ?>" name="sender_email">
+                        <input type="email" placeholder="<?php esc_attr_e('Sender email', 'newsletter') ?>" value="<?php echo esc_attr(Newsletter::instance()->get_sender_email()) ?>" name="sender_email">
                     </div>
                 </li>
 

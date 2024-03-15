@@ -26,7 +26,25 @@ class NewsletterProfile extends NewsletterModule {
     }
 
     function message_url($user = null, $email = null, $alert = '') {
-        return parent::build_message_url($this->get_option('url'), 'profile', $user, $email, $alert);
+        if ($user) {
+            $this->switch_language($user->language);
+        }
+        $url = trim($this->get_option('url')); // Compatibility with old parameter
+        if (empty($url)) {
+            $page_id = $this->get_option('page_id');
+            if (!empty($page_id)) {
+                if ($page_id === 'url') {
+                    $url = trim($this->get_option('page_url'));
+                } else {
+                    $url = get_permalink((int)$page_id);
+                }
+            }
+        }
+        $url = parent::build_message_url($url, 'profile', $user, $email, $alert);
+        if ($user) {
+            $this->restore_language();
+        }
+        return $url;
     }
 
     function hook_newsletter_action_dummy($action, $user, $email) {
@@ -74,12 +92,10 @@ class NewsletterProfile extends NewsletterModule {
             case 'ps':
                 $res = $this->save_profile($user);
                 if (is_wp_error($res)) {
-                    wp_redirect($this->message_url($user, $email, $res->get_error_message()));
-                    die();
+                    $this->redirect($this->message_url($user, $email, $res->get_error_message()));
                 }
 
-                wp_redirect($this->message_url($user, $email, $res));
-                die();
+                $this->redirect($this->message_url($user, $email));
                 break;
 
             case 'profile_export':
@@ -182,6 +198,8 @@ class NewsletterProfile extends NewsletterModule {
      */
     function get_profile_form($user) {
 
+        $this->switch_language($user->language);
+
         $options = $this->get_options(); // Per language
 
         $subscription = NewsletterSubscription::instance();
@@ -236,12 +254,12 @@ class NewsletterProfile extends NewsletterModule {
                 $languages = $this->get_languages();
 
                 $buffer .= '<div class="tnp-field tnp-field-language">';
-                $buffer .= '<label>' . __('Language', 'newsletter') . '</label>';
+                $buffer .= '<label>' . esc_html__('Language', 'newsletter') . '</label>';
                 $buffer .= '<select name="nlng" class="tnp-language">';
 
                 $buffer .= '<option value="" disabled ' . ( empty($user->language) ? ' selected' : '' ) . '>' . __('Select language', 'newsletter') . '</option>';
                 foreach ($languages as $key => $l) {
-                    $buffer .= '<option value="' . $key . '"' . ( $user->language == $key ? ' selected' : '' ) . '>' . esc_html($l) . '</option>';
+                    $buffer .= '<option value="' . esc_attr($key) . '"' . ( $user->language == $key ? ' selected' : '' ) . '>' . esc_html($l) . '</option>';
                 }
 
                 $buffer .= '</select>';
@@ -265,12 +283,12 @@ class NewsletterProfile extends NewsletterModule {
                 $field = 'profile_' . $i;
 
                 if ($profile->is_text()) {
-                    $buffer .= '<input class="tnp-profile tnp-profile-' . $i . '" type="text" name="np' . $i . '" value="' . esc_attr($user->$field) . '"' .
+                    $buffer .= '<input class="tnp-profile tnp-profile-' . esc_attr($i) . '" type="text" name="np' . esc_attr($i) . '" value="' . esc_attr($user->$field) . '"' .
                             ($profile->is_required() ? ' required' : '') . '>';
                 }
 
                 if ($profile->is_select()) {
-                    $buffer .= '<select class="tnp-profile tnp-profile-' . $i . '" name="np' . $i . '"' . ($profile->is_required() ? ' required' : '') . '>';
+                    $buffer .= '<select class="tnp-profile tnp-profile-' . esc_attr($i) . '" name="np' . esc_attr($i) . '"' . ($profile->is_required() ? ' required' : '') . '>';
                     foreach ($profile->options as $option) {
                         $buffer .= '<option';
                         if ($option == $user->$field) {
@@ -330,6 +348,8 @@ class NewsletterProfile extends NewsletterModule {
         $buffer .= "</div>\n";
 
         $buffer .= "</form>\n</div>\n";
+
+        $this->restore_language();
 
         return $buffer;
     }

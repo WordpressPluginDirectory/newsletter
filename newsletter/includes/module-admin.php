@@ -68,15 +68,17 @@ class NewsletterModuleAdmin extends NewsletterModuleBase {
      * @param string $sub
      * @return mixed Returns null if the option is not found
      */
-    function get_option($key, $sub = '') {
+    function get_option($key, $sub = '', $language = null) {
         if (!$sub) {
             $sub = $this->module;
         }
-        if (isset($this->cache[$sub . self::$language][$key])) {
-            return $this->cache[$sub . self::$language][$key];
+        $language = $language ?? self::$language;
+
+        if (isset($this->cache[$sub . $language][$key])) {
+            return $this->cache[$sub . $language][$key];
         }
 
-        $options = $this->get_options($sub);
+        $options = $this->get_options($sub, $language);
         if (!isset($options[$key])) {
             return null;
         }

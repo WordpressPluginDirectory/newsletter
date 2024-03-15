@@ -432,49 +432,51 @@ class TNP_Composer {
     static function image($media, $attr = []) {
 
         $default_attrs = [
-            'style' => 'max-width: 100%; height: auto; display: inline-block',
+            'style' => 'display: inline-block; max-width: 100%!important; height: auto; padding: 0; border: 0; font-size: 12px',
             'class' => '',
-            'link-style' => 'text-decoration: none; display: inline-block',
-            'link-class' => null,
+            'inline-class' => '',
+            'link-style' => 'display: inline-block; font-size: 0; text-decoration: none; line-height: normal!important',
+            'link-class' => '',
+            'link-inline-class' => '',
+            'alt' => 'Image'
         ];
 
         $attr = array_merge($default_attrs, $attr);
 
-        //Class and style attribute are mutually exclusive.
-        //Class take priority to style because classes will transform to inline style inside block rendering operation
+        // inline-class and style attribute are mutually exclusive.
         if (!empty($attr['inline-class'])) {
             $styling = ' inline-class="' . esc_attr($attr['inline-class']) . '" ';
         } else {
             $styling = ' style="' . esc_attr($attr['style']) . '" ';
         }
 
-        if (!empty($attr['class'])) {
-            $styling .= ' class="' . esc_attr($attr['class']) . '" ';
-        }
-
         //Class and style attribute are mutually exclusive.
         //Class take priority to style because classes will transform to inline style inside block rendering operation
-        if (!empty($attr['link-class'])) {
-            $link_styling = ' inline-class="' . esc_attr($attr['link-class']) . '" ';
+        if (!empty($attr['link-inline-class'])) {
+            $link_styling = ' inline-class="' . esc_attr($attr['link-inline-class']) . '" ';
         } else {
             $link_styling = ' style="' . esc_attr($attr['link-style']) . '" ';
         }
 
         $b = '';
         if ($media->link) {
-            $b .= '<a href="' . esc_attr($media->link) . '" target="_blank" rel="noopener nofollow" style="display: inline-block; font-size: 0; text-decoration: none; line-height: normal!important">';
+            $b .= '<a href="' . esc_attr($media->link) . '" target="_blank" rel="noopener nofollow" ';
+            $b .= $link_styling;
+            $b .= ' class="' . esc_attr($attr['link-class']) . '"';
+            $b .= '>';
         } else {
             // The span grants images are not upscaled when fluid (two columns posts block)
             $b .= '<span style="display: inline-block; font-size: 0; text-decoration: none; line-height: normal!important">';
         }
+
         if ($media) {
             $b .= '<img src="' . esc_attr($media->url) . '" width="' . esc_attr($media->width) . '"';
             if ($media->height) {
                 $b .= ' height="' . esc_attr($media->height) . '"';
             }
-            $b .= ' alt="' . esc_attr($media->alt) . '"'
+            $b .= ' alt="' . esc_attr($media->alt) . '" '
                     . ' border="0"'
-                    . ' style="display: inline-block; max-width: 100%!important; padding: 0; border: 0; font-size: 12px"'
+                    . $styling
                     . ' class="' . esc_attr($attr['class']) . '" '
                     . '>';
         }

@@ -109,6 +109,8 @@ class NewsletterDefaults {
                 'text_custom' => '0',
                 'export_newsletters' => '0',
                 'url' => '',
+                'page_id' => '',
+                'page_url' => '',
                 'email' => '1',
                 'name' => '1',
                 'surname' => '1',

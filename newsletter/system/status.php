@@ -1075,6 +1075,20 @@ function tnp_describe_table($table) {
                         </td>
                     </tr>
 
+                    <?php
+                    $r = $wpdb->get_row("check table " . esc_sql(NEWSLETTER_LOGS_TABLE));
+                    $condition = $r->Msg_text == 'OK' ? 1 : 0;
+                    ?>
+                    <tr>
+                        <td><code><?php echo esc_html(NEWSLETTER_LOGS_TABLE) ?></code></td>
+                        <td>
+                            <?php $this->condition_flag($condition) ?>
+                        </td>
+                        <td>
+                            <?php esc_html(print_r($r)) ?>
+                        </td>
+                    </tr>
+
                     <?php if (class_exists('NewsletterAutomated')) { ?>
                         <?php
                         $r = $wpdb->get_row("check table " . $wpdb->prefix . 'newsletter_automated');

@@ -58,7 +58,7 @@ class NewsletterModuleBase {
     /* For compatibility */
 
     function get_current_language() {
-        return $this->language();
+        return self::$language;
     }
 
     /**
@@ -204,12 +204,9 @@ class NewsletterModuleBase {
      * An empty array is returned if no language is available.
      */
     function get_languages() {
-        if (defined('NEWSLETTER_SIMULATE_MULTILANGUAGE') && NEWSLETTER_SIMULATE_MULTILANGUAGE) {
-            return ['en' => 'English', 'it' => 'Italian', 'es' => 'Spanish'];
-        }
-
         $language_options = [];
 
+        // WPML
         if (class_exists('SitePress')) {
             $languages = apply_filters('wpml_active_languages', null, ['skip_missing' => 0]);
             foreach ($languages as $language) {
@@ -217,16 +214,19 @@ class NewsletterModuleBase {
             }
 
             return $language_options;
-        } else if (function_exists('pll_languages_list')) {
+        }
+
+        // Polylang
+        if (function_exists('pll_languages_list')) {
             $languages = pll_languages_list(['fields' => '']);
             foreach ($languages as $data) {
                 $language_options[$data->slug] = $data->name;
             }
 
-
             return $language_options;
         }
 
+        // Addons
         return apply_filters('newsletter_languages', $language_options);
     }
 
@@ -1213,7 +1213,7 @@ class NewsletterModuleBase {
     function set_lock($name, $duration) {
         global $wpdb;
 
-        $duration = (int)$duration;
+        $duration = (int) $duration;
 
         $row = $wpdb->get_row($wpdb->prepare("SELECT * FROM $wpdb->options WHERE option_name = %s LIMIT 1", 'newsletter_lock_' . $name));
         if (is_object($row)) {
