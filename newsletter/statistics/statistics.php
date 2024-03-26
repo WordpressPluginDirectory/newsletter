@@ -13,6 +13,11 @@ class NewsletterStatistics extends NewsletterModule {
     const SENT_READ = 1;
     const SENT_CLICK = 2;
 
+    var $relink_email_id;
+    var $relink_user_id;
+    var $relink_email_token;
+    var $relink_key = '';
+
     /**
      * @return NewsletterStatistics
      */
@@ -48,7 +53,7 @@ class NewsletterStatistics extends NewsletterModule {
 
             $parts = parse_url($url);
 
-            $verified = $signature == md5($email_id . ';' . $user_id . ';' . $url . ';' . $anchor . $this->get_option('key'));
+            $verified = $signature == md5($email_id . ';' . $user_id . ';' . $url . ';' . $anchor . $this->get_main_option('key'));
 
             if (!$verified) {
                 $this->dienow('Invalid link', 'The link signature (which grants a valid redirection and protects from redirect attacks) is not valid.', 404);
@@ -168,17 +173,16 @@ class NewsletterStatistics extends NewsletterModule {
         $wpdb->update(NEWSLETTER_EMAILS_TABLE, ['stats_time' => 0], ['id' => $email_id]);
     }
 
-    var $relink_email_id;
-    var $relink_user_id;
-    var $relink_email_token;
-    var $relink_key = '';
-
     function relink($text, $email_id, $user_id, $email_token = '') {
         $this->relink_email_id = $email_id;
         $this->relink_user_id = $user_id;
         $this->relink_email_token = $email_token;
         if (empty($this->relink_key)) {
-            $this->relink_key = $this->get_option('key');
+            if (defined('NEWSLETTER_RELINK_KEY')) {
+                $this->relink_key = NEWSLETTER_RELINK_KEY;
+            } else {
+                $this->relink_key = $this->get_main_option('key');
+            }
         }
         $text = preg_replace_callback('/(<[aA][^>]+href[\s]*=[\s]*["\'])([^>"\']+)(["\'][^>]*>)(.*?)(<\/[Aa]>)/is', array($this, 'relink_callback'), $text);
 

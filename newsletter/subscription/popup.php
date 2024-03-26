@@ -73,6 +73,6 @@ if (!$controls->is_action()) {
 
     </div>
 
-    <?php include NEWSLETTER_ADMIN_FOOTER ?>
+    <?php include NEWSLETTER_ADMIN_FOOTER; ?>
 
 </div>

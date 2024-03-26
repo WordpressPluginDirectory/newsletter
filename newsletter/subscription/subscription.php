@@ -180,7 +180,6 @@ class NewsletterSubscription extends NewsletterModule {
                     if (is_wp_error($user)) {
                         if ($user->get_error_code() === 'exists') {
                             $this->show_message('error');
-                            //$this->dienow($this->get_text('error_text'), $user->get_error_message(), 200);
                         }
                         $this->dienow(__('Registration failed.', 'newsletter'), $user->get_error_message(), 400);
                     }
@@ -426,8 +425,7 @@ class NewsletterSubscription extends NewsletterModule {
 
         // Do we accept repeated subscriptions?
         if ($user != null && $subscription->if_exists === TNP_Subscription::EXISTING_ERROR) {
-            $this->show_message('error', $user);
-            //return new WP_Error('exists', 'Email address already registered and Newsletter sets to block repeated registrations. You can change this behavior or the user message above on subscription configuration panel.');
+            return new WP_Error('exists', 'Email address already registered and Newsletter sets to block repeated registrations. You can change this behavior or the user message above on subscription configuration panel.');
         }
 
 
@@ -454,6 +452,7 @@ class NewsletterSubscription extends NewsletterModule {
 
                     // This status is *not* stored it indicate a temporary status to show the correct messages
                     $user->status = TNP_User::STATUS_NOT_CONFIRMED;
+                    $user->language = $subscription->data->language;
 
                     $this->send_message('confirmation', $user);
 
@@ -662,6 +661,7 @@ class NewsletterSubscription extends NewsletterModule {
         $language = '';
         if (!empty($_REQUEST['nlang'])) {
             $language = $_REQUEST['nlang'];
+            $this->switch_language($language);
         } else {
             $language = $this->language();
         }
@@ -1000,9 +1000,9 @@ class NewsletterSubscription extends NewsletterModule {
         $message = [];
         $message['html'] = do_shortcode($this->get_text($type . '_message'));
         $message['text'] = $this->get_text_message($type);
-        if ($user->status == TNP_User::STATUS_NOT_CONFIRMED) {
-            $message['html'] = $this->add_microdata($message['html']);
-        }
+//        if ($user->status == TNP_User::STATUS_NOT_CONFIRMED) {
+//            $message['html'] = $this->add_microdata($message['html']);
+//        }
         $subject = $this->get_text($type . '_subject');
 
         return $this->mail($user, $subject, $message);

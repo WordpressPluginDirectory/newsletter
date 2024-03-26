@@ -36,7 +36,7 @@ class NewsletterProfile extends NewsletterModule {
                 if ($page_id === 'url') {
                     $url = trim($this->get_option('page_url'));
                 } else {
-                    $url = get_permalink((int)$page_id);
+                    $url = get_permalink((int) $page_id);
                 }
             }
         }
@@ -447,12 +447,14 @@ class NewsletterProfile extends NewsletterModule {
 
         // Profile
         $ids = $this->get_main_option('profiles');
-        foreach ($ids as $id) {
-            $profile = $this->get_profile($id);
-            if (!$profile || $profile->is_private())
-                continue;
-            if (isset($_REQUEST['np' . $id])) {
-                $data['profile_' . $id] = wp_kses_post(stripslashes($_REQUEST['np' . $id]));
+        if ($ids) {
+            foreach ($ids as $id) {
+                $profile = $this->get_profile($id);
+                if (!$profile || $profile->is_private())
+                    continue;
+                if (isset($_REQUEST['np' . $id])) {
+                    $data['profile_' . $id] = wp_kses_post(stripslashes($_REQUEST['np' . $id]));
+                }
             }
         }
 

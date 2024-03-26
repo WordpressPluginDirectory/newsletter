@@ -52,13 +52,13 @@ ksort($options);
                                     <?php foreach ($v as $k2 => $v2) { ?>
                                         <tr>
                                     <th><?php echo esc_html($k), '.', esc_html($k2) ?></th>
-                                    <td><?php echo esc_html($v2) ?></td>
+                                    <td><?php echo esc_html(is_scalar($v2)?$v2:'object|array'); ?></td>
                                     </tr>
                                 <?php } ?>
                             <?php } else { ?>
                                 <tr>
                                     <th><?php echo esc_html($k) ?></th>
-                                    <td><?php echo esc_html($v) ?></td>
+                                    <td><?php echo esc_html(is_scalar($v)?$v:'object|array') ?></td>
                                 </tr>
                             <?php } ?>
                         <?php } ?>

@@ -320,7 +320,7 @@ function tnp_resize($media_id, $size) {
     $file_ext = strtolower($pathinfo['extension']);
     $out_mimetype = null;
 
-    if ($file_ext === 'webp') {
+    if ($file_ext === 'webp' || $file_ext === 'avif') {
         $file_ext = 'jpg';
         $out_mimetype = 'image/jpeg';
     }

@@ -1216,15 +1216,15 @@ class NewsletterModuleBase {
         $duration = (int) $duration;
 
         $row = $wpdb->get_row($wpdb->prepare("SELECT * FROM $wpdb->options WHERE option_name = %s LIMIT 1", 'newsletter_lock_' . $name));
-        if (is_object($row)) {
-            if ((int) $row->option_value < time()) {
-                //$wpdb->update($wpdb->options, ['option_value' => time() + $duration], ['option_id' => $row->option_id]);
-                $wpdb->query($wpdb->prepare("update $wpdb->options set option_value=%s where option_id=%d limit 1", time() + $duration, $row->option_id));
+        if ($row) {
+            $value = (int)$row->option_value;
+            if ($value < time()) {
+                $wpdb->query($wpdb->prepare("update $wpdb->options set option_value=%s where option_id=%d limit 1", '' . time() + $duration, $row->option_id));
                 return true;
             }
             return false;
         }
-        $wpdb->insert($wpdb->options, ['option_name' => 'newsletter_lock_' . $name, 'option_value' => time() + $duration]);
+        $wpdb->insert($wpdb->options, ['option_name' => 'newsletter_lock_' . $name, 'option_value' => '' . (time() + $duration)]);
         return true;
     }
 

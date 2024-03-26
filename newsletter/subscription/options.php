@@ -77,8 +77,6 @@ if ($controls->is_action()) {
     $controls->data = $this->get_options('', $language);
 }
 
-//$this->dump($controls->data);
-
 foreach (['confirmed_text', 'confirmed_message', 'confirmation_text', 'confirmation_message', 'subscription_text', 'error_text'] as $key) {
     if (!empty($controls->data[$key])) {
         $controls->data[$key . '_custom'] = '1';
@@ -299,7 +297,7 @@ foreach (['confirmed_text', 'confirmed_message', 'confirmation_text', 'confirmat
             </div>
 
             <p>
-                <?php $controls->button_save() ?>
+                <?php $controls->button_save(); ?>
             </p>
 
         </form>
@@ -307,6 +305,6 @@ foreach (['confirmed_text', 'confirmed_message', 'confirmation_text', 'confirmat
 
     </div>
 
-    <?php include NEWSLETTER_ADMIN_FOOTER ?>
+    <?php include NEWSLETTER_ADMIN_FOOTER; ?>
 
 </div>

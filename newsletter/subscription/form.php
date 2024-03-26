@@ -10,8 +10,6 @@ if (!$controls->is_action()) {
 } else {
     if ($controls->is_action('save')) {
 
-        $controls->data['under_posts_preable'] = wp_kses_post($controls->data['under_posts_preable']);
-
         // Processing profile fields
         if (!$language) {
             for ($i = 1; $i <= NEWSLETTER_PROFILE_MAX; $i++) {

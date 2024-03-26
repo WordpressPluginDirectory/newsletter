@@ -107,6 +107,7 @@ function tnp_describe_table($table) {
     </table>
     <?php
 }
+
 ?>
 
 <style>
@@ -833,7 +834,7 @@ function tnp_describe_table($table) {
                         </td>
 
                     </tr>
-                    <?php if (ini_get('opcache.validate_timestamps') === '0') { ?>
+                    <?php if (!empty(ini_get('opcache.enable')) && ini_get('opcache.validate_timestamps') === '0') { ?>
                         <tr>
                             <td>
                                 Opcache

@@ -72,6 +72,10 @@ class NewsletterModule extends NewsletterModuleBase {
         return $options;
     }
 
+    function get_main_options($set = '') {
+        return $this->get_options($set, '');
+    }
+
     /**
      * Get the option value for a specifc key using the current language.
      *

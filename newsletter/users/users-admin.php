@@ -66,8 +66,9 @@ class NewsletterUsersAdmin extends NewsletterModuleAdmin {
 
         echo '"Feed by mail"' . $sep . '"Follow up"' . $sep;
         echo '"IP"' . $sep . '"Referrer"' . $sep . '"Country"' . $sep . '"Language"' . $sep;
-        echo '"ID"' . $sep . '"WP User ID"' . $sep;;
-        
+        echo '"ID"' . $sep . '"WP User ID"' . $sep;
+        echo '"Last Activity"' . $sep;
+
 
         echo "\n";
 
@@ -106,6 +107,7 @@ class NewsletterUsersAdmin extends NewsletterModuleAdmin {
                 echo '"' . $this->sanitize_csv($recipients[$i]->language) . '"' . $sep;
                 echo '"' . $recipients[$i]->id . '"' . $sep;
                 echo '"' . $recipients[$i]->wp_user_id . '"' . $sep;
+                echo '"' . date('Y-m-d H:i:s', $recipients[$i]->last_activity) . '"' . $sep;
 
                 echo "\n";
                 flush();
@@ -117,7 +119,7 @@ class NewsletterUsersAdmin extends NewsletterModuleAdmin {
         }
         die();
     }
-    
+
 
     function sanitize_csv($text) {
         $text = str_replace(['"', "\n", "\r", ";"], ["'", " ", " ", " "], $text);

@@ -1,7 +1,7 @@
 === Newsletter - Send awesome emails from WordPress ===
 Tags: newsletter, subscription, email marketing, welcome email, signup forms
 Tested up to: 6.4.3
-Stable tag: 8.2.3
+Stable tag: 8.2.4
 Contributors: satollo,webagile
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -127,6 +127,16 @@ Thank you, The Newsletter Team
 3. The Reports extension
 
 == Changelog ==
+
+= 8.2.4 =
+
+* Fixed warning on profile page
+* Added avif image conversion
+* Improved check on opcache PHP module
+* Removed the microdata on email for the confirmation link
+* Added author filter on "posts" block
+* Fixed the custom welcome email on multilanguage installations
+* Added last activity time on the subscriber export
 
 = 8.2.3 =
 
@@ -312,75 +322,3 @@ Thank you, The Newsletter Team
 * Reviewed how the [newsletter] shortcode works
 * Fixed multilanguage bug when using shortcodes and placeholder to inject forms (subscription and profile editing)
 
-= 7.9.9 =
-
-* Removed use of the utf8_decode() function deprecated with PHP 8.2
-* Fixed notice on some internal pages with PHP 8.2
-* Fixed mobile preview for multicolumns block
-* Fixed translation domain for the activation message
-
-= 7.9.8 =
-
-* Fixed PHP notice for "add_submenu_page()"
-* Fixed PHP waning on user meta
-
-= 7.9.7 =
-
-* Fixed a "foreach" error on 7.9.6
-
-= 7.9.6 =
-
-* Added custom welcome email support
-* More linking information on lists panel
-* Fixed is_private() error under some specific settings
-* Fixed warning with minimal form widget
-* Updated Char.min.js (thanks to H. Nguyen)
-* Added support for subscriber meta values
-* Fixed "nocrop" missing key
-
-= 7.9.5 =
-
-* Fixed missing width for Outlook on packaged templates
-* Foxed private list filtering on subscription form
-
-= 7.9.4 =
-
-* Fixed list max change and database upgrade
-* Added a couple of templates
-* Fixed debug notice on some composer blocks when WP_DEBUG is active
-
-= 7.9.3 =
-
-* Added check on custom fields when the configuration is missing
-* Added twitter new logo
-* New template management panel
-* Fix attempt for shortcode not working on some blogs
-* Added subscriber ID and connected WP User ID on export
-* Newsletter list panel aligned with the new layout
-* Added the template change on the composer
-
-= 7.9.2 =
-
-* Removed image format filters when we generate thumbnail to avoid the creation of webp images
-* Added image crop control on posts block (experimental)
-* Fixed test error on template configuration
-* Added new controls and options to NewsletterFields
-* Fixed antibot for keyed parameters
-
-= 7.9.1 =
-
-* Added the "required" attribute on profile fields
-* Fixed "deprecated" notice with PHP 8.2
-* Fixed debug notices on profile page with some PHP installations
-
-= 7.9.0 =
-
-* Fixed some line heights
-* Added registration of shortcodes under the AJAX context
-* Added shortcode management on newsletter online view
-* Fixed line-height for Outlook on some blocks
-* Fixed the template message test
-* Added webp images check since Outlook does not support that format
-* Fixed error text field on subscription panel not displaying when customized
-* Security fix on minimal form shortcode
-* Removed the "before" and "after" attributes of the main shortcode

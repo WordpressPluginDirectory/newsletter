@@ -25,7 +25,7 @@ class NewsletterWidgetMinimal extends WP_Widget {
         }
         // Filters are used for WPML
         if (!empty($instance['title'])) {
-            $title = apply_filters('widget_title', $instance['title'], $instance);
+            $title = apply_filters('widget_title', $instance['title'], $instance, $this->id_base);
             echo $before_title . $title . $after_title;
         }
 

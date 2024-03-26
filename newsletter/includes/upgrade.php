@@ -231,9 +231,15 @@ class NewsletterUpgrade {
                 }
                 $options = get_option($item->option_name);
                 $backup[$item->option_name] = $options;
-            }
+            } 
 
             update_option('newsletter_backup_' . $this->old_version, $backup, false);
+        }
+
+        $opt = $this->get_option_array('newsletter_statistics');
+        if (empty($opt['key'])) {
+            $opt['key'] = md5(__DIR__ . rand(100000, 999999) . time());
+            update_option('newsletter_statistics', $opt, false);
         }
 
         if ($this->old_version < '8.0.8') {
@@ -516,26 +522,19 @@ class NewsletterUpgrade {
             delete_option('newsletter_wp');
         }
 
-//        NewsletterMainAdmin::instance()->upgrade();
-//        NewsletterProfileAdmin::instance()->upgrade();
-//        NewsletterSubscriptionAdmin::instance()->upgrade();
-//        NewsletterUnsubscriptionAdmin::instance()->upgrade();
-//        NewsletterEmailsAdmin::instance()->upgrade();
-//        NewsletterUsersAdmin::instance()->upgrade();
-//        NewsletterSystemAdmin::instance()->upgrade();
-//        NewsletterStatisticsAdmin::instance()->upgrade();
-
         delete_transient('newsletter_license_data');
         delete_transient('tnp_extensions_json');
         touch(NEWSLETTER_LOG_DIR . '/index.html');
 
-        // Probably no more used
-        if (empty(NewsletterAdmin::instance()->get_option('key', 'statistics'))) {
-            $options = NewsletterAdmin::instance()->get_options('statistics');
-            $options['key'] = md5($_SERVER['REMOTE_ADDR'] . rand(100000, 999999) . time());
-            NewsletterAdmin::instance()->save_options($options, 'statistics');
-        }
         $this->logger->info('End');
+    }
+
+    function get_option_array($name) {
+        $opt = get_option($name, []);
+        if (!is_array($opt)) {
+            return [];
+        }
+        return $opt;
     }
 }
 

@@ -810,7 +810,7 @@ class NewsletterFields {
 
         echo '&nbsp;&nbsp;&nbsp;';
         $this->padding('block_padding', '', ['field_only' => true]);
-        echo '<div class="tnp-description">Gradients are displayed only by few clients</div>';
+        echo '<div class="tnpf-description">Gradients are displayed only by few clients</div>';
         $this->_close();
     }
 

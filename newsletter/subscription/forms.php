@@ -5,11 +5,11 @@
 defined('ABSPATH') || exit;
 
 if (!$controls->is_action()) {
-    $controls->data = $this->get_options('htmlforms');
+    $controls->data = $this->get_main_options('htmlforms');
 }
 
 if ($controls->is_action('save')) {
-    $this->save_options($controls->data, 'htmlforms');
+    $this->save_main_options($controls->data, 'htmlforms');
     $controls->add_toast_saved();
 }
 ?>
@@ -21,18 +21,16 @@ if ($controls->is_action('save')) {
     <div id="tnp-heading">
 
         <?php $controls->title_help('/subscription/newsletter-forms/') ?>
-        <h2><?php _e('Forms', 'newsletter') ?></h2>
+        <h2><?php esc_html_e('Forms', 'newsletter') ?></h2>
         <?php include __DIR__ . '/nav-forms.php' ?>
 
     </div>
 
     <div id="tnp-body">
         <p>
-            <strong>Deprecated.</strong>
-        </p>
-        <p>
-            To inject an HTML form use the shortcode <code>[newsletter_form form="X"]</code> where
+            <strong>Old feature</strong>. To inject an HTML form use the shortcode <code>[newsletter_form form="X"]</code> where
             <code>X</code> is the form number.
+        </p>
 
         <?php $controls->show(); ?>
 

@@ -116,7 +116,8 @@ class NewsletterDefaults {
                 'surname' => '1',
                 'sex' => '1',
                 'lists' => [],
-                'customfields' => []
+                'customfields' => [],
+                'profiles' => []
             ];
         }
 

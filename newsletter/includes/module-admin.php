@@ -26,24 +26,8 @@ class NewsletterModuleAdmin extends NewsletterModuleBase {
         $this->logger->debug('First install');
     }
 
-    function get_db_options($sub, $language = '') {
-        if (!$sub) {
-            $sub = $this->module;
-        }
+    function get_db_options($sub = '', $language = '') {
         return $this->get_option_array($this->get_prefix($sub, $language));
-    }
-
-    /**
-     * Returns the main options.
-     *
-     * @param string $sub Submodule, if empty the options of the main module are returned.
-     * @return type
-     */
-    function get_main_options($sub = '') {
-        if (!$sub) {
-            $sub = $this->module;
-        }
-        return $this->get_option_array($this->get_prefix($sub, ''));
     }
 
     /**
@@ -55,8 +39,6 @@ class NewsletterModuleAdmin extends NewsletterModuleBase {
      * @return array
      */
     function get_options($sub = '', $language = '') {
-        if (!$sub)
-            $sub = $this->module;
         $options = array_merge($this->get_default_options($sub), $this->get_option_array($this->get_prefix($sub, $language)));
         return $options;
     }
@@ -68,7 +50,7 @@ class NewsletterModuleAdmin extends NewsletterModuleBase {
      * @param string $sub
      * @return mixed Returns null if the option is not found
      */
-    function get_option($key, $sub = '', $language = null) {
+    function get_option($key, $sub = '', $language = '') {
         if (!$sub) {
             $sub = $this->module;
         }
@@ -79,10 +61,22 @@ class NewsletterModuleAdmin extends NewsletterModuleBase {
         }
 
         $options = $this->get_options($sub, $language);
-        if (!isset($options[$key])) {
-            return null;
-        }
-        return $options[$key];
+
+        return $options[$key] ?? null;
+    }
+
+    /**
+     * Returns the main options.
+     *
+     * @param string $sub Submodule, if empty the options of the main module are returned.
+     * @return type
+     */
+    function get_main_options($sub = '') {
+        return $this->get_options($sub, '');
+    }
+
+    function get_main_option($key, $sub = '') {
+        return $this->get_option($key, $sub, '');
     }
 
     function reset_options($sub = '', $language = '') {
@@ -798,5 +792,4 @@ class NewsletterModuleAdmin extends NewsletterModuleBase {
         $this->query("delete s from `{$wpdb->prefix}newsletter_sent` s left join `{$wpdb->prefix}newsletter` u on s.user_id=u.id where u.id is null");
         $this->query("delete s from `{$wpdb->prefix}newsletter_sent` s left join `{$wpdb->prefix}newsletter_emails` e on s.email_id=e.id where e.id is null");
     }
-
 }
