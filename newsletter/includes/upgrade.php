@@ -198,6 +198,8 @@ class NewsletterUpgrade {
         delete_option('newsletter_system_warnings');
         delete_option('newsletter_promotion');
         delete_option('newsletter_main_status');
+        delete_option('newsletter_statistics_available_version');
+        delete_option('newsletter_statistics_secret');
 
         if (!wp_next_scheduled('newsletter')) {
             wp_schedule_event(time() + 30, 'newsletter', 'newsletter');
@@ -231,7 +233,7 @@ class NewsletterUpgrade {
                 }
                 $options = get_option($item->option_name);
                 $backup[$item->option_name] = $options;
-            } 
+            }
 
             update_option('newsletter_backup_' . $this->old_version, $backup, false);
         }

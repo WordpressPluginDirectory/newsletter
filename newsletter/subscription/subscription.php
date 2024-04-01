@@ -1051,7 +1051,7 @@ class NewsletterSubscription extends NewsletterModule {
      * Finds the right way to show the message identified by $key (welcome, unsubscription, ...) redirecting the user to the
      * WordPress page or loading the configured url or activating the standard page.
      */
-    function show_message($key, $user, $alert = '', $email = null) {
+    function show_message($key, $user = null, $alert = '', $email = null) {
         $url = '';
 
         if ($user) {

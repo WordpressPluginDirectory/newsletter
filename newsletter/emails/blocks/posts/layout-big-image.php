@@ -13,7 +13,7 @@ $text_style = TNP_Composer::get_style($options, '', $composer, 'text');
         line-height: normal!important;
         text-decoration: none;
     }
-    
+
     .excerpt-td {
         padding: 10px 0 15px 0;
     }
@@ -58,7 +58,7 @@ $text_style = TNP_Composer::get_style($options, '', $composer, 'text');
     if ($show_author) {
         $author_object = get_user_by('id', $post->post_author);
         if ($author_object) {
-            $meta[] = $author_object->display_name;
+            $meta[] = apply_filters('the_author', $author_object->display_name);
         }
     }
     ?>

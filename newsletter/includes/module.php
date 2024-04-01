@@ -415,7 +415,8 @@ class NewsletterModule extends NewsletterModuleBase {
     }
 
     function is_current_user_dummy() {
-        if (!current_user_can('administrator')) return false;
+        if (!current_user_can('administrator'))
+            return false;
 
         if (isset($_REQUEST['nk'])) {
             list($id, $token) = explode('-', $_REQUEST['nk'], 2);
@@ -627,11 +628,20 @@ class NewsletterModule extends NewsletterModuleBase {
      */
     function update_user_last_activity($user) {
         global $wpdb;
+        if (!$user) {
+            return;
+        }
         $this->query($wpdb->prepare("update " . NEWSLETTER_USERS_TABLE . " set last_activity=%d where id=%d limit 1", time(), $user->id));
     }
 
     function update_user_ip($user, $ip) {
         global $wpdb;
+        if (!$user) {
+            return;
+        }
+        if (!$ip) {
+            return;
+        }
 // Only if changed
         $r = $this->query($wpdb->prepare("update " . NEWSLETTER_USERS_TABLE . " set ip=%s, geo=0 where ip<>%s and id=%d limit 1", $ip, $ip, $user->id));
     }

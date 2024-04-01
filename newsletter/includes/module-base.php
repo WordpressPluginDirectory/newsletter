@@ -1219,7 +1219,7 @@ class NewsletterModuleBase {
         if ($row) {
             $value = (int)$row->option_value;
             if ($value < time()) {
-                $wpdb->query($wpdb->prepare("update $wpdb->options set option_value=%s where option_id=%d limit 1", '' . time() + $duration, $row->option_id));
+                $wpdb->query($wpdb->prepare("update $wpdb->options set option_value=%s where option_id=%d limit 1", '' . (time() + $duration), $row->option_id));
                 return true;
             }
             return false;

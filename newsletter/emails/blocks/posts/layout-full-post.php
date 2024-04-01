@@ -71,7 +71,7 @@ $text_style = TNP_Composer::get_text_style($options, '', $composer);
     if ($show_author) {
         $author_object = get_user_by('id', $post->post_author);
         if ($author_object) {
-            $meta[] = $author_object->display_name;
+            $meta[] = apply_filters('the_author', $author_object->display_name);
         }
     }
 
