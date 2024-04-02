@@ -89,11 +89,11 @@ class NewsletterStatistics extends NewsletterModule {
                 }
             }
 
-//            $email = $this->get_email($email_id);
-//            if (!$email) {
-//                $this->dienow('Invalid newsletter', 'The link originates from a newsletter not found (it could have been deleted)', 404);
-//            }
-//            setcookie('tnpe', $email->id . '-' . $email->token, time() + 60 * 60 * 24 * 365, '/');
+            $email = $this->get_email($email_id);
+            if (!$email) {
+                $this->dienow('Invalid newsletter', 'The link originates from a newsletter not found (it could have been deleted)', 404);
+            }
+            setcookie('tnpe', $email->id . '-' . $email->token, time() + 60 * 60 * 24 * 365, '/');
 
             $is_action = strpos($url, '?na=');
 
