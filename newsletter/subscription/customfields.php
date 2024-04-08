@@ -33,7 +33,7 @@ if (!$controls->is_action()) {
         }
         $this->save_options($controls->data, 'customfields', $language);
         $controls->data = $this->get_options('customfields', $language);
-        $controls->add_message_saved();
+        $controls->add_toast_saved();
     }
 }
 

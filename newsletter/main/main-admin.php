@@ -65,6 +65,7 @@ class NewsletterMainAdmin extends NewsletterModuleAdmin {
             //$this->add_menu_page('main', __('Settings', 'newsletter'));
             // Pages not on menu
             $this->add_admin_page('design', 'Design System');
+            $this->add_admin_page('cover', 'Cover');
         }
     }
 

@@ -250,11 +250,11 @@ if (NEWSLETTER_DEBUG || NEWSLETTER_PAGE_WARNING) {
 
             foreach ($languages as $l => $label) { // Do NOT use $language!
                 $tnp_page_id = NewsletterMainAdmin::instance()->get_option('page', '', $l);
-                $status = get_post_status($tnp_page_id);
-                if ($status === false) {
+                $tnp_page_status = get_post_status($tnp_page_id);
+                if ($tnp_page_status === false) {
                     $missing[] = '<a href="?page=newsletter_main_main&lang=' . esc_attr($l) . '#tabs-basic">' . esc_html($label) . '</a>';
                 } else {
-                    if ($status !== 'publish') {
+                    if ($tnp_page_status !== 'publish') {
                         $missing_publish[] = '<a href="' . esc_attr(admin_url('post.php')) . '?post=' . esc_attr($tnp_page_id)
                                 . '&action=edit" target="_blank">' . esc_html(get_post_field('post_title', $tnp_page_id)) . '</a>';
                     }
