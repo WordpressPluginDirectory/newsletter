@@ -14,6 +14,18 @@ class Integrations {
         return class_exists('NewsletterLeads');
     }
 
+    static function get_leads_url() {
+        if (self::is_leads_active()) {
+            return '?page=newsletter_leads_index';
+        } else {
+            if (self::is_addon_manager_active()) {
+                return '?page=newsletter_extensions_index#newsletter-leads';
+            } else {
+                return '?page=newsletter_main_extensions#newsletter-leads';
+            }
+        }
+    }
+
     static function is_woocommerce_active() {
         return class_exists('WooCommerce');
     }

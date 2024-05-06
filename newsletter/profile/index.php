@@ -31,7 +31,7 @@ foreach (['text'] as $key) {
 
 <div class="wrap tnp-profile tnp-profile-index" id="tnp-wrap">
 
-    <?php include NEWSLETTER_ADMIN_HEADER ?>
+    <?php include NEWSLETTER_ADMIN_HEADER; ?>
 
     <div id="tnp-heading">
         <?php $controls->title_help('/profile-page') ?>
@@ -190,10 +190,6 @@ foreach (['text'] as $key) {
 
                     <?php } ?>
                 </div>
-
-
-
-
 
                 <div id="tabs-labels">
                     <?php $this->language_notice() ?>

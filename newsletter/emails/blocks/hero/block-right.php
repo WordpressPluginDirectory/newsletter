@@ -1,6 +1,9 @@
 <?php
 defined('ABSPATH') || exit;
-
+$widths = [];
+if ($layout === 'right13') {
+    $widths = [2, 1];
+}
 $items = [];
 ?>
 <style>
@@ -25,33 +28,33 @@ $items = [];
 ob_start();
 ?>
 
-<table width="<?php echo $td_width ?>" align="left" class="responsive" border="0" cellspacing="0" cellpadding="0">
+<table align="left" class="responsive" border="0" cellspacing="0" cellpadding="0">
     <?php if (empty($order)) { ?>
         <tr>
-            <td inline-class="title" dir="ltr">
+            <td inline-class="title">
                 <?php echo $options['title'] ?>
             </td>
         </tr>
         <tr>
-            <td inline-class="text" dir="ltr">
+            <td inline-class="text">
                 <?php echo $options['text'] ?>
             </td>
         </tr>
     <?php } else { ?>
         <tr>
-            <td inline-class="text" dir="ltr">
+            <td inline-class="text">
                 <?php echo $options['text'] ?>
             </td>
         </tr>
         <tr>
-            <td inline-class="title" dir="ltr">
+            <td inline-class="title">
                 <?php echo $options['title'] ?>
             </td>
         </tr>
 
     <?php } ?>
     <tr>
-        <td align="center" inline-class="button" dir="ltr">
+        <td align="center" inline-class="button">
             <?php echo TNP_Composer::button($button_options, 'button', $composer) ?>
         </td>
     </tr>
@@ -62,5 +65,5 @@ $items[] = trim(ob_get_clean());
 if ($media) {
     $items[] = TNP_Composer::image($media);
 }
-echo TNP_Composer::grid($items, ['columns' => count($items), 'width' => $composer['content_width'], 'responsive' => true]);
+echo TNP_Composer::grid($items, ['columns' => count($items), 'widths'=>$widths, 'width' => $composer['content_width'], 'responsive' => true]);
 ?>

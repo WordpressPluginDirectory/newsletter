@@ -229,6 +229,30 @@ class NewsletterAddon {
         return $r;
     }
 
+    function get_results($query) {
+        global $wpdb;
+        $r = $wpdb->get_results($query);
+        if ($r === false) {
+            $this->logger->fatal($query);
+            $this->logger->fatal($wpdb->last_error);
+        }
+        return $r;
+    }
+
+    function get_row($query) {
+        global $wpdb;
+        $r = $wpdb->get_row($query);
+        if ($r === false) {
+            $this->logger->fatal($query);
+            $this->logger->fatal($wpdb->last_error);
+        }
+        return $r;
+    }
+
+    function get_user($id_or_email) {
+        return Newsletter::instance()->get_user($id_or_email);
+    }
+
     function show_email_status_label($email) {
         return NewsletterAdmin::instance()->show_email_status_label($email);
     }
@@ -349,21 +373,21 @@ class NewsletterMailerAddon extends NewsletterAddon {
         global $wpdb;
         $logger = $this->get_logger();
         $logger->info($email . ' bounced');
-        $wpdb->query($wpdb->prepare("update " . NEWSLETTER_USERS_TABLE . " set status=%s where email=%s limit 1", TNP_User::STATUS_BOUNCED, $email));
+        $this->query($wpdb->prepare("update " . NEWSLETTER_USERS_TABLE . " set status=%s where email=%s limit 1", TNP_User::STATUS_BOUNCED, $email));
     }
 
     function set_complained($email) {
         global $wpdb;
         $logger = $this->get_logger();
         $logger->info($email . ' complained');
-        $wpdb->query($wpdb->prepare("update " . NEWSLETTER_USERS_TABLE . " set status=%s where email=%s limit 1", TNP_User::STATUS_COMPLAINED, $email));
+        $this->query($wpdb->prepare("update " . NEWSLETTER_USERS_TABLE . " set status=%s where email=%s limit 1", TNP_User::STATUS_COMPLAINED, $email));
     }
 
     function set_unsubscribed($email) {
         global $wpdb;
         $logger = $this->get_logger();
         $logger->info($email . ' unsubscribed');
-        $wpdb->query($wpdb->prepare("update " . NEWSLETTER_USERS_TABLE . " set status=%s where email=%s limit 1", TNP_User::STATUS_UNSUBSCRIBED, $email));
+        $this->query($wpdb->prepare("update " . NEWSLETTER_USERS_TABLE . " set status=%s where email=%s limit 1", TNP_User::STATUS_UNSUBSCRIBED, $email));
     }
 
     /**

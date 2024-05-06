@@ -386,39 +386,49 @@ class TNP_Composer {
      * @return string
      */
     static function button($options, $prefix = 'button', $composer = []) {
-
         if (empty($options[$prefix . '_label'])) {
             return;
         }
 
         $defaults = [
             $prefix . '_url' => '#',
-            $prefix . '_font_family' => $composer['button_font_family'],
-            $prefix . '_font_color' => $composer['button_font_color'],
-            $prefix . '_font_weight' => $composer['button_font_weight'],
-            $prefix . '_font_size' => $composer['button_font_size'],
-            $prefix . '_background' => $composer['button_background_color'],
-            $prefix . '_align' => 'center'
+            $prefix . '_font_family' => $composer['button_font_family'] ?? 'sans-serif',
+            $prefix . '_font_color' => $composer['button_font_color'] ?? '#000',
+            $prefix . '_font_weight' => $composer['button_font_weight'] ?? 'normal',
+            $prefix . '_font_size' => $composer['button_font_size'] ?? '16',
+            $prefix . '_background' => $composer['button_background_color'] ?? '',
+            $prefix . '_border_radius' => '5',
+            $prefix . '_align' => 'center',
+            $prefix . '_width' => 'auto'
         ];
 
         $options = array_merge($defaults, array_filter($options));
 
-        $b = '<table border="0" cellpadding="0" cellspacing="0" role="presentation" style="margin: 0 auto"';
-        if (!empty($options[$prefix . '_align'])) {
-            $b .= ' align="' . esc_attr($options[$prefix . '_align']) . '"';
-        }
+        $a_style = 'display:inline-block;'
+                . 'color:' . $options[$prefix . '_font_color'] . ';font-family:' . $options[$prefix . '_font_family'] . ';'
+                . 'font-size:' . $options[$prefix . '_font_size'] . 'px;font-weight:' . $options[$prefix . '_font_weight'] . ';'
+                . 'line-height:120%;margin:0;text-decoration:none;text-transform:none;padding:10px 25px;mso-padding-alt:0px;';
+        $a_style .= 'border-radius:' . $options[$prefix . '_border_radius'] . 'px;';
+        $table_style = 'border-collapse:separate !important;line-height:100%;';
+
+        $td_style = 'border-collapse:separate !important;cursor:auto;mso-padding-alt:10px 25px;background:' . $options[$prefix . '_background'] . ';';
+        $td_style .= 'border-radius:' . $options[$prefix . '_border_radius'] . 'px;';
         if (!empty($options[$prefix . '_width'])) {
-            $b .= ' width="' . esc_attr($options[$prefix . '_width']) . '"';
+            $a_style .= ' width:' . $options[$prefix . '_width'] . 'px;';
+            $table_style .= 'width:' . $options[$prefix . '_width'] . 'px;';
         }
-        $b .= '>';
-        $b .= '<tr>';
-        $b .= '<td align="center" bgcolor="' . $options[$prefix . '_background'] . '" role="presentation" style="border:none;border-radius:3px;cursor:auto;mso-padding-alt:10px 25px;background:' . $options[$prefix . '_background'] . '" valign="middle">';
-        $b .= '<a href="' . $options[$prefix . '_url'] . '"';
-        $b .= ' style="display:inline-block;background:' . $options[$prefix . '_background'] . ';color:' . $options[$prefix . '_font_color'] . ';font-family:' . $options[$prefix . '_font_family'] . ';font-size:' . $options[$prefix . '_font_size'] . 'px;font-weight:' . $options[$prefix . '_font_weight'] . ';line-height:120%;margin:0;text-decoration:none;text-transform:none;padding:10px 25px;mso-padding-alt:0px;border-radius:3px;"';
-        $b .= ' target="_blank">';
-        $b .= $options[$prefix . '_label'];
-        $b .= '</a>';
-        $b .= '</td></tr></table>';
+
+        if (!empty($options[$prefix . '_border_color'])) {
+            $td_style .= 'border:1px solid ' . $options[$prefix . '_border_color'] . ';';
+        }
+
+        $b = '';
+        $b .= '<table border="0" cellpadding="0" cellspacing="0" role="presentation" align="' . esc_attr($options[$prefix . '_align']) . '" style="' . esc_attr($table_style) . '">'
+                . '<tr>'
+                . '<td align="center" bgcolor="' . esc_attr($options[$prefix . '_background']) . '" role="presentation" style="' . esc_attr($td_style) . '" valign="middle">'
+                . '<a href="' . esc_attr($options[$prefix . '_url']) . '" style="' . esc_attr($a_style) . '" target="_blank">' . wp_kses_post($options[$prefix . '_label']) . '</a>'
+                . '</td></tr></table>';
+
         return $b;
     }
 
@@ -620,10 +630,21 @@ class TNP_Composer {
      * @return string
      */
     static function grid($items = [], $attrs = []) {
-        $attrs = wp_parse_args($attrs, ['width' => 600, 'columns' => 2, 'padding' => 10, 'responsive' => true]);
+        $attrs = wp_parse_args($attrs, ['width' => 600, 'columns' => 2, 'widths'=>[], 'padding' => 10, 'responsive' => true]);
         $width = (int) $attrs['width'];
         $columns = (int) $attrs['columns'];
         $padding = (int) $attrs['padding'];
+
+        if (empty($attrs['widths'])) {
+            $attrs['widths'] = array_fill(0, $columns, 1);
+        }
+        $column_widths = [];
+        $td_widths = [];
+        $sum = (float)array_sum($attrs['widths']);
+        for ($i=0; $i<$columns; $i++) {
+            $column_widths[$i] = ($width - $padding * $columns) * $attrs['widths'][$i] / $sum;
+            $td_widths[$i] = (int) (100 * $attrs['widths'][$i] / $sum);
+        }
         $column_width = ($width - $padding * $columns) / $columns;
         $td_width = 100 / $columns;
         $chunks = array_chunk($items, $columns);
@@ -634,10 +655,11 @@ class TNP_Composer {
             foreach ($chunks as &$chunk) {
                 $e .= '<div style="text-align:center;font-size:0;">';
                 $e .= '<!--[if mso]><table role="presentation" width="100%"><tr><![endif]-->';
+                $i = 0;
                 foreach ($chunk as &$item) {
-                    $e .= '<!--[if mso]><td width="' . $td_width . '%" style="width:' . $td_width . '%;padding:' . $padding . 'px" valign="top"><![endif]-->';
+                    $e .= '<!--[if mso]><td width="' . $td_widths[$i] . '%" style="width:' . $td_widths[$i] . '%;padding:' . $padding . 'px" valign="top"><![endif]-->';
 
-                    $e .= '<div class="max-width-100" style="width:100%;max-width:' . $column_width . 'px;display:inline-block;vertical-align: top;box-sizing: border-box;">';
+                    $e .= '<div class="max-width-100" style="width:100%;max-width:' . $column_widths[$i] . 'px;display:inline-block;vertical-align: top;box-sizing: border-box;">';
 
                     // This element to add padding without deal with border-box not well supported
                     $e .= '<div style="padding:' . $padding . 'px;">';
@@ -646,6 +668,7 @@ class TNP_Composer {
                     $e .= '</div>';
 
                     $e .= '<!--[if mso]></td><![endif]-->';
+                    $i++;
                 }
                 $e .= '<!--[if mso]></tr></table><![endif]-->';
                 $e .= '</div>';
@@ -829,11 +852,11 @@ class TNP_Style {
 
     function echo_css($scale = 1.0) {
         echo 'font-size: ', round($this->font_size * $scale), 'px;';
-        echo 'font-family: ', $this->font_family, ';';
-        echo 'font-weight: ', $this->font_weight, ';';
-        echo 'color: ', $this->font_color, ';';
+        echo 'font-family: ', esc_html($this->font_family), ';';
+        echo 'font-weight: ', esc_html($this->font_weight), ';';
+        echo 'color: ', sanitize_hex_color($this->font_color), ';';
         if (!empty($this->align)) {
-            echo 'text-align: ', $this->align, ';';
+            echo 'text-align: ', esc_html($this->align), ';';
         }
     }
 }

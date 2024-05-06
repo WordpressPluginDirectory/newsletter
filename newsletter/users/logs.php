@@ -14,10 +14,9 @@ if (!$user) {
 
 ?>
 
-
 <div class="wrap tnp-users tnp-users-edit" id="tnp-wrap">
 
-    <?php include NEWSLETTER_ADMIN_HEADER ?>
+    <?php include NEWSLETTER_ADMIN_HEADER; ?>
 
     <div id="tnp-heading">
         <?php $controls->title_help('/subscribers-and-management/') ?>
@@ -52,10 +51,10 @@ if (!$user) {
                             <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>Date</th>
-                                    <th>Source</th>
+                                    <th><?php esc_html_e('Date', 'newsletter'); ?></th>
+                                    <th><?php esc_html_e('Source', 'newsletter'); ?></th>
                                     <th>IP</th>
-                                    <th>Lists</th>
+                                    <th><?php esc_html_e('Lists', 'newsletter'); ?></th>
                                 </tr>
 
                             <tbody>
@@ -74,7 +73,7 @@ if (!$user) {
                                             <?php
                                             if (is_array($data)) {
                                                 foreach ($data as $key => $value) {
-                                                    echo esc_html(str_replace('_', ' ', $key)), ': ', esc_html($value) . '<br>';
+                                                    echo esc_html(str_replace('_', ' ', $key)), ': ', esc_html($value), '<br>';
                                                 }
                                             }
                                             ?>
@@ -86,16 +85,13 @@ if (!$user) {
                         </table>
                     <?php } ?>
 
-
                 </div>
 
             </div>
 
-
-
         </form>
     </div>
 
-    <?php include NEWSLETTER_ADMIN_FOOTER ?>
+    <?php include NEWSLETTER_ADMIN_FOOTER; ?>
 
 </div>

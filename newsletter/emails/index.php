@@ -20,7 +20,7 @@ if ($controls->is_action('template')) {
     $email['options'] = $original->options;
 
     $this->save_email($email);
-    $controls->messages .= __('Template created.', 'newsletter');
+    $controls->messages .= esc_html__('Template created.', 'newsletter');
 }
 
 if ($controls->is_action('copy')) {
@@ -36,7 +36,7 @@ if ($controls->is_action('copy')) {
     $email['options'] = $original->options;
 
     $this->save_email($email);
-    $controls->messages .= __('Message duplicated.', 'newsletter');
+    $controls->messages .= esc_html__('Message duplicated.', 'newsletter');
 }
 
 if ($controls->is_action('delete')) {
@@ -46,20 +46,30 @@ if ($controls->is_action('delete')) {
 
 if ($controls->is_action('delete_selected')) {
     $r = $this->delete_email($_POST['ids']);
-    $controls->messages .= $r . ' message(s) deleted';
+    $controls->messages .= $r . ' newsletter(s) deleted';
 }
 
 $pagination_controller = new TNP_Pagination_Controller(NEWSLETTER_EMAILS_TABLE, 'id', ['type' => 'message']);
 $emails = $pagination_controller->get_items();
+
+$emails_with_error = $this->get_emails_by_status(TNP_Email::STATUS_ERROR);
+
+if ($emails_with_error) {
+    foreach ($emails_with_error as $e) {
+        if (!$e->type === 'message') continue;
+        $controls->errors .= 'A newsletter has been stopped by an error: ' . esc_html($email->options['error_message']??'[not set]');
+        break;
+    }
+}
 ?>
 
 <div class="wrap tnp-emails tnp-emails-index" id="tnp-wrap">
 
-    <?php include NEWSLETTER_ADMIN_HEADER ?>
+    <?php include NEWSLETTER_ADMIN_HEADER; ?>
 
     <div id="tnp-heading">
 
-        <h2><?php _e('Newsletters', 'newsletter') ?></h2>
+        <h2><?php esc_html_e('Newsletters', 'newsletter') ?></h2>
 
         <?php include __DIR__ . '/nav.php' ?>
 
@@ -72,7 +82,7 @@ $emails = $pagination_controller->get_items();
         <form method="post" action="">
             <?php $controls->init(); ?>
 
-            <a href="<?php echo $this->get_admin_page_url('composer'); ?>" class="button-primary"><?php _e('Add new', 'newsletter') ?></a>
+            <a href="<?php echo $this->get_admin_page_url('composer'); ?>" class="button-primary"><?php esc_html_e('Add new', 'newsletter') ?></a>
 
             <?php $controls->btn('delete_selected', __('Delete selected', 'newsletter'), ['tertiary'=>true, 'confirm'=>true]); ?>
 
@@ -83,10 +93,10 @@ $emails = $pagination_controller->get_items();
                     <tr>
                         <th style="text-align: left"><input type="checkbox" style="margin-left: 0;" onchange="jQuery('input.tnp-selector').prop('checked', this.checked)"></th>
                         <th>Id</th>
-                        <th><?php _e('Subject', 'newsletter') ?></th>
-                        <th><?php _e('Status', 'newsletter') ?></th>
-                        <th><?php _e('Progress', 'newsletter') ?>&nbsp;(*)</th>
-                        <th><?php _e('Date', 'newsletter') ?></th>
+                        <th><?php esc_html_e('Subject', 'newsletter') ?></th>
+                        <th><?php esc_html_e('Status', 'newsletter') ?></th>
+                        <th colspan="2"><?php esc_html_e('Progress', 'newsletter') ?>&nbsp;(*)</th>
+                        <th><?php esc_html_e('Date', 'newsletter') ?></th>
                         <th>&nbsp;</th>
                         <th>&nbsp;</th>
                         <th>&nbsp;</th>
@@ -97,17 +107,17 @@ $emails = $pagination_controller->get_items();
                     <?php foreach ($emails as $email) { ?>
                         <tr>
                             <td style="text-align: left;">
-                                <input type="checkbox" class="tnp-selector" name="ids[]" value="<?php echo $email->id; ?>">
+                                <input type="checkbox" class="tnp-selector" name="ids[]" value="<?php echo esc_attr($email->id); ?>">
                             </td>
                             <td style="font-size: .9em">
-                                <?php echo $email->id; ?>
+                                <?php echo esc_html($email->id); ?>
                             </td>
                             <td>
                                 <?php
                                 if ($email->subject)
                                     echo esc_html($email->subject);
                                 else
-                                    echo "Newsletter #" . $email->id;
+                                    echo "Newsletter #" . esc_html($email->id);
                                 ?>
                             </td>
 
@@ -115,7 +125,10 @@ $emails = $pagination_controller->get_items();
                                 <?php $this->show_email_status_label($email) ?>
                             </td>
                             <td>
-                                <?php $this->show_email_progress_bar($email, array('numbers' => true)) ?>
+                                <?php $this->show_email_progress_bar($email, array('numbers' => false)) ?>
+                            </td>
+                            <td>
+                                <?php $this->show_email_progress_numbers($email) ?>
                             </td>
                             <td>
                                 <?php if ($email->status == 'sent' || $email->status == 'sending') echo $this->format_date($email->send_on); ?>
@@ -126,7 +139,7 @@ $emails = $pagination_controller->get_items();
 
                             <td style="white-space: nowrap">
                                 <?php $controls->button_icon_statistics(NewsletterStatisticsAdmin::instance()->get_statistics_url($email->id), ['secondary'=>true]) ?>
-                                <?php $controls->button_icon_view(home_url('/') . '?na=view&id=' . $email->id) ?>
+                                <?php $controls->button_icon_view(home_url('/') . '?na=view&id=' . urlencode($email->id)) ?>
                             </td>
 
                             <td style="white-space: nowrap">
@@ -142,11 +155,11 @@ $emails = $pagination_controller->get_items();
                 </tbody>
             </table>
             <p>
-                (*) <?php _e('Expected total at the end of the delivery may differ due to subscriptions/unsubscriptions occurred meanwhile.', 'newsletter') ?>
+                (*) <?php esc_html_e('Expected total at the end of the delivery may differ due to subscriptions/unsubscriptions occurred meanwhile.', 'newsletter') ?>
             </p>
         </form>
     </div>
 
-    <?php include NEWSLETTER_DIR . '/tnp-footer.php'; ?>
+    <?php include NEWSLETTER_ADMIN_FOOTER; ?>
 
 </div>

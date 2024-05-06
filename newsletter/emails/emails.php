@@ -193,10 +193,10 @@ class NewsletterEmails extends NewsletterModule {
 
             case 'json':
                 if (!current_user_can('administrator')) {
-                    header("HTTP/1.0 404 Not Found");
-                    die('Not sent yet');
+                    header("HTTP/1.0 403 Not Found");
+                    die('Not allowed');
                 }
-                $email = $this->get_email($_GET['id']);
+                $email = $this->get_email((int)$_GET['id']);
 
                 if (empty($email)) {
                     header("HTTP/1.0 404 Not Found");
@@ -408,7 +408,7 @@ class NewsletterEmails extends NewsletterModule {
             return $options;
         }
 
-        return array();
+        return [];
     }
 
     /**

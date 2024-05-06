@@ -55,7 +55,8 @@ $total = array_reduce($urls, function ($carry, $item) {
 
     <div id="tnp-body">
         <p style="font-size: 1.1em;">
-            Details by single clicked link are available with the <a href="https://www.thenewsletterplugin.com/reports" target="_blank">Reports addon</a>.
+            Details by single clicked link for this newsletter are available with the
+            <a href="https://www.thenewsletterplugin.com/reports?utm_source=statistics&utm_campaign=plugin" target="_blank">Reports Addon</a>.
             Data below is a sample view.
         </p>
 

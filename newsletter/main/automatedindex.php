@@ -37,6 +37,8 @@ $feed->data = [
     'enabled' => 1];
 
 $feeds[] = $feed;
+
+NewsletterMainAdmin::instance()->set_completed_step('automated');
 ?>
 <script src="<?php echo plugins_url('newsletter') ?>/vendor/driver/driver.js.iife.js"></script>
 <link rel="stylesheet" href="<?php echo plugins_url('newsletter') ?>/vendor/driver/driver.css"/>

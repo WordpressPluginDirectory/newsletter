@@ -47,6 +47,10 @@ if (class_exists('NewsletterExtensions')) {
             </div>
         </div>
         <div style="clear: both"></div>
+
+        <?php $fields->text('main_title', __('Title', 'newsletter')) ?>
+        <?php $fields->font('main_title_font', false, ['family_default' => true, 'size_default' => true, 'weight_default' => true]) ?>
+        <?php $fields->align('main_title_align') ?>
     </div>
 <?php } ?>
 
@@ -89,8 +93,8 @@ $fields->select('layout', __('Layout', 'newsletter'),
     </div>
     <div class="tnp-field-col-4">
         <div class="tnp-field-col-3">
-        <?php $fields->yesno('private', __('Private', 'newsletter')) ?>
-    </div>
+            <?php $fields->yesno('private', __('Private', 'newsletter')) ?>
+        </div>
     </div>
     <div style="clear: both"></div>
 </div>

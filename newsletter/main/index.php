@@ -18,12 +18,25 @@ if ($controls->is_action('feed_disable')) {
 
 $emails_module = NewsletterEmailsAdmin::instance();
 $statistics_module = NewsletterStatisticsAdmin::instance();
-$emails = $wpdb->get_results("select * from " . NEWSLETTER_EMAILS_TABLE . " where type='message' order by id desc limit 5");
+$emails = $wpdb->get_results("select * from " . NEWSLETTER_EMAILS_TABLE . " where type='message' or type like 'automated_%' and type<> 'automated_template' order by id desc limit 5");
+
+$list = $wpdb->get_results("select * from " . NEWSLETTER_EMAILS_TABLE . " where status='sending' and send_on<" . time() . " order by id asc");
+$total = 0;
+$queued = 0;
+foreach ($list as $email) {
+    $total += $email->total;
+    $queued += $email->total - $email->sent;
+}
+$speed = $newsletter->get_send_speed();
+
+$total_sent = (int) $wpdb->get_var("select sum(total) from " . NEWSLETTER_EMAILS_TABLE . " where status='sent'");
 
 $users_module = NewsletterUsersAdmin::instance();
-$query = "select * from " . NEWSLETTER_USERS_TABLE . " order by id desc limit 10";
+$query = "select * from " . NEWSLETTER_USERS_TABLE . " order by id desc limit 7";
 $subscribers = $wpdb->get_results($query);
 
+$subscribers_count = (int) $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE . " where status='C'");
+$subscribers_count_last_30_days = (int) $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE . " where status='C' and created>date_sub(now(), interval 30 day)");
 // Retrieves the last standard newsletter
 $last_email = $wpdb->get_row(
         $wpdb->prepare("select * from " . NEWSLETTER_EMAILS_TABLE . " where type='message' and status in ('sent', 'sending') and send_on<%d order by id desc limit 1", time()));
@@ -64,177 +77,261 @@ foreach ($months as $month) {
 $values = array_reverse($values);
 $labels = array_reverse($labels);
 
-$lists = $this->get_lists();
-
-$sources = [];
-
-$extensions_url = '?page=newsletter_main_extension';
-if (class_exists('NewsletterExtensions')) {
-    $extensions_url = '?page=newsletter_extensions_index';
+// Unconfirmed
+$unconfirmed = ['y' => [], 'x' => []];
+$months = $wpdb->get_results("select count(*) as c, concat(year(created), '-', month(created)) as d "
+        . "from " . NEWSLETTER_USERS_TABLE . " where status='S' "
+        . "group by year(created), month(created) order by year(created) desc, month(created) desc limit 12");
+$months = array_reverse($months);
+foreach ($months as $month) {
+    $unconfirmed['y'][] = (int) $month->c;
+    $unconfirmed['x'][] = date("M y", date_create_from_format("Y-m", $month->d)->getTimestamp());
 }
 
-$active = class_exists('NewsletterWoocommerce');
-$url = $active ? '?page=newsletter_woocommerce_index' : $extensions_url;
-$sources[] = ['title' => 'WC Registration', 'active' => $active, 'url' => $url];
+$lists = $this->get_lists();
 
-$active = class_exists('NewsletterWoocommerce');
-$url = $active ? '?page=newsletter_woocommerce_index' : $extensions_url;
-$sources[] = ['title' => 'WC Checkout', 'active' => $active, 'url' => $url];
+// Setup
 
-$active = class_exists('NewsletterCF7');
-$url = $active ? '?page=newsletter_cf7_index' : $extensions_url;
-$sources[] = ['title' => 'CF7 Forms', 'active' => $active, 'url' => $url];
+$steps = $this->get_option_array('newsletter_main_steps');
+$steps['sender'] = 1;
 
-$active = class_exists('NewsletterWPForms');
-$url = $active ? '?page=newsletter_wpnlforms_index' : $extensions_url;
-$sources[] = ['title' => 'WP Forms', 'active' => $active, 'url' => $url];
+if (class_exists('NewsletterExtensions')) {
+    $steps['addons-manager'] = 1;
+}
 
-$active = class_exists('NewsletterNinjaForms');
-$url = $active ? '?page=newsletter_ninjaforms_index' : $extensions_url;
-$sources[] = ['title' => 'Ninja Forms', 'active' => $active, 'url' => $url];
+global $wpdb;
+$c = $wpdb->get_results("select id from " . NEWSLETTER_EMAILS_TABLE . " where status in ('sending', 'sent') limit 1");
+if ($c) {
+    $steps['first-newsletter'] = 1;
+}
 
-$active = class_exists('NewsletterGravityForms');
-$url = $active ? '?page=newsletter_gravityforms_index' : $extensions_url;
-$sources[] = ['title' => 'Gravity Forms', 'active' => $active, 'url' => $url];
-
-$active = class_exists('NewsletterElementor');
-$url = $active ? '?page=newsletter_elementor_index' : $extensions_url;
-$sources[] = ['title' => 'Elementor Forms', 'active' => $active, 'url' => $url];
-
-$active = class_exists('NewsletterForminator');
-$url = $active ? '?page=newsletter_forminator_index' : $extensions_url;
-$sources[] = ['title' => 'Forminator Forms', 'active' => $active, 'url' => $url];
-
-$active = class_exists('NewsletterFormidable');
-$url = $active ? '?page=newsletter_formidable_index' : $extensions_url;
-$sources[] = ['title' => 'Formidable Forms', 'active' => $active, 'url' => $url];
-
-$active = class_exists('NewsletterFluentForms');
-$url = $active ? '?page=newsletter_fluentforms_index' : $extensions_url;
-$sources[] = ['title' => 'Fluent Forms', 'active' => $active, 'url' => $url];
-
-$active = class_exists('NewsletterApi');
-$url = $active ? '?page=newsletter_api_index' : $extensions_url;
-$sources[] = ['title' => 'Newsletter API', 'active' => $active, 'url' => $url];
-
-$active = class_exists('NewsletterPmpro');
-$url = $active ? '?page=newsletter_pmpro_index' : $extensions_url;
-$sources[] = ['title' => 'Paid Memb. Pro', 'active' => $active, 'url' => $url];
-
-$active = class_exists('NewsletterEdd');
-$url = $active ? '?page=newsletter_edd_index' : $extensions_url;
-$sources[] = ['title' => 'EDD Checkout', 'active' => $active, 'url' => $url];
-
-$active = class_exists('NewsletterComments');
-$url = $active ? '?page=newsletter_comments_index' : $extensions_url;
-$sources[] = ['title' => 'WP Comments', 'active' => $active, 'url' => $url];
-
-$active = class_exists('NewsletterAutomated');
-$url = $active ? '?page=newsletter_automated_index' : '?page=newsletter_main_automated';
-$automated = ['title' => 'Automated', 'active' => $active, 'url' => $url, 'usable' => true];
-
-$active = class_exists('NewsletterAutoresponder');
-$url = $active ? '?page=newsletter_autoresponder_index' : $extensions_url;
-$autoresponder = ['title' => 'Autoresponder', 'active' => $active, 'url' => $url, 'usable' => true];
-
-$active = class_exists('NewsletterWpUsers');
-$url = $active ? '?page=newsletter_wpusers_index' : $extensions_url;
-$sources[] = ['title' => 'WP Signup', 'active' => $active, 'url' => $url, 'usable' => $active];
-
-$active = class_exists('NewsletterReports');
-$url = $active ? '?page=newsletter_reports_newsletters' : $extensions_url . '#analytics';
-$reports = ['title' => 'Advanced Reports', 'active' => $active, 'url' => $url, 'usable' => true];
-
-$blocks = [];
-$active = class_exists('NewsletterBlocks');
-$url = $active ? '?page=newsletter_blocks_index' : $extensions_url;
-$blocks[] = ['title' => 'Extra Blocks', 'active' => $active, 'url' => $url];
-
-$active = class_exists('NewsletterWoocommerce');
-$url = $active ? '?page=newsletter_blocks_index' : $extensions_url;
-$blocks[] = ['title' => 'WC Products', 'active' => $active, 'url' => $url];
-
-$active = class_exists('NewsletterEdd');
-$url = $active ? '?page=newsletter_blocks_index' : $extensions_url;
-$blocks[] = ['title' => 'EDD Downloads', 'active' => $active, 'url' => $url];
-
-$active = class_exists('NewsletterEvents');
-$url = $active ? '?page=newsletter_blocks_index' : $extensions_url;
-$blocks[] = ['title' => 'Events', 'active' => $active, 'url' => $url];
+$max_steps = 8;
+$completed_steps = count($steps);
+$completed = $completed_steps == $max_steps;
 ?>
 
 <style>
 <?php include __DIR__ . '/css/dashboard.css' ?>
+<?php include __DIR__ . '/css/setup.css' ?>
 </style>
 
 <div class="wrap" id="tnp-wrap">
 
-    <?php include NEWSLETTER_ADMIN_HEADER ?>
+    <?php include NEWSLETTER_ADMIN_HEADER; ?>
+
+    <div id="tnp-heading">
+        <?php $controls->title_help('https://www.thenewsletterplugin.com/plugins/newsletter/newsletter-configuration') ?>
+
+        <h2><?php esc_html_e('Dashboard', 'newsletter'); ?></h2>
+        <?php include __DIR__ . '/dashboard-nav.php' ?>
+
+    </div>
 
     <div id="tnp-body" class="tnp-main-index">
 
         <div class="tnp-dashboard">
 
-            <div class="tnp-cards-container">
-                <div class="tnp-card">
-                    <div class="tnp-flow">
+            <?php if (current_user_can('administrator')) { ?>
 
-                        <div>
-                            <div class="tnp-flow-item title wide">Subscribers start here</div>
-                        </div>
-                        <div>
-                            <div class="tnp-flow-item"><a href="?page=newsletter_subscription_form" target="_blank">Standard form</a></div>
-
-                            <?php foreach ($sources as $source) { ?>
-                                <?php if (!$source['active']) continue; ?>
-                                <div class="tnp-flow-item <?php echo $source['active'] ? '' : 'inactive' ?>"><a href="<?php echo esc_attr($source['url']) ?>" target="_blank"><?php echo esc_html($source['title']) ?></a></div>
-                            <?php } ?>
-                        </div>
-                        <a href="javascript:void()" onclick="document.getElementById('tnp-other-sources').style.display = 'flex'; return false" style="display: block; text-decoration: underline">Other sources</a>
-                        <div id="tnp-other-sources" style="display: none;">
+                <div class="tnp-cards-container">
 
 
-                            <?php foreach ($sources as $source) { ?>
-                                <?php if ($source['active']) continue; ?>
-                                <div class="tnp-flow-item notusable"><a href="<?php echo esc_attr($source['url']) ?>" target="_blank"><?php echo esc_html($source['title']) ?></a></div>
-                            <?php } ?>
+                    <div class="tnp-card">
 
-                        </div>
-                        <div class="tnp-flow-arrow">▼</div>
-                        <div>
-                            <div class="tnp-flow-item"><a href="?page=newsletter_subscription_antispam" target="_blank">Antispam</a></div>
+                        <div class="tnp-step sender <?php echo!empty($steps['sender']) ? 'ok' : ''; ?>">
+                            <div>
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div>
+                                <h3>Your sender name and address</h3>
+                                <p>
+                                    From who your subscribers will see the emails coming from?
+
+                                    <a href="?page=newsletter_main_main">Review</a>
+                                </p>
+                            </div>
                         </div>
 
-                        <div>
-                            <div class="tnp-flow-item wide"><a href="?page=newsletter_subscription_options" target="_blank">Activation/Welcome messages and emails</a></div>
-                        </div>
-                        <div class="tnp-flow-arrow">▼</div>
-                        <div>
-                            <div class="tnp-flow-item <?php echo $automated['active'] ? '' : 'inactive' ?>"><a href="<?php echo esc_attr($automated['url']) ?>" target="_blank">Automated</a></div>
-                            <div class="tnp-flow-item"><a href="?page=newsletter_emails_index" target="_blank">Newsletters</a></div>
-                            <div class="tnp-flow-item <?php echo $autoresponder['active'] ? '' : 'inactive' ?>"><a href="<?php echo esc_attr($autoresponder['url']) ?>" target="_blank">Autoresponder</a></div>
-                        </div>
+                        <div class="tnp-step forms <?php echo!empty($steps['forms']) ? 'ok' : ''; ?>">
+                            <div>
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div>
+                                <h3>Subscription: popup and inline forms</h3>
+                                <p>
+                                    Activate the subscription forms to grow your subscriber list.
 
-                        <a href="javascript:void()" onclick="document.getElementById('tnp-other-blocks').style.display = 'flex'; return false" style="display: block; text-decoration: underline">Contents</a>
-                        <div id="tnp-other-blocks" style="display: none;">
-                            <?php foreach ($blocks as $block) { ?>
-                                <div class="tnp-flow-item notusable"><a href="?page=newsletter_main_extensions#tnp-creating<?php //echo esc_attr($block['url']) ?>" target="_blank"><?php echo esc_html($block['title']) ?></a></div>
-                            <?php } ?>
+                                    <a href="?page=newsletter_subscription_sources">Configure</a>.
+                                </p>
+                            </div>
                         </div>
 
-                        <div class="tnp-flow-arrow">▼</div>
+                        <div class="tnp-step <?php echo!empty($steps['notification']) ? 'ok' : ''; ?>">
+                            <div>
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div>
+                                <h3>Be notified when someone subscribes</h3>
+                                <p>
+                                    Activate the notification when you get a new subscriber.
 
-                        <div>
-                            <div class="tnp-flow-item">Standard reports</div>
-                            <div class="tnp-flow-item <?php echo $reports['active'] ? '' : 'inactive' ?>"><a href="<?php echo esc_attr($reports['url']) ?>" target="_blank"><a href="<?php echo esc_attr($reports['url']) ?>" target="_blank"><?php echo esc_html($reports['title']) ?></a></a></div>
+                                    <a href="?page=newsletter_subscription_options#advanced">Configure</a>.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="tnp-step welcome-email <?php echo!empty($steps['welcome-email']) ? 'ok' : ''; ?>">
+                            <div>
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div>
+                                <h3>Welcome email: give it your style</h3>
+                                <p>
+                                    Customize the welcome email to reflect your style.
+                                    <a href="?page=newsletter_subscription_welcome">Review</a>.
+                                </p>
+                            </div>
+                        </div>
+
+
+
+                        <div class="tnp-step addons-manager <?php echo!empty($steps['addons-manager']) ? 'ok' : ''; ?>">
+                            <div>
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div>
+                                <h3>Get a free license</h3>
+                                <p>
+                                    And install free addons to get more power.
+
+                                    <a href="?page=newsletter_main_extensions">Get it</a>.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="tnp-card">
+
+
+                        <div class="tnp-step test-email <?php echo !empty($steps['test-email']) ? 'ok' : ''; ?>">
+                            <div>
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div>
+                                <h3>Test the email delivery</h3>
+                                <p>
+                                    Check if your blog can deliver emails.
+
+                                    <a href="?page=newsletter_system_delivery">Run a test</a>.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="tnp-step company <?php echo!empty($steps['company']) ? 'ok' : ''; ?>">
+                            <div>
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div>
+                                <h3>Your company info and socials</h3>
+                                <p>
+                                    Review your company info and socials
+
+                                    <a href="?page=newsletter_main_info">Review</a>.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="tnp-step first-newsletter <?php echo!empty($steps['first-newsletter']) ? 'ok' : ''; ?>">
+                            <div>
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div>
+                                <h3>Create your first newsletter</h3>
+                                <p>
+                                    Explore the composer and send it.
+
+                                    <a href="?page=newsletter_emails_index">Go create</a>.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="tnp-step <?php echo!empty($steps['delivery-speed']) ? 'ok' : ''; ?>">
+                            <div>
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div>
+                                <h3>Change the delivery speed</h3>
+                                <p>
+                                    Set how many emails per hour you want to send.
+
+                                    <a href="?page=newsletter_main_main">Review</a>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="tnp-step <?php echo!empty($steps['automated']) ? 'ok' : ''; ?>">
+                            <div>
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div>
+                                <h3>Explore the Automated Newsletters</h3>
+                                <p>
+                                    Everything on autopilot: set the direction and relax
+
+                                    <a href="?page=newsletter_main_automated">Check it out.</a>
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
+            <?php } ?>
+
+
+
+
+            <div class="tnp-cards-container">
                 <div class="tnp-card">
                     <div class="tnp-card-header">
                         <div class="tnp-card-title"><?php esc_html_e('Subscribers', 'newsletter') ?></div>
-                        <div class="tnp-card-upper-buttons"><a href="?page=newsletter_users_index"><?php _e('Manage', 'newsletter') ?></a></div>
+                        <div class="tnp-card-upper-buttons"><a href="?page=newsletter_users_statistics"><i class="fas fa-chart-bar"></i></a></div>
+                    </div>
+                    <div class="tnp-card-value"><?php echo esc_html($subscribers_count); ?></div>
+                    <div class="tnp-card-description">Confirmed subscribers</div>
+                </div>
+
+                <div class="tnp-card">
+                    <div class="tnp-card-title"><?php esc_html_e('Last 30 days', 'newsletter') ?></div>
+                    <div class="tnp-card-value"><?php echo esc_html($subscribers_count_last_30_days); ?></div>
+                    <div class="tnp-card-description">Confirmed subscribers</div>
+
+                </div>
+
+
+                <div class="tnp-card">
+                    <div class="tnp-card-title"><?php esc_html_e('Queued emails', 'newsletter') ?></div>
+                    <div class="tnp-card-value"><?php echo esc_html($queued); ?></div>
+                    <div class="tnp-card-description">Delivering at <?php echo esc_html($speed); ?> emails per hour.</div>
+                </div>
+
+                <div class="tnp-card">
+                    <div class="tnp-card-title"><?php esc_html_e('Total sent emails', 'newsletter') ?></div>
+                    <div class="tnp-card-value"><?php echo esc_html($total_sent); ?></div>
+                    <div class="tnp-card-description"></div>
+                </div>
+
+
+            </div>
+
+
+            <div class="tnp-cards-container">
+
+
+                <div class="tnp-card">
+                    <div class="tnp-card-header">
+                        <div class="tnp-card-title"><?php esc_html_e('Subscribers', 'newsletter') ?></div>
+                        <div class="tnp-card-upper-buttons"><a href="?page=newsletter_users_index"><i class="fas fa-folder-open"></i></a></div>
                     </div>
                     <div class="tnp-card-content">
                         <table class="widefat" style="width: 100%">
@@ -252,7 +349,7 @@ $blocks[] = ['title' => 'Events', 'active' => $active, 'url' => $url];
                                             <?php echo $emails_module->get_user_status_label($s, true) ?>
                                         </td>
                                         <td style="text-align: right">
-                                            <?php $controls->button_icon_edit('?page=newsletter_users_edit' . '&amp;id=' . $s->id) ?>
+                                            <?php $controls->button_icon_edit('?page=newsletter_users_edit&id=' . $s->id, ['tertiary' => true]) ?>
                                         </td>
                                     </tr>
                                 <?php } ?>
@@ -262,48 +359,11 @@ $blocks[] = ['title' => 'Events', 'active' => $active, 'url' => $url];
 
                     </div>
                 </div>
-            </div>
 
-            <div class="tnp-cards-container">
-                <div class="tnp-card tnp-mimosa">
-                    <div class="tnp-card-title"><?php esc_html_e('Form', 'newsletter') ?></div>
-                    <div class="tnp-card-description"><?php esc_html_e('Setup the form fields and labels.', 'newsletter') ?></div>
-                    <div class="tnp-card-button-container">
-                        <a href="?page=newsletter_subscription_form"><?php esc_html_e('Configure', 'newsletter') ?></a>
-                    </div>
-                </div>
-
-                <div class="tnp-card">
-                    <div class="tnp-card-title"><?php esc_html_e('Lists', 'newsletter') ?></div>
-                    <div class="tnp-card-description">You have <?php echo count($lists) ?> lists.</div>
-                    <div class="tnp-card-button-container">
-                        <a href="?page=newsletter_subscription_lists"><?php esc_html_e('Configure', 'newsletter') ?></a>
-                    </div>
-                </div>
-
-                <div class="tnp-card">
-                    <div class="tnp-card-title"><?php esc_html_e('Delivery', 'newsletter') ?></div>
-                    <div class="tnp-card-description"><?php esc_html_e('Change the delivery speed, sender name and return path.', 'newsletter') ?></div>
-                    <div class="tnp-card-button-container">
-                        <a href="?page=newsletter_main_main"><?php esc_html_e('Configure', 'newsletter') ?></a>
-                    </div>
-                </div>
-
-                <div class="tnp-card">
-                    <div class="tnp-card-title"><?php esc_html_e('Company Info', 'newsletter') ?></div>
-                    <div class="tnp-card-description"><?php esc_html_e('Set your company name, address, socials.', 'newsletter') ?></div>
-                    <div class="tnp-card-button-container">
-                        <a href="?page=newsletter_main_info"><?php esc_html_e('Configure', 'newsletter') ?></a>
-                    </div>
-                </div>
-            </div>
-
-
-            <div class="tnp-cards-container">
                 <div class="tnp-card">
                     <div class="tnp-card-header">
                         <div class="tnp-card-title"><?php esc_html_e('Newsletters', 'newsletter') ?></div>
-                        <div class="tnp-card-upper-buttons"><a href="?page=newsletter_emails_index"><?php _e('Manage', 'newsletter') ?></a></div>
+                        <div class="tnp-card-upper-buttons"><a href="?page=newsletter_emails_index"><i class="fas fa-folder-open"></i></a></div>
                     </div>
                     <div class="tnp-card-content">
 
@@ -313,6 +373,7 @@ $blocks[] = ['title' => 'Events', 'active' => $active, 'url' => $url];
                                 <?php foreach ($emails as $email) { ?>
                                     <tr>
                                         <td>
+                                            <small><?php echo esc_html($email->type == 'message' ? 'Regular newsletter' : 'Automated newsletter'); ?></small><br>
                                             <?php echo esc_html($email->subject) ?>
                                         </td>
                                         <td style="text-align: center">
@@ -324,9 +385,9 @@ $blocks[] = ['title' => 'Events', 'active' => $active, 'url' => $url];
                                         <td style="text-align: right">
                                             <?php
                                             if ($email->status === TNP_Email::STATUS_SENT || $email->status === TNP_Email::STATUS_SENDING) {
-                                                echo '<a class="button-primary" href="' . $statistics_module->get_statistics_url($email->id) . '"><i class="fas fa-chart-bar"></i></a>';
+                                                $controls->button_icon_statistics($statistics_module->get_statistics_url($email->id), ['tertiary' => true]);
                                             } else {
-                                                echo $emails_module->get_edit_button($email, true);
+                                                $controls->button_icon_edit('?page=newsletter_emails_edit&id=' . $email->id, ['tertiary' => true]);
                                             }
                                             ?>
 
@@ -339,10 +400,21 @@ $blocks[] = ['title' => 'Events', 'active' => $active, 'url' => $url];
                     </div>
                 </div>
 
+            </div>
+
+            <div class="tnp-cards-container">
+
                 <div class="tnp-card">
-                    <div class="tnp-card-title"><?php _e('Subscriptions', 'newsletter') ?></div>
-                    <div class="tnp-canvas">
-                        <canvas id="tnp-events-chart-canvas" height="300"></canvas>
+                    <div class="tnp-card-header">
+                        <div class="tnp-card-title"><?php esc_html_e('Confirmed subscriptions', 'newsletter') ?></div>
+                        <div class="tnp-card-upper-buttons"><a href="?page=newsletter_users_statistics"><?php _e('Full statistics', 'newsletter') ?></a></div>
+                    </div>
+
+                    <div class="tnp-card-content">
+
+                        <div class="tnp-canvas">
+                            <canvas id="tnp-events-chart-canvas" height="300"></canvas>
+                        </div>
                     </div>
 
                     <script type="text/javascript">
@@ -350,38 +422,88 @@ $blocks[] = ['title' => 'Events', 'active' => $active, 'url' => $url];
                             labels: <?php echo json_encode($labels) ?>,
                             datasets: [
                                 {
-                                    label: "<?php _e('Subscriptions', 'newsletter') ?>",
+                                    label: "",
                                     fill: true,
-                                    strokeColor: "#27AE60",
-                                    backgroundColor: "#eee",
-                                    borderColor: "#27AE60",
-                                    pointBorderColor: "#27AE60",
-                                    pointBackgroundColor: "#ECF0F1",
-                                    data: <?php echo json_encode($values) ?>
+                                    strokeColor: "#3498db",
+                                    backgroundColor: "#72b8e6",
+                                    borderColor: "#3498db",
+                                    data: <?php echo wp_json_encode($values) ?>
                                 }
                             ]
                         };
 
-                        jQuery(document).ready(function ($) {
+                        jQuery(function ($) {
                             ctxe = $('#tnp-events-chart-canvas').get(0).getContext("2d");
                             eventsLineChart = new Chart(ctxe, {
-                                type: 'line', data: events_data,
+                                type: 'bar', data: events_data,
                                 options: {
                                     maintainAspectRatio: false,
                                     xresponsive: true,
                                     scales: {
                                         xAxes: [{
                                                 type: "category",
-                                                "id": "x-axis-1",
-                                                gridLines: {display: false},
-                                                ticks: {fontFamily: "soleil"}
                                             }],
                                         yAxes: [
                                             {
                                                 type: "linear",
-                                                "id": "y-axis-1",
-                                                gridLines: {display: false},
-                                                ticks: {fontFamily: "soleil"}
+                                                ticks: {
+                                                    beginAtZero: true
+                                                }
+                                            },
+                                        ]
+                                    },
+                                }
+                            });
+                        });
+                    </script>
+                </div>
+            </div>
+
+            <div class="tnp-cards-container">
+
+                <div class="tnp-card">
+                    <div class="tnp-card-header">
+                        <div class="tnp-card-title"><?php esc_html_e('Unconfirmed subscriptions', 'newsletter') ?></div>
+                        <div class="tnp-card-upper-buttons"><a href="?page=newsletter_users_statistics"><?php _e('Full statistics', 'newsletter') ?></a></div>
+                    </div>
+
+                    <div class="tnp-card-content">
+
+                        <div class="tnp-canvas">
+                            <canvas id="tnp-unconfirmed-chart" height="300"></canvas>
+                        </div>
+                    </div>
+
+                    <script type="text/javascript">
+                        var events_data2 = {
+                            labels: <?php echo json_encode($unconfirmed['x']) ?>,
+                            datasets: [
+                                {
+                                    label: "",
+                                    fill: true,
+                                    backgroundColor: "#f27b36",
+                                    data: <?php echo wp_json_encode($unconfirmed['y']) ?>
+                                }
+                            ]
+                        };
+
+                        jQuery(function ($) {
+                            ctxe = $('#tnp-unconfirmed-chart').get(0).getContext("2d");
+                            eventsLineChart2 = new Chart(ctxe, {
+                                type: 'bar', data: events_data2,
+                                options: {
+                                    maintainAspectRatio: false,
+                                    xresponsive: true,
+                                    scales: {
+                                        xAxes: [{
+                                                type: "category",
+                                            }],
+                                        yAxes: [
+                                            {
+                                                type: "linear",
+                                                ticks: {
+                                                    beginAtZero: true
+                                                }
                                             },
                                         ]
                                     },
@@ -460,33 +582,9 @@ $blocks[] = ['title' => 'Events', 'active' => $active, 'url' => $url];
             </div>
 
 
-            <div class="tnp-cards-container">
-                <div class="tnp-card">
-                    <div class="tnp-card-header">
-                        <div class="tnp-card-title"><?php _e('Developers', 'newsletter') ?></div>
-                    </div>
-                    <div class="tnp-card-description">Extending Newsletter by yourself? There is something for you as well!</div>
-                    <div class="tnp-card-button-container">
-                        <a href="https://www.thenewsletterplugin.com/documentation/developers/" target="_blank">Developer's love 💛</a>
-                    </div>
-                </div>
-                <div class="tnp-card">
-                    <div class="tnp-card-header">
-                        <div class="tnp-card-title"><?php _e('Video Tutorials', 'newsletter') ?></div>
-                    </div>
-                    <div class="tnp-card-description">We have some videos to help gest the most from Newsletter.</div>
-                    <div class="tnp-card-video">
-                        <iframe width="400" height="200" src="https://www.youtube.com/embed/zmVmW84Bw9A" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                    </div>
-                    <div class="tnp-card-button-container">
-                        <a href="https://www.thenewsletterplugin.com/video-tutorials" target="_blank">See the videos</a>
-                    </div>
-                </div>
-            </div>
+
 
         </div>
-
-        <?php include NEWSLETTER_DIR . '/tnp-footer.php'; ?>
 
     </div>
 </div>

@@ -44,13 +44,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['ac
     if ($r) {
         //$status_options['mail'] = 1;
         //$module->save_options($status_options, 'status');
-        echo _e('Check your mailbox for a test message. Check the spam folder as well.', 'newsletter');
+        echo esc_html_e('Check your mailbox for a test message. Check the spam folder as well.', 'newsletter');
         die();
     } else {
         //$status_options['mail'] = 0;
         //$status_options['mail_error'] = $module->mail_last_error;
         //$module->save_options($status_options, 'status');
-        echo _e('There was an error. Complete the setup and then use the System panels to test again.', 'newsletter');
+        echo esc_html_e('There was an error. Complete the setup and then use the System panels to test again.', 'newsletter');
         die();
     }
     die();

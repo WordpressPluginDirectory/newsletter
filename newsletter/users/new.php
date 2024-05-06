@@ -21,10 +21,7 @@ if ($controls->is_action('save')) {
         if ($user === false) {
             $controls->errors = __('This subscriber already exists.', 'newsletter');
         } else {
-            echo '<script>';
-            echo 'location.href="' . $this->get_admin_page_url('edit') . '&id=' . $user->id . '"';
-            echo '</script>';
-            return;
+            $controls->js_redirect('?page=newsletter_users_edit&id=' . $user->id);
         }
     }
 }

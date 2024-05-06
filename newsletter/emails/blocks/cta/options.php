@@ -1,32 +1,5 @@
 <?php
 /* @var $fields NewsletterFields */
-
-// Migration from old option names
-if (!empty($controls->data['font_color']))
-    $controls->data['button_font_color'] = $controls->data['font_color'];
-if (!empty($controls->data['url']))
-    $controls->data['button_url'] = $controls->data['url'];
-if (!empty($controls->data['font_family']))
-    $controls->data['button_font_family'] = $controls->data['font_family'];
-if (!empty($controls->data['font_size']))
-    $controls->data['button_font_size'] = $controls->data['font_size'];
-if (!empty($controls->data['font_weight']))
-    $controls->data['button_font_weight'] = $controls->data['font_weight'];
-if (!empty($controls->data['background']))
-    $controls->data['button_background'] = $controls->data['background'];
-if (!empty($controls->data['text']))
-    $controls->data['button_label'] = $controls->data['text'];
-if (!empty($controls->data['width']))
-    $controls->data['button_width'] = $controls->data['width'];
-
-unset($controls->data['font_color']);
-unset($controls->data['url']);
-unset($controls->data['font_family']);
-unset($controls->data['font_size']);
-unset($controls->data['font_weight']);
-unset($controls->data['background']);
-unset($controls->data['text']);
-unset($controls->data['width']);
 ?>
 
 <?php
@@ -38,22 +11,29 @@ $fields->button('button', 'Button layout', [
 ])
 ?>
 
-<?php
-//if (class_exists('NewsletterReports')) {
-//    $fields->lists_public('list' . $i, 'Add who click to', ['empty_label' => '-']);
-//} else {
-//    $fields->lists_public('list' . $i, 'Add who click to (requires the Reports Addon)', ['empty_label' => '-']);
-//}
-?>
-
 <div class="tnp-field-row">
     <div class="tnp-field-col-2">
         <?php $fields->size('button_width', __('Width', 'newsletter')) ?>
     </div>
     <div class="tnp-field-col-2">
-        <?php $fields->select('button_align', 'Alignment', ['center' => __('Center'), 'left' => __('Left'), 'right' => __('Right')]) ?>
+        <?php $fields->select('button_align', __('Alignment', 'newsletter'), ['center' => __('Center'), 'left' => __('Left'), 'right' => __('Right')]) ?>
     </div>
 
+</div>
+
+
+<div class="tnp-field-row">
+
+    <div class="tnp-field-col-2">
+        <?php $fields->lists_public('list', 'Add to', ['empty_label' => 'None']) ?>
+    </div>
+    <div class="tnp-field-col-2">
+        <?php $fields->lists_public('unlist', 'Remove from', ['empty_label' => 'None']) ?>
+    </div>
+    <div style="clear: both"></div>
+    <?php if (!method_exists('NewsletterReports', 'build_lists_change_url')) { ?>
+    <label class="tnp-row-label">Requires the Reports Addon last version</label>
+    <?php } ?>
 </div>
 
 

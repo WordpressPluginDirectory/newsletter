@@ -12,7 +12,7 @@ defined('ABSPATH') || exit;
 
 <div class="row">
     <div class="col-md-6">
-        
+
         <?php
         $dt = new DateTime();
         $dt->setTime(12, 0, 0)->setDate((int) date('Y'), (int) date('m'), 1);
@@ -51,7 +51,7 @@ defined('ABSPATH') || exit;
 
     <div class="col-md-6">
 
-       
+
         <?php
         $dt = new DateTime();
         $dt->setTime(12, 0, 0);
@@ -92,23 +92,23 @@ defined('ABSPATH') || exit;
 
 <script>
     const dataDays = {
-        labels: <?php echo json_encode($days) ?>,
+        labels: <?php echo wp_json_encode($days) ?>,
         datasets: [{
                 label: 'By day',
                 borderColor: '#3498DB',
                 borderWidth: 1,
-                data: <?php echo json_encode($dataDays) ?>,
+                data: <?php echo wp_json_encode($dataDays) ?>,
             }]
     };
 
 
     const dataMonths = {
-        labels: <?php echo json_encode($months) ?>,
+        labels: <?php echo wp_json_encode($months) ?>,
         datasets: [{
                 label: 'By month',
                 borderColor: '#3498DB',
                 borderWidth: 1,
-                data: <?php echo json_encode($dataMonths) ?>,
+                data: <?php echo wp_json_encode($dataMonths) ?>,
             }]
     };
 

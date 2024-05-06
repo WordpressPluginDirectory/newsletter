@@ -67,8 +67,8 @@ if (!$controls->is_action()) {
         } else {
             $email['options']['lists_operator'] = 'and';
         }
-        $controls->data['options_lists'] = array();
-        $controls->data['options_lists_exclude'] = array();
+        $controls->data['options_lists'] = [];
+        $controls->data['options_lists_exclude'] = [];
 
         if (!empty($email['preferences'])) {
             $preferences = explode(',', $email['preferences']);
@@ -287,6 +287,8 @@ if (empty($controls->errors) && ($controls->is_action('send') || $controls->is_a
         if ($controls->is_action('send') && $email['total'] < 20) {
             Newsletter::instance()->hook_newsletter();
         }
+
+        NewsletterMainAdmin::instance()->set_completed_step('first-newsletter');
     }
 }
 
@@ -372,7 +374,7 @@ if ($email['status'] != 'sent') {
 
                         <div style="flex-grow: 1">
                             <?php
-                            if ($email['status'] == 'sending' && $email['send_on'] > time() || $email['status'] == 'sent') {
+                            if ($email['status'] == 'sending' && $email['send_on'] > time() || $email['status'] == 'sent' || $email['status'] == 'error') {
                                 echo $this->format_date($email['send_on']);
                             } else {
                                 $this->show_email_progress_bar($email);
@@ -398,20 +400,20 @@ if ($email['status'] != 'sent') {
             <div id="tabs">
 
                 <ul>
-                    <li><a href="#tabs-options"><?php _e('Targeting', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-options"><?php esc_html_e('Targeting', 'newsletter') ?></a></li>
                     <li><a href="#tabs-ga">Google Analytics</a></li>
-                    <li class="tnp-tabs-advanced"><a href="#tabs-advanced"><?php _e('Advanced', 'newsletter') ?></a></li>
+                    <li class="tnp-tabs-advanced"><a href="#tabs-advanced"><?php esc_html_e('Advanced', 'newsletter') ?></a></li>
                 </ul>
 
 
                 <div id="tabs-options" class="tnp-list-conditions">
 
                     <p>
-                        <?php _e('Leaving all multichoice options unselected is like to select all them', 'newsletter'); ?>
+                        <?php esc_html_e('Leaving all multichoice options unselected is like to select all them', 'newsletter'); ?>
                     </p>
                     <table class="form-table">
                         <tr>
-                            <th><?php _e('Lists', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Lists', 'newsletter') ?></th>
                             <td>
                                 <?php
                                 $lists = $controls->get_list_options();
@@ -421,34 +423,34 @@ if ($email['status'] != 'sent') {
                                 <?php $controls->select2('options_lists', $lists, null, true, null, __('All', 'newsletter')); ?>
 
                                 <br>
-                                <?php _e('must not in one of', 'newsletter') ?>
+                                <?php esc_html_e('must not in one of', 'newsletter') ?>
 
                                 <?php $controls->select2('options_lists_exclude', $lists, null, true, null, __('None', 'newsletter')); ?>
                             </td>
                         </tr>
 
                         <tr>
-                            <th><?php _e('Language', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Language', 'newsletter') ?></th>
                             <td>
                                 <?php $controls->language('options_language'); ?>
                             </td>
                         </tr>
 
                         <tr>
-                            <th><?php _e('Gender', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Gender', 'newsletter') ?></th>
                             <td>
                                 <?php $controls->checkboxes_group('options_sex', array('f' => 'Women', 'm' => 'Men', 'n' => 'Not specified')); ?>
                             </td>
                         </tr>
                         <tr>
-                            <th><?php _e('Status', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Status', 'newsletter') ?></th>
                             <td>
                                 <?php $controls->select('options_status', array('C' => __('Confirmed', 'newsletter'), 'S' => __('Not confirmed', 'newsletter'))); ?>
 
                             </td>
                         </tr>
                         <tr>
-                            <th><?php _e('Only to subscribers linked to WP users', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Only to subscribers linked to WP users', 'newsletter') ?></th>
                             <td>
                                 <?php $controls->yesno('options_wp_users'); ?>
                             </td>
@@ -458,7 +460,7 @@ if ($email['status'] != 'sent') {
                         ?>
                         <?php if (!empty($fields)) { ?>
                             <tr>
-                                <th><?php _e('Profile fields', 'newsletter') ?></th>
+                                <th><?php esc_html_e('Profile fields', 'newsletter') ?></th>
                                 <td>
                                     <?php foreach ($fields as $profile) { ?>
                                         <?php if ($profile->type !== TNP_Profile::TYPE_SELECT) continue; ?>
@@ -547,26 +549,26 @@ if ($email['status'] != 'sent') {
 
                     <table class="form-table">
                         <tr>
-                            <th><?php _e('Keep private', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Keep private', 'newsletter') ?></th>
                             <td>
                                 <?php $controls->yesno('private'); ?>
                                 <?php if ($email['status'] == 'sent') { ?>
                                     <?php $controls->button('change-private', __('Save')) ?>
                                 <?php } ?>
                                 <span class="description">
-                                    <?php _e('Hide/show from public sent newsletter list.', 'newsletter') ?>
-                                    <?php _e('Used by', 'newsletter') ?>: <a href="" target="_blank">Archive Addon</a>
+                                    <?php esc_html_e('Hide/show from public sent newsletter list.', 'newsletter') ?>
+                                    <?php esc_html_e('Used by', 'newsletter') ?>: <a href="" target="_blank">Archive Addon</a>
                                 </span>
                             </td>
                         </tr>
                         <tr>
-                            <th><?php _e('Track clicks and message opening', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Track clicks and message opening', 'newsletter') ?></th>
                             <td>
                                 <?php $controls->yesno('track'); ?>
                             </td>
                         </tr>
                         <tr>
-                            <th><?php _e('Sender email address', 'newsletter') ?></th>
+                            <th><?php esc_html_e('Sender email address', 'newsletter') ?></th>
                             <td>
                                 <?php $controls->text_email('options_sender_email', 40); ?>
                                 <span class="description">
@@ -579,7 +581,7 @@ if ($email['status'] != 'sent') {
                         </tr>
                         <tr>
                             <th>
-                                <?php _e('Sender name', 'newsletter') ?>
+                                <?php esc_html_e('Sender name', 'newsletter') ?>
                             </th>
                             <td>
                                 <?php $controls->text('options_sender_name', 40); ?>
@@ -590,6 +592,7 @@ if ($email['status'] != 'sent') {
                         </tr>
                     </table>
 
+                    <?php do_action('newsletter_emails_edit_other', $this->get_email($email_id), $controls) ?>
 
                     <table class="form-table">
 

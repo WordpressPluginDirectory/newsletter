@@ -11,7 +11,7 @@ $fields->controls->data['schema'] = '';
 <?php $controls->hidden('image_url') ?>
 <div class="tnp-field-row">
     <div class="tnp-field-col-3">
-        <?php $fields->select('layout', __('Layout', 'newsletter'), array('full' => 'Full', 'left' => 'Image left', 'right' => 'Image right')) ?>
+        <?php $fields->select('layout', __('Layout', 'newsletter'), array('full' => 'Full', 'left' => 'Image left', 'left13' => 'Image left 1/3', 'right' => 'Image right', 'right13' => 'Image right 1/3')) ?>
     </div>
     <div class="tnp-field-col-3">
         <?php $fields->select('schema', __('Schema', 'newsletter'), array('' => 'Custom', 'bright' => 'Bright', 'dark' => 'Dark', 'orangeblue'=>'Orange+Blue'), ['after-rendering' => 'reload']) ?>

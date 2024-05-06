@@ -41,6 +41,8 @@ class NewsletterUpgrade {
         require_once NEWSLETTER_DIR . '/admin.php';
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
+        wp_cache_flush();
+
         if (!get_option('newsletter_install_time')) {
             update_option('newsletter_install_time', time(), false);
         }
@@ -212,7 +214,7 @@ class NewsletterUpgrade {
         // Delete old backup
         $items = $wpdb->get_results("select option_name from {$wpdb->options} where option_name like 'newsletter_backup_%' order by option_name");
         if ($items) {
-            for ($i = 0; $i < count($items) - 3; $i++) {
+            for ($i = 0; $i < count($items) - 5; $i++) {
                 $this->logger->info('Deleting settings backup ' . $items[$i]->option_name);
                 delete_option($items[$i]->option_name);
             }

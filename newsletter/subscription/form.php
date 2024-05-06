@@ -55,7 +55,7 @@ $main_options = $this->get_main_options('form');
         <p>
             The standard subscription form settings.
             See it on <a href="<?php echo esc_attr(Newsletter::instance()->get_newsletter_page_url()) ?>" target="_blank">the Newsletter public page</a>.
-
+        </p>
 
         <form action="" method="post">
             <?php $controls->init(); ?>

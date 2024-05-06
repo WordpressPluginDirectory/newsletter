@@ -188,7 +188,9 @@ class NewsletterModuleAdmin extends NewsletterModuleBase {
             return;
         }
         echo '<div class="tnpc-language-notice">';
-        echo 'You are configuring the language <strong>' . $this->get_language_label($this->language()) . '</strong>. Switch to "all languages" to see all options.';
+        $label = $this->get_language_label($this->language());
+        echo sprintf(esc_html__('You are configuring the language %s. Switch to "all languages" to see all options.', 'newsletter'),
+                        '<strong>' . $label . '</strong>');
         echo '</div>';
     }
 
@@ -366,7 +368,7 @@ class NewsletterModuleAdmin extends NewsletterModuleBase {
             case TNP_User::STATUS_COMPLAINED: $class = 'complained';
                 break;
         }
-        return '<span class="tnp-status tnp-user-status tnp-user-status--' . $class . '">' . esc_html($label) . '</span>';
+        return '<span class="tnp-status tnp-user-status tnp-user-status--' . esc_attr($class) . '">' . esc_html($label) . '</span>';
     }
 
     /**

@@ -86,13 +86,14 @@ $list[] = $s;
 </style>
 <div class="wrap tnp-statistics tnp-statistics-view" id="tnp-wrap">
     <?php include NEWSLETTER_ADMIN_HEADER; ?>
-    
+
     <?php include __DIR__ . '/view-heading.php' ?>
 
 
     <div id="tnp-body">
         <p style="font-size: 1.1em;">
-            Details by single subscriber are available with the <a href="https://www.thenewsletterplugin.com/reports" target="_blank">Reports addon</a>.
+            Details by single subscriber for this newsletter are available
+            with the <a href="https://www.thenewsletterplugin.com/reports?utm_source=statistics&utm_campaign=plugin" target="_blank">Reports Addon</a>.
             Data below is a sample view.
         </p>
 

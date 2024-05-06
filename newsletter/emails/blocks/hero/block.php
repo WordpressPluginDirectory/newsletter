@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Name: Hero
+ * Name: Image+Text+Button
  * Section: content
  * Description: Image, title, text and call to action all in one
  */
@@ -129,9 +129,11 @@ if (!empty($options['image']['id'])) {
 
 switch ($layout) {
     case 'left':
+    case 'left13':
         include __DIR__ . '/block-left.php';
         return;
     case 'right':
+    case 'right13':
         include __DIR__ . '/block-right.php';
         return;
     case 'full':

@@ -10,7 +10,7 @@ class NewsletterFields {
     }
 
     public function _open($subclass = '') {
-        echo '<div class="tnpf-field ', $subclass, '">';
+        echo '<div class="tnpf-field ', esc_attr($subclass), '">';
     }
 
     public function _close() {
@@ -21,8 +21,7 @@ class NewsletterFields {
         if (empty($text)) {
             return;
         }
-        // Do not escape, HTML allowed
-        echo '<label class="tnpf-label">', $text, '</label>';
+        echo '<label class="tnpf-label">', wp_kses_post($text), '</label>';
     }
 
     public function _description($attrs) {
@@ -30,7 +29,7 @@ class NewsletterFields {
             return;
         }
         // Do not escape, HTML allowed
-        echo '<div class="tnpf-description">', $attrs['description'], '</div>';
+        echo '<div class="tnpf-description">', wp_kses_post($attrs['description']), '</div>';
     }
 
     public function _id($name) {
@@ -100,21 +99,21 @@ class NewsletterFields {
         echo '<input id="', $this->_id($name), '" placeholder="', esc_attr($attrs['placeholder']), '" name="', $this->_name($name), '" type="', esc_attr($attrs['type']), '"';
 
         if (!empty($attrs['size'])) {
-            echo ' style="width: ', $attrs['size'], 'px"';
+            echo ' style="width: ', ((int) $attrs['size']), 'px"';
         }
 
         if (isset($attrs['min'])) {
-            echo ' min="' . (int) $attrs['min'] . '"';
+            echo ' min="' . ((int) $attrs['min']) . '"';
         }
 
         if (isset($attrs['max'])) {
-            echo ' max="' . (int) $attrs['max'] . '"';
+            echo ' max="' . ((int) $attrs['max']) . '"';
         }
 
         echo ' value="', esc_attr($value), '">';
 
         if (!empty($attrs['label_after'])) {
-            echo $attrs['label_after'];
+            echo wp_kses_post($attrs['label_after']);
         }
 
         $this->_description($attrs);
@@ -144,11 +143,11 @@ class NewsletterFields {
         echo ' style="width: 90%;"';
 
         if (isset($attrs['min'])) {
-            echo ' min="' . (int) $attrs['min'] . '"';
+            echo ' min="' . ((int) $attrs['min']) . '"';
         }
 
         if (isset($attrs['max'])) {
-            echo ' max="' . (int) $attrs['max'] . '"';
+            echo ' max="' . ((int) $attrs['max']) . '"';
         }
 
         echo ' value="', esc_attr($value), '">';
@@ -184,14 +183,14 @@ class NewsletterFields {
 
         for ($i = 1; $i <= $count; $i++) {
             $value = $this->controls->get_value($name . '_' . $i);
-            echo '<input id="', $this->_id($name . '_' . $i), '" placeholder="', esc_attr($attrs['placeholder']), '" name="options[', $name, '_', $i, ']" type="text"';
+            echo '<input id="', $this->_id($name . '_' . $i), '" placeholder="', esc_attr($attrs['placeholder']), '" name="options[', esc_attr($name), '_', $i, ']" type="text"';
             if (!empty($attrs['size'])) {
-                echo ' style="width: ', $attrs['size'], 'px"';
+                echo ' style="width: ', ((int) $attrs['size']), 'px"';
             }
             echo ' value="', esc_attr($value), '">';
         }
         if (!empty($attrs['label_after'])) {
-            echo $attrs['label_after'];
+            echo wp_kses_post($attrs['label_after']);
         }
         $this->_description($attrs);
         $this->_close();
@@ -219,38 +218,31 @@ class NewsletterFields {
         if (is_array($value)) {
             $value = implode("\n", $value);
         }
-        if (version_compare($wp_version, '4.8', '<')) {
-            echo '<p><strong>Rich editor available only with WP 4.8+</strong></p>';
-        }
+
         echo '<textarea class="tnpf-wp-editor" id="options-', $name, '" name="options[', $name, ']" style="width: 100%;height:250px">';
         echo esc_html($value);
         echo '</textarea>';
 
-        if (version_compare($wp_version, '4.8', '>=')) {
-
-            $paragraph_style = " p { font-family: {$attrs['text_font_family']}; font-size: {$attrs['text_font_size']}px; font-weight: 0{$attrs['text_font_weight']}; color: {$attrs['text_font_color']}; line-height: 1.5em; }";
-            $content_style = $paragraph_style;
-            if (!empty($attrs['background'])) {
-                $content_style .= 'body { background-color: ' . esc_attr($attrs['background']) . ';}';
-            }
-
-            echo '<script>';
-            //. 'font_formats: "Default=; Andale Monox=andale mono,times; Arial=arial,helvetica,sans-serif; Arial Black=arial black,avant garde; Book Antiqua=book antiqua,palatino; Comic Sans MS=comic sans ms,sans-serif; Courier New=courier new,courier; Georgia=georgia,palatino; Helvetica=helvetica; Impact=impact,chicago; Oswald=oswald; Symbol=symbol; Tahoma=tahoma,arial,helvetica,sans-serif; Terminal=terminal,monaco; Times New Roman=times new roman,times; Trebuchet MS=trebuchet ms,geneva; Verdana=verdana,geneva; Webdings=webdings; Wingdings=wingdings,zapf dingbats",'
-
-            echo 'wp.editor.remove("options-', $name, '");';
-            echo 'wp.editor.initialize("options-', $name, '", { tinymce: {'
-            . 'content_style: "' . $content_style . '",'
-            . 'toolbar1: "undo redo | formatselect fontselect fontsizeselect | bold italic forecolor backcolor | link unlink | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | wp_add_media | charmap | rtl ltr",'
-            . 'fontsize_formats: "11px 12px 14px 16px 18px 24px 36px 48px",'
-            . 'plugins: "link textcolor colorpicker lists wordpress charmap directionality",'
-            . 'default_link_target: "_blank",'
-            . 'relative_urls : false,'
-            . 'convert_urls: false,'
-            . 'init_instance_callback: function (editor) { editor.on("blur", function (e) { tinymce.triggerSave(); jQuery(editor.getElement()).trigger("change"); }); },'
-            . 'keep_styles: true'
-            . '}});';
-            echo '</script>';
+        $content_style = " p { font-family: {$attrs['text_font_family']}; font-size: {$attrs['text_font_size']}px; font-weight: 0{$attrs['text_font_weight']}; color: {$attrs['text_font_color']}; line-height: 1.5em; }";
+        if (!empty($attrs['background'])) {
+            $content_style .= 'body { background-color: ' . $attrs['background'] . ';}';
         }
+
+        echo '<script>';
+
+        echo 'wp.editor.remove("options-', esc_js($name), '");';
+        echo 'wp.editor.initialize("options-', esc_js($name), '", { tinymce: {'
+        . 'content_style: "' . esc_js($content_style) . '",'
+        . 'toolbar1: "undo redo | formatselect fontselect fontsizeselect | bold italic forecolor backcolor | link unlink | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat | wp_add_media | charmap | rtl ltr",'
+        . 'fontsize_formats: "11px 12px 14px 16px 18px 24px 36px 48px",'
+        . 'plugins: "link textcolor colorpicker lists wordpress charmap directionality",'
+        . 'default_link_target: "_blank",'
+        . 'relative_urls : false,'
+        . 'convert_urls: false,'
+        . 'init_instance_callback: function (editor) { editor.on("blur", function (e) { tinymce.triggerSave(); jQuery(editor.getElement()).trigger("change"); }); },'
+        . 'keep_styles: true'
+        . '}});';
+        echo '</script>';
         $this->_description($attrs);
         $this->_close();
     }
@@ -278,7 +270,7 @@ class NewsletterFields {
             echo ' onchange="tnpc_reload_options(event)"';
         }
         if (!empty($attrs['after-rendering'])) {
-            echo ' data-after-rendering="', $attrs['after-rendering'], '"';
+            echo ' data-after-rendering="', esc_attr($attrs['after-rendering']), '"';
         }
         echo '>';
 //        if (!empty($first)) {
@@ -351,9 +343,9 @@ class NewsletterFields {
         $value = $this->controls->get_value($name);
         echo '<input id="', $this->_id($name), '" placeholder="', esc_attr($attrs['placeholder']), '" name="', $this->_name($name), '" type="text"';
         if (!empty($attrs['size'])) {
-            echo ' style="width: ', $attrs['size'], 'px"';
+            echo ' style="width: ', ((int)$attrs['size']), 'px"';
         }
-        echo ' value="', esc_attr($value), '">', $attrs['label_after'];
+        echo ' value="', esc_attr($value), '">', wp_kses_post($attrs['label_after']);
         $this->_description($attrs);
         $this->_close();
     }
@@ -416,7 +408,7 @@ class NewsletterFields {
         echo '</div>';
 
         if ($attrs['align']) {
-            $this->controls->select($name . '_align', ['center' => 'Center', 'left' => 'Left', 'right' => 'Right']);
+            $this->controls->select($name . '_align', ['center' => __('Center'), 'left' => __('Left'), 'right' => __('Right')]);
         }
 
         $this->controls->css_font($name . '_font', [
@@ -426,6 +418,7 @@ class NewsletterFields {
             'weight_default' => $attrs['weight_default']
         ]);
         $this->controls->color($name . '_background');
+        $this->controls->color($name . '_border_color');
         $this->_close();
     }
 
@@ -451,7 +444,7 @@ class NewsletterFields {
         $this->_label($label);
         $this->controls->text_url($name);
         if (isset($attrs['media'])) {
-            echo '<i class="far fa-folder-open" onclick="tnp_fields_url_select(\'options_', $name, '\')"></i>';
+            echo '<i class="far fa-folder-open" onclick="tnp_fields_url_select(\'options_', esc_attr(esc_js($name)), '\')"></i>';
         }
         $this->_description($attrs);
         $this->_close();
@@ -813,5 +806,4 @@ class NewsletterFields {
         echo '<div class="tnpf-description">Gradients are displayed only by few clients</div>';
         $this->_close();
     }
-
 }

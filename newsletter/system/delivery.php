@@ -5,6 +5,8 @@
 
 defined('ABSPATH') || exit;
 
+wp_enqueue_script('tnp-chart');
+
 $newsletter = Newsletter::instance();
 $mailer = $newsletter->get_mailer();
 
@@ -31,6 +33,7 @@ if ($controls->is_action('test')) {
             $controls->messages .= '<strong>SUCCESS</strong><br>';
             $controls->messages .= 'Anyway if the message does not appear the mailbox (check even the spam folder) you can ';
             $controls->messages .= '<a href="https://www.thenewsletterplugin.com/documentation/?p=15170" target="_blank"><strong>read more here</strong></a>.';
+            NewsletterMainAdmin::instance()->set_completed_step('test-email');
         } else {
             $options['mail'] = 0;
             $options['mail_error'] = $r->get_error_message();

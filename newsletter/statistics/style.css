@@ -8,17 +8,14 @@
 .tnp-card {
     flex: 1 0;
     align-content: flex-start;
-    margin: 15px;
+    margin: 1rem;
     border-radius: 10px;
     background-color: #fff;
     -webkit-box-shadow: 1px 1px 7px 0px rgba(0, 0, 0, 0.15);
     -moz-box-shadow: 1px 1px 7px 0px rgba(0, 0, 0, 0.15);
     box-shadow: 1px 1px 7px 0px rgba(0, 0, 0, 0.15);
-    padding: 15px;
+    padding: 1rem;
     color: #FFF;
-    display: flex;
-    flex-wrap: wrap;
-    position: relative;
 }
 
 
@@ -39,17 +36,17 @@
 }
 
 .tnp-card .tnp-card-title {
-    flex-basis: 100%;
     font-size: 19px;
-    margin-bottom: 25px;
+    margin-bottom: 1rem;
     color: #444;
+    line-height: normal;
 }
 
 .tnp-card .tnp-card-value {
-    flex-basis: 75%;
-    font-size: 39px;
+    font-size: 2rem;
     font-weight: bold;
     color: #444;
+    line-height: normal;
 }
 
 
@@ -220,7 +217,7 @@
 }
 
 .tnp-card-icon-filter-remove {
-    background-image: url('./images/filter-remove.svg');
+    /*background-image: url('./images/filter-remove.svg');*/
 }
 
 .tnp-card-icon-mouse {
@@ -228,15 +225,15 @@
 }
 
 .tnp-card-icon-business-contact {
-    background-image: url('./images/business-contact-85.svg');
+    /*background-image: url('./images/business-contact-85.svg');*/
 }
 
 .tnp-card-icon-preview {
-    background-image: url('./images/preview.svg');
+    /*background-image: url('./images/preview.svg');*/
 }
 
 .tnp-card-icon-rabbit {
-    background-image: url('./images/rabbit.svg');
+    /*background-image: url('./images/rabbit.svg');*/
 }
 
 /* Fix for third party plugins */

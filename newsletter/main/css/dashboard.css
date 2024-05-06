@@ -16,13 +16,13 @@
     height: 0;
 }
 
-.tnp-dashboard .tnp-cards-container {
+#tnp-body .tnp-dashboard .tnp-cards-container {
     display: flex;
     flex-wrap: wrap;
     flex-direction: row;
 }
 
-.tnp-dashboard .tnp-card {
+#tnp-body .tnp-dashboard .tnp-card {
     flex: 1 0;
     align-content: flex-start;
     margin: 15px;
@@ -40,26 +40,26 @@
     position: relative;
 }
 
-.tnp-dashboard .tnp-card a, .tnp-dashboard .tnp-card a:active {
+#tnp-body .tnp-dashboard .tnp-card a, .tnp-dashboard .tnp-card a:active {
     text-decoration: none;
 }
 
-.tnp-dashboard .tnp-card .tnp-card-header {
+#tnp-body .tnp-dashboard .tnp-card .tnp-card-header {
     display: flex;
     width: 100%;
     justify-content: space-between;
 }
 
-.tnp-dashboard .tnp-card .tnp-card-title {
+#tnp-body .tnp-dashboard .tnp-card .tnp-card-title {
     /*flex-basis: 80%;*/
     font-weight: bold;
-    margin: 0px 0px 30px;
+    margin: 0px 0px 1rem;
     font-size: 1rem;
     /*color: #fff;*/
     /*background-color: var(--tnp-blue);*/
 }
 
-.tnp-dashboard .tnp-card .tnp-card-upper-buttons {
+#tnp-body .tnp-dashboard .tnp-card .tnp-card-upper-buttons {
     /*flex-basis: 10%;*/
     font-weight: normal;
     margin: 0px 0px 10px;
@@ -67,19 +67,26 @@
     text-align: right;
 }
 
-.tnp-dashboard .tnp-card .tnp-card-description {
+#tnp-body .tnp-dashboard .tnp-card .tnp-card-description {
     font-size: .75rem;
     line-height: 1rem;
     font-weight: normal;
     margin: 0px 0px 20px;
 }
 
-.tnp-dashboard .tnp-card .tnp-card-content {
+#tnp-body .tnp-dashboard .tnp-card .tnp-card-value {
+    font-size: 1.5rem;
+    line-height: normal;
+    font-weight: normal;
+}
+
+#tnp-body .tnp-dashboard .tnp-card .tnp-card-content {
     width: 100%;
 }
 
-.tnp-dashboard .tnp-card .widefat {
+#tnp-body .tnp-dashboard .tnp-card .widefat {
     border: 0 !important;
+    margin-top: 0;
 }
 
 .tnp-dashboard .tnp-card .tnp-card-button-container {
@@ -179,4 +186,15 @@
 
 .tnp-mimosa {
     background-color: #fd7278;
+}
+
+
+.tnp-dashboard .tnp-user-status {
+    min-width: 120px;
+    display: inline-block;
+}
+
+.tnp-dashboard .tnp-email-status {
+    min-width: 80px;
+    display: inline-block;
 }

@@ -31,8 +31,8 @@ if (empty($email->track)) {
 </style>
 
 <div class="wrap tnp-statistics tnp-statistics-view" id="tnp-wrap">
-    <?php include NEWSLETTER_ADMIN_HEADER ?>
-    
+    <?php include NEWSLETTER_ADMIN_HEADER; ?>
+
     <?php include __DIR__ . '/view-heading.php' ?>
 
 
@@ -40,51 +40,54 @@ if (empty($email->track)) {
 
         <?php $controls->show() ?>
 
+        <p>
+            The full report for this newsletter can be generated with the
+            <a href="https://www.thenewsletterplugin.com/reports" target="_blank">Reports Addon</a>.
+        </p>
+
         <div class="tnp-cards-container">
-            <div class="tnp-card">
-                <div class="tnp-card-title">Reach</div>
-                <div class="tnp-card-value">
-                    <span class="tnp-counter-animationx"><?php echo $report->total ?></span>
-                    <div class="tnp-card-description">Total people that got your email</div>
-                </div>
-                <div class="tnp-card-icon"><div class="tnp-card-icon-business-contact"></div></div>
 
-            </div>
             <div class="tnp-card">
-                <div class="tnp-card-title">Opens</div>
+                <div class="tnp-card-title"><?php esc_html_e('Reach', 'newsletter'); ?></div>
                 <div class="tnp-card-value">
-                    <span class="tnp-counter-animationx percentage"><?php echo $report->open_rate; ?></span>%
+                    <span><?php echo $report->total ?></span>
+                    <div class="tnp-card-description"><?php esc_html_e('Total people that got your email', 'newsletter'); ?></div>
+                </div>
+            </div>
+
+            <div class="tnp-card">
+                <div class="tnp-card-title"><?php esc_html_e('Opens', 'newsletter'); ?></div>
+                <div class="tnp-card-value">
+                    <span class="percentage"><?php echo (float) $report->open_rate; ?></span>%
                     <div class="tnp-card-description">
-                        <span class="value"><?php echo $report->open_count ?></span> total people that
-                        opened your email
+                        <span class="value"><?php echo (int) $report->open_count ?></span>
+                        <?php esc_html_e('total people that opened your email', 'newsletter'); ?>
                     </div>
                 </div>
-                <div class="tnp-card-icon"><div class="tnp-card-icon-preview"></div></div>
-
             </div>
+
             <div class="tnp-card">
-                <div class="tnp-card-title">Clicks</div>
+                <div class="tnp-card-title"><?php esc_html_e('Clicks', 'newsletter'); ?></div>
                 <div class="tnp-card-value">
-                    <span class="tnp-counter-animationx percentage"><?php echo $report->click_rate; ?></span>%
+                    <span class="percentage"><?php echo (float) $report->click_rate; ?></span>%
                     <div class="tnp-card-description">
-                        <span class="value"><?php echo $report->click_count ?></span> total people that
-                        clicked a link in your email
+                        <span class="value"><?php echo (int) $report->click_count ?></span>
+                        <?php esc_html_e('total people that clicked a link in your email', 'newsletter'); ?>
                     </div>
                 </div>
-                <div class="tnp-card-icon"><div class="tnp-card-icon-mouse"></div></div>
-
             </div>
+
             <div class="tnp-card">
-                <div class="tnp-card-title">Reactivity</div>
+                <div class="tnp-card-title"><?php esc_html_e('Reactivity', 'newsletter'); ?></div>
                 <div class="tnp-card-value">
                     <span class="tnp-counter-animationx percentage"><?php echo $report->reactivity ?></span>%
                     <div class="tnp-card-description">
-                        <span class="value"><?php echo $report->click_count ?></span> clicks out of
-                        <span class="value"><?php echo $report->open_count ?></span> opens
+                        <span class="value"><?php echo (int) $report->click_count ?></span> <?php esc_html_e('clicks out of', 'newsletter'); ?>
+                        <span class="value"><?php echo (int) $report->open_count ?></span> <?php esc_html_e('opens', 'newsletter'); ?>
                     </div>
                 </div>
-                <div class="tnp-card-icon"><div class="tnp-card-icon-rabbit"></div></div>
             </div>
+
         </div>
         <div class="tnp-cards-container">
             <div class="tnp-card">
@@ -129,58 +132,58 @@ if (empty($email->track)) {
 <script>
     jQuery(document).ready(function ($) {
 
-    var opensSentChartData = {
-    labels: [
-            "Sent",
-            "Opens"
-    ],
-            datasets: [
-            {
-            data: [<?php echo $report->total - $report->open_count; ?>, <?php echo $report->open_count ?>],
-                    backgroundColor: [
-                            "#49a0e9",
-                            "#27AE60",
-                    ]
-            }]
-    };
-            var opensSentChartConfig = {
-            type: "doughnut",
-                    data: opensSentChartData,
-                    options: {
-                    responsive: true,
-                            legend: {display: false},
-                            elements: {
-                            arc: {borderWidth: 0}
-                            }
-                    }
-            };
-            new Chart('tnp-opens-sent-chart', opensSentChartConfig);
-            var clicksOpensChartData = {
+        var opensSentChartData = {
             labels: [
-                    "Opens",
-                    "Clicks"
+                "Sent",
+                "Opens"
             ],
-                    datasets: [
-                    {
-                    data: [<?php echo $report->open_count - $report->click_count; ?>, <?php echo $report->click_count ?>],
-                            backgroundColor: [
-                                    "#49a0e9",
-                                    "#27AE60",
-                            ]
-                    }]
-            };
-            var clicksOpensChartConfig = {
+            datasets: [
+                {
+                    data: [<?php echo $report->total - $report->open_count; ?>, <?php echo (int)$report->open_count ?>],
+                    backgroundColor: [
+                        "#49a0e9",
+                        "#27AE60",
+                    ]
+                }]
+        };
+        var opensSentChartConfig = {
             type: "doughnut",
-                    data: clicksOpensChartData,
-                    options: {
-                    responsive: true,
-                            legend: {display: false},
-                            elements: {
-                            arc: {borderWidth: 0}
-                            }
-                    }
-            };
-            new Chart('tnp-clicks-opens-chart', clicksOpensChartConfig);
+            data: opensSentChartData,
+            options: {
+                responsive: true,
+                legend: {display: false},
+                elements: {
+                    arc: {borderWidth: 0}
+                }
+            }
+        };
+        new Chart('tnp-opens-sent-chart', opensSentChartConfig);
+        var clicksOpensChartData = {
+            labels: [
+                "Opens",
+                "Clicks"
+            ],
+            datasets: [
+                {
+                    data: [<?php echo $report->open_count - $report->click_count; ?>, <?php echo $report->click_count ?>],
+                    backgroundColor: [
+                        "#49a0e9",
+                        "#27AE60",
+                    ]
+                }]
+        };
+        var clicksOpensChartConfig = {
+            type: "doughnut",
+            data: clicksOpensChartData,
+            options: {
+                responsive: true,
+                legend: {display: false},
+                elements: {
+                    arc: {borderWidth: 0}
+                }
+            }
+        };
+        new Chart('tnp-clicks-opens-chart', clicksOpensChartConfig);
     });
 
 </script>

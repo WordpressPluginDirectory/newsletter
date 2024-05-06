@@ -132,7 +132,7 @@ if ($controls->is_action('change_status')) {
 
         <?php $controls->show(); ?>
 
-        <p style="font-weight: bold"><?php esc_html_e('Please backup before running maintenance actions.', 'newsletter') ?></p>
+        <div class="tnp-notice"><?php esc_html_e('Please backup before running maintenance actions.', 'newsletter') ?></div>
 
         <?php if (!empty($results)) { ?>
 
@@ -313,8 +313,6 @@ if ($controls->is_action('change_status')) {
                                 <?php $controls->lists_select('list_3') ?> <?php esc_html_e('subscribers without a list', 'newsletter') ?> <?php $controls->button_confirm('list_none', '&raquo;'); ?>
                             </td>
                         </tr>
-
-
 
                     </table>
                 </div>

@@ -12,6 +12,7 @@ if (!$controls->is_action()) {
         $controls->data = wp_kses_post_deep($controls->data);
         $this->save_options($controls->data, 'popup', $language);
         $controls->add_toast_saved();
+        NewsletterMainAdmin::instance()->set_completed_step('forms');
     }
 }
 ?>
@@ -36,7 +37,7 @@ if (!$controls->is_action()) {
             When closed it shows up again after 30 days.
         </p>
         <p>
-            More options are available with the <a href="<?php echo esc_attr($leads_url)?>" target="_blank">Leads Addon</a>.
+            More options are available with the <a href="<?php echo esc_attr(Newsletter\Integrations::get_leads_url())?>" target="_blank">Leads Addon</a>.
         </p>
 
 

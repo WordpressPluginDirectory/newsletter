@@ -8,7 +8,7 @@ defined('ABSPATH') || exit;
 
 <div class="wrap" id="tnp-wrap">
 
-    <?php include NEWSLETTER_ADMIN_HEADER ?>
+    <?php include NEWSLETTER_ADMIN_HEADER; ?>
 
     <div id="tnp-heading">
         <?php $controls->title_help('/subscription') ?>

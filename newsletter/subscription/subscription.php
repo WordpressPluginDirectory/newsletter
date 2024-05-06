@@ -381,6 +381,10 @@ class NewsletterSubscription extends NewsletterModule {
                 break;
             case 2: $subscription->welcome_email_id = -1;
         }
+
+//        if ($this->get_option('autoresponder')) {
+//            $subscription->autoresponders = [$this->get_option('autoresponder')];
+//        }
         return $subscription;
     }
 
@@ -454,6 +458,10 @@ class NewsletterSubscription extends NewsletterModule {
                     $user->status = TNP_User::STATUS_NOT_CONFIRMED;
                     $user->language = $subscription->data->language;
 
+                    if (!empty($subscription->autoresponders)) {
+                        $this->save_user_meta($user->id, 'autoresponders', implode(',', $subscription->autoresponders));
+                    }
+
                     $this->send_message('confirmation', $user);
 
                     return $user;
@@ -492,6 +500,12 @@ class NewsletterSubscription extends NewsletterModule {
             $this->save_user_meta($user->id, 'welcome_page_id', $subscription->welcome_page_id);
         } else {
             $this->delete_user_meta($user->id, 'welcome_page_id');
+        }
+
+        if (!empty($subscription->autoresponders)) {
+            $this->save_user_meta($user->id, 'autoresponders', implode(',', $subscription->autoresponders));
+        } else {
+            $this->delete_user_meta($user->id, 'autoresponders');
         }
 
         $this->add_user_log($user, 'subscribe');
@@ -726,6 +740,21 @@ class NewsletterSubscription extends NewsletterModule {
         if (isset($_REQUEST['welcome_page_id'])) {
             $subscription->welcome_page_id = (int) $_REQUEST['welcome_page_id'];
         }
+
+        if (class_exists('NewsletterAutoresponder') && method_exists('NewsletterAutoresponder', 'is_valid_key')) {
+
+            $keys = wp_parse_list($_REQUEST['nar'] ?? []);
+            if ($keys) {
+                $subscription->autoresponders = []; // Remove the default one
+                // Check the keys
+                foreach ($keys as $key) {
+                    if (NewsletterAutoresponder::$instance->is_valid_key($key)) {
+                        $subscription->autoresponders[] = $id;
+                    }
+                }
+            }
+        }
+
 
         // Opt-in mode
         if (!empty($this->get_main_option('optin_override')) && isset($_REQUEST['optin'])) {
@@ -1074,7 +1103,7 @@ class NewsletterSubscription extends NewsletterModule {
                         if ($page_id === 'url') {
                             $url = trim($this->get_option($key . '_url'));
                         } else {
-                            $url = get_permalink((int)$page_id);
+                            $url = get_permalink((int) $page_id);
                         }
                     }
                 }
@@ -1093,9 +1122,7 @@ class NewsletterSubscription extends NewsletterModule {
         }
 
         $url = Newsletter::instance()->build_message_url($url, $key, $user, $email, $alert);
-        wp_redirect($url);
-
-        die();
+        $this->redirect($url);
     }
 
     var $privacy_url = false;
@@ -1266,6 +1293,18 @@ class NewsletterSubscription extends NewsletterModule {
                 $b .= '<input type="hidden" name="welcome_page_id" value="' . esc_attr($page->ID) . '">' . "\n";
             } else {
                 $b .= $this->build_field_admin_notice('The welcome page ID is not correct.');
+            }
+        }
+
+        if (isset($attrs['autoresponders']) && method_exists('NewsletterAutoresponder', 'get_autoresponder_key')) {
+            $ids = wp_parse_id_list($attrs['autoresponders']);
+            foreach ($ids as $id) {
+                $key = NewsletterAutoresponder::instance()->get_autoresponder_key($id);
+                if ($key) {
+                    $b .= '<input type="hidden" name="nar[]" value="' . esc_attr($key) . '">' . "\n";
+                } else {
+                    $b .= $this->build_field_admin_notice('Autoresponder not found: ' . $id);
+                }
             }
         }
 

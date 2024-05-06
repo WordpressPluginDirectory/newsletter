@@ -30,7 +30,23 @@ $text_style = TNP_Composer::get_style($options, '', $composer, 'text');
         padding: 0 0 5px 0;
         font-style: italic;
     }
+    .main-title {
+        <?php $main_title_style->echo_css(1.1)?>
+        padding: 0 0 20px 0;
+        line-height: normal !important;
+        letter-spacing: normal;
+    }
 </style>
+
+<?php if (!empty($main_title)) { ?>
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+    <tr>
+        <td align="<?php echo esc_attr($options['main_title_align']) ?>" valign="middle" inline-class="main-title" dir="<?php echo esc_attr($dir) ?>">
+            <?php echo $main_title; ?>
+        </td>
+    </tr>
+</table>
+<?php } ?>
 
 
 <?php foreach ($posts as $post) { ?>

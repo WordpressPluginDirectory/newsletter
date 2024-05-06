@@ -27,6 +27,7 @@ class NewsletterUsersAdmin extends NewsletterModuleAdmin {
         $this->add_admin_page('edit', __('Subscriber Edit', 'newsletter'));
         $this->add_admin_page('logs', __('Logs', 'newsletter'));
         $this->add_admin_page('newsletters', __('Newsletters', 'newsletter'));
+        $this->add_admin_page('autoresponders', __('Autoresponders', 'newsletter'));
         $this->add_admin_page('massive', __('Subscribers Maintenance', 'newsletter'));
         $this->add_admin_page('export', __('Export', 'newsletter'));
         $this->add_admin_page('import', __('Import', 'newsletter'));

@@ -13,9 +13,7 @@ $referres = $wpdb->get_results("select referrer, count(*) as total, SUM(if(statu
 
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
-
     google.charts.load("current", {packages: ['corechart', 'geochart', 'geomap']});
-
 </script>
 
 <div class="wrap" id="tnp-wrap">

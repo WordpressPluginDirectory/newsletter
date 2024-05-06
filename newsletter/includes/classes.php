@@ -50,7 +50,6 @@ class TNP_List {
         }
         return $lists;
     }
-
 }
 
 class TNP_Media {
@@ -80,7 +79,6 @@ class TNP_Media {
         $this->width = floor(($height / $this->height) * $this->width);
         $this->height = $height;
     }
-
 }
 
 /**
@@ -140,7 +138,6 @@ class TNP_Profile {
     function show_on_profile() {
         return $this->status == self::STATUS_PROFILE_ONLY || $this->status == self::STATUS_PUBLIC;
     }
-
 }
 
 /**
@@ -225,7 +222,6 @@ class TNP_Subscription_Data {
             $this->lists[$list_id] = 1;
         }
     }
-
 }
 
 /**
@@ -256,9 +252,9 @@ class TNP_Subscription {
      * @var boolean
      */
     var $send_emails = true;
-
     var $welcome_email_id = 0;
     var $welcome_page_id = 0;
+    var $autoresponders = [];
 
     public function __construct() {
         $this->data = new TNP_Subscription_Data();
@@ -280,7 +276,6 @@ class TNP_Subscription {
     public function is_double_optin() {
         return $this->optin == 'double';
     }
-
 }
 
 /**
@@ -304,21 +299,33 @@ class TNP_User {
 
     var $ip = '';
 
-    public static function get_status_label($status) {
+    public static function get_status_label($status, $html = false) {
+        $label = 'Unknown';
+        $class = 'unknown';
+
         switch ($status) {
-            case self::STATUS_NOT_CONFIRMED: return __('Not confirmed', 'newsletter');
+            case self::STATUS_NOT_CONFIRMED:
+                $label = __('Not confirmed', 'newsletter');
+                $class = 'not-confirmed';
                 break;
-            case self::STATUS_CONFIRMED: return __('Confirmed', 'newsletter');
+            case self::STATUS_CONFIRMED: $label = __('Confirmed', 'newsletter');
+                $class = 'confirmed';
                 break;
-            case self::STATUS_UNSUBSCRIBED: return __('Unsubscribed', 'newsletter');
+            case self::STATUS_UNSUBSCRIBED: $label = __('Unsubscribed', 'newsletter');
+                $class = 'unsubscribed';
                 break;
-            case self::STATUS_BOUNCED: return __('Bounced', 'newsletter');
+            case self::STATUS_BOUNCED: $label = __('Bounced', 'newsletter');
+                $class = 'bounced';
                 break;
-            case self::STATUS_COMPLAINED: return __('Complained', 'newsletter');
+            case self::STATUS_COMPLAINED: $label = __('Complained', 'newsletter');
+                $class = 'complained';
                 break;
-            default:
-                return __('Unknown', 'newsletter');
         }
+        if (!$html) {
+            return $label;
+        }
+
+        return '<span class="tnp-status tnp-user-status tnp-user-status--' . esc_attr($class) . '">' . esc_html($label) . '</span>';
     }
 
     public static function is_status_valid($status) {
@@ -331,7 +338,6 @@ class TNP_User {
             default: return false;
         }
     }
-
 }
 
 /**
@@ -352,5 +358,4 @@ class TNP_Email {
     const STATUS_SENDING = 'sending';
     const STATUS_PAUSED = 'paused';
     const STATUS_ERROR = 'error';
-
 }

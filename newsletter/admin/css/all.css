@@ -56,8 +56,8 @@
     --tnp-red-darker: #b2360e;
 
     --tnp-orange-lighter: hsl(22, 88%, 95%);
-    --tnp-orange-light: hsl(22, 88%, 75%);
-    --tnp-orange: hsl(22, 88%, 58%);
+    --tnp-orange-light: hsl(22, 88%, 75%); /* #f7b087 */
+    --tnp-orange: hsl(22, 88%, 58%); /* #f27b36 */
     --tnp-orange-dark: hsl(22, 88%, 38%);
     --tnp-orange-darker: hsl(22, 88%, 18%);
 
@@ -1640,13 +1640,11 @@ span.tnp-user-status {
     border: 1px solid #ddd;
     border-radius: 20px;
     width: 150px;
-    xmin-height: 70px;
     color: #444 !important;
     text-decoration: none;
     text-align: center;
     font-size: 16px;
-    padding: 15px;
-    padding-top: 10px;
+    padding: 13px;
     margin: 7px;
     cursor: pointer;
     background-color: #fff;
@@ -1659,12 +1657,13 @@ span.tnp-user-status {
 .tnp-flow-item a {
     text-decoration: none;
     color: #444 !important;
+    line-height: normal;
 }
 
 
 .tnp-flow-item.title {
-    background-color: var(--tnp-orange);
-    color: #fff !important;
+    background-color: var(--tnp-orange-lighter);
+    color: var(--tnp-orange-dark) !important;
     font-weight: bold;
 }
 
@@ -1912,9 +1911,11 @@ span.tnp-user-status {
 }
 
 .tnpc-error, .tnp-error {
-    background-color: var(--tnp-red-lighter);
+    /*background-color: var(--tnp-red-lighter);*/
     border-color: var(--tnp-red-light);
-    color: var(--tnp-red-darker);
+    /*color: var(--tnp-red-darker);*/
+    background-color: var(--tnp-red-darker);
+    color: #fff;
     /*border-left: 5px solid #dd0000;*/
 }
 
@@ -2128,7 +2129,7 @@ span.tnp-user-status {
 
 #tnp-body .tnpc-media {
     position: relative;
-    width: 400px;
+    /*width: 400px;*/
     max-width: 100%;
     background-color: #eee;
     margin-bottom: .5rem;
@@ -2304,6 +2305,7 @@ html {
     padding: 10px;
     background-color: #eee !important;
     border: 1px solid #bbb;
+    margin-bottom: 10px;
 }
 
 .tnpf-section {
@@ -2336,7 +2338,7 @@ html {
     font-size: .9em;
 }
 
-.tnpf-field label.tnpf-label, 
+.tnpf-field label.tnpf-label,
 .tnpf-field label.tnp-label {
     display: block;
     font-size: 12px;

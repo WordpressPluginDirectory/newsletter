@@ -13,6 +13,7 @@ $default_options = array(
     'button_font_weight' => '',
     'button_font_color' => '',
     'button_background' => '',
+    'button_border_color' => '',
     'align' => 'center',
     'block_background' => '',
     'button_width' => '200',
@@ -68,11 +69,18 @@ if (!empty($options['schema'])) {
 // Cloned since we need to set the general options
 $button_options = $options;
 
-$button_options['button_font_family'] = empty($options['button_font_family']) ? $global_button_font_family : $options['button_font_family'];
-$button_options['button_font_size'] = empty($options['button_font_size']) ? $global_button_font_size : $options['button_font_size'];
-$button_options['button_font_color'] = empty($options['button_font_color']) ? $global_button_font_color : $options['button_font_color'];
-$button_options['button_font_weight'] = empty($options['button_font_weight']) ? $global_button_font_weight : $options['button_font_weight'];
-$button_options['button_background'] = empty($options['button_background']) ? $global_button_background_color : $options['button_background'];
+if (method_exists('NewsletterReports', 'build_lists_change_url')) {
+    $lists = [];
+    if (!empty($button_options['list'])) {
+        $lists[$button_options['list']] = 1;
+    }
+    if (!empty($button_options['unlist'])) {
+        $lists[$button_options['unlist']] = 0;
+    }
+    if ($lists) {
+        $button_options["button_url"] = NewsletterReports::build_lists_change_url($button_options["button_url"], $lists);
+    }
+}
 
 //if (!empty($options['list']) && method_exists('NewsletterReports', 'build_list_change_url')) {
 //    $button_options['button_url'] = NewsletterReports::build_list_change_url($button_options['button_url'], 0, 1);
@@ -88,10 +96,3 @@ $button_options['button_background'] = empty($options['button_background']) ? $g
     </tr>
 </table>
 
-<div itemscope="" itemtype="http://schema.org/EmailMessage">
-    <div itemprop="potentialAction" itemscope="" itemtype="http://schema.org/ViewAction">
-        <meta itemprop="url" content="<?php echo esc_attr($options['button_url']) ?>" />
-        <meta itemprop="name" content="<?php echo esc_attr($options['button_label']) ?>" />
-    </div>
-    <meta itemprop="description" content="<?php echo esc_attr($options['button_label']) ?>" />
-</div>

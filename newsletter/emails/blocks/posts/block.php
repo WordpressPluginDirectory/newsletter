@@ -15,6 +15,15 @@ $defaults = array(
     'font_family' => '',
     'font_size' => '',
     'font_color' => '',
+
+    'main_title' => '',
+    'main_title_weight' => '',
+    'main_title_font_family' => '',
+    'main_title_font_size' => '',
+    'main_title_font_color' => '',
+    'main_title_font_weight' => '',
+    'main_title_align' => is_rtl()?'right':'left',
+
     'title_weight' => '',
     'title_font_family' => '',
     'title_font_size' => '',
@@ -160,6 +169,10 @@ $show_read_more_button = (bool) $options['show_read_more_button'];
 Newsletter::instance()->switch_language($options['language']);
 
 // Preprocessing
+
+$main_title = wp_kses_post($options['main_title']);
+$main_title_style = TNP_Composer::get_title_style($options, 'main_title', $composer);
+
 foreach ($posts as $post) {
     $post->url = tnp_post_permalink($post);
 

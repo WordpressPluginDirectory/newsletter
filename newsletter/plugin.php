@@ -4,7 +4,7 @@
   Plugin Name: Newsletter
   Plugin URI: https://www.thenewsletterplugin.com
   Description: Newsletter is a cool plugin to create your own subscriber list, to send newsletters, to build your business. <strong>Before update give a look to <a href="https://www.thenewsletterplugin.com/category/release">this page</a> to know what's changed.</strong>
-  Version: 8.2.8
+  Version: 8.3.2
   Author: Stefano Lissa & The Newsletter Team
   Author URI: https://www.thenewsletterplugin.com
   Disclaimer: Use at your own risk. No warranty expressed or implied is provided.
@@ -37,7 +37,7 @@ if (version_compare(phpversion(), '7.0', '<')) {
     return;
 }
 
-define('NEWSLETTER_VERSION', '8.2.8');
+define('NEWSLETTER_VERSION', '8.3.2');
 
 global $newsletter, $wpdb;
 
@@ -508,6 +508,13 @@ class Newsletter extends NewsletterModule {
     }
 
     function get_send_delay() {
+        if (NEWSLETTER_SEND_DELAY) {
+            return NEWSLETTER_SEND_DELAY;
+        }
+        $max = (float) $this->get_main_option('max_per_second');
+        if ($max > 0) {
+            return (int)(1000 / $max);
+        }
         return 0;
     }
 
@@ -655,6 +662,10 @@ class Newsletter extends NewsletterModule {
 
         $batch_size = $mailer->get_batch_size();
 
+        $delay = $this->get_send_delay();
+
+        $this->logger->debug(__METHOD__ . '> Delay set to ' . $delay);
+
         //$this->logger->debug(__METHOD__ . '> Batch size: ' . $batch_size);
         // For batch size == 1 (normal condition) we optimize
         if ($batch_size == 1) {
@@ -682,8 +693,8 @@ class Newsletter extends NewsletterModule {
 
                 $r = $mailer->send($message);
 
-                if (NEWSLETTER_SEND_DELAY) {
-                    usleep(NEWSLETTER_SEND_DELAY * 1000);
+                if ($delay) {
+                    usleep($delay * 1000);
                 }
 
                 if (!empty($message->error)) {

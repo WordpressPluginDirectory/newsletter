@@ -117,19 +117,25 @@ class NewsletterUnsubscription extends NewsletterModule {
 //                return;
 //            }
             if (strpos($agent, 'googlebot') !== false) {
-                return;
+                die();
             }
             if (strpos($agent, 'yandexbot') !== false) {
-                return;
+                die();
             }
             if (strpos($agent, 'bingbot') !== false) {
-                return;
+                die();
             }
             if (strpos($agent, 'bingpreview') !== false) {
-                return;
+                die();
             }
             if (strpos($agent, 'microsoftpreview') !== false) {
-                return;
+                die();
+            }
+            if (strpos($agent, 'bytespider') !== false) {
+                die();
+            }
+            if (strpos($agent, 'headlesschrome') !== false) {
+                die();
             }
         }
 

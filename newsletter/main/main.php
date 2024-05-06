@@ -33,6 +33,11 @@ if (!$controls->is_action()) {
                 $controls->data['scheduler_max'] = 12;
             }
 
+            $controls->data['max_per_second'] = (int) $controls->data['max_per_second'];
+            if ($controls->data['max_per_second'] <= 0) {
+                $controls->data['max_per_second'] = 0;
+            }
+
             if (!$this->is_email($controls->data['reply_to'], true)) {
                 $controls->errors .= __('Reply to email is not correct.', 'newsletter') . '<br>';
             } else {
@@ -50,6 +55,10 @@ if (!$controls->is_action()) {
             $this->save_options($controls->data, '', $language);
             $controls->add_toast_saved();
             $this->logger->debug('Main options saved');
+            NewsletterMainAdmin::instance()->set_completed_step('sender');
+            if ($controls->data['scheduler_max'] != 100) {
+                NewsletterMainAdmin::instance()->set_completed_step('delivery-speed');
+            }
         }
 
         delete_transient("tnp_extensions_json");
@@ -257,10 +266,22 @@ if (!empty($return_path)) {
                                 <td>
                                     <?php $controls->text('scheduler_max', 5); ?> (min. 10)
                                     <p class="description">
-                                        <a href="?page=newsletter_system_status#tnp-speed">See the collected statistics</a>
+                                        <a href="?page=newsletter_system_delivery#tnp-speed">See the collected statistics</a>
                                     </p>
                                 </td>
                             </tr>
+
+                            <tr>
+                                <th>
+                                    <?php esc_html_e('Max emails per second', 'newsletter') ?>
+                                    <?php $controls->field_help('https://www.thenewsletterplugin.com/documentation/installation/newsletter-configuration/#speed') ?>
+                                </th>
+                                <td>
+                                    <?php $controls->text('max_per_second', 5); ?>
+                                    <span class="description"><?php esc_html_e('0 for unlimited', 'newsletter') ?></span>
+                                </td>
+                            </tr>
+
                         </table>
 
                         <?php do_action('newsletter_panel_main_speed', $controls) ?>

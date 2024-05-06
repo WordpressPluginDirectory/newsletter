@@ -1,6 +1,9 @@
 <?php
 defined('ABSPATH') || exit;
-
+$widths = [];
+if ($layout === 'left13') {
+    $widths = [1, 2];
+}
 $items = [];
 ?>
 <style>
@@ -63,5 +66,5 @@ ob_start();
 </table>
 <?php
 $items[] = ob_get_clean();
-echo TNP_Composer::grid($items, ['columns' => count($items), 'width' => $composer['content_width'], 'responsive' => true]);
+echo TNP_Composer::grid($items, ['columns' => count($items), 'widths'=>$widths, 'width' => $composer['content_width'], 'responsive' => true]);
 ?>

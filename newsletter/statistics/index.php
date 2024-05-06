@@ -50,9 +50,13 @@ $overview_open_rate = array_reverse($overview_open_rate);
 $overview_click_rate = array_reverse($overview_click_rate);
 
 if (empty($emails)) {
-    $controls->warnings[] = __('No newsletters have been sent till now', 'newsletter');
+    $controls->warnings[] = esc_html__('No newsletters have been sent till now', 'newsletter');
 }
 ?>
+
+<style>
+<?php include __DIR__ . '/style.css'; ?>
+</style>
 
 <script>
     var titles = <?php echo wp_json_encode(array_reverse($overview_titles)) ?>;
@@ -62,165 +66,154 @@ if (empty($emails)) {
     <?php include NEWSLETTER_ADMIN_HEADER; ?>
     <div id="tnp-heading">
         <h2><?php esc_html_e('Overall basic statistics (last 20 newsletters)', 'newsletter') ?></h2>
-        <p>More details, including Automated and Autoresponder newsletter statistics are available with the <a href="https://www.thenewsletterplugin.com/reports?utm_source=reports&utm_campaign=plugin" target="_blank">Reports Addon</a>.</p>
     </div>
 
     <div id="tnp-body" class="tnp-statistics">
 
         <?php $controls->show() ?>
 
-        <div class="row">
-            <div class="col-md-3">
-                <div class="tnp-widget tnp-number">
-                    <h3>Emails Sent</h3>
-                    <div class="tnp-icon"><i class="fas fa-users"></i></div>
-                    <div class="tnp-value"><?php echo number_format_i18n($report->total, 0) ?></div>
-                </div>
+        <p>
+            Full details, including Automated and Autoresponder newsletter statistics are available with the
+            <a href="https://www.thenewsletterplugin.com/reports?utm_source=statistics&utm_campaign=plugin" target="_blank">Reports Addon</a>.
+        </p>
+
+        <div class="tnp-cards-container">
+
+            <div class="tnp-card">
+                <div class="tnp-card-title">Sent</div>
+                <div class="tnp-card-value"><?php echo number_format_i18n($report->total, 0) ?></div>
+                <div class="tnp-card-description"></div>
             </div>
 
-            <div class="col-md-3">
-                <div class="tnp-widget tnp-number">
-                    <h3>Overall Opens</h3>
-                    <div class="tnp-icon tnp-blue"><i class="fas fa-envelope-open"></i></div>
-                    <div class="tnp-value"><?php echo $report->open_rate; ?>%</div>
-                    <div class="tnp-value-2">(<?php echo $report->open_count; ?>)</div>
-                </div>
+            <div class="tnp-card">
+                <div class="tnp-card-title">Opens</div>
+                <div class="tnp-card-value"><?php echo $report->open_rate; ?>%</div>
+                <div class="tnp-card-description"></div>
             </div>
 
-            <div class="col-md-3">
-                <div class="tnp-widget tnp-number">
-                    <h3>Overall Clicks</h3>
-                    <div class="tnp-icon tnp-orange"><i class="fas fa-mouse-pointer"></i></div>
-                    <div class="tnp-value"><?php echo $report->click_rate; ?>%</div>
-                    <div class="tnp-value-2">(<?php echo $report->click_count; ?>)</div>
-                </div>
+            <div class="tnp-card">
+                <div class="tnp-card-title">Clicks</div>
+                <div class="tnp-card-value"><?php echo $report->click_rate; ?>%</div>
+                <div class="tnp-card-description"></div>
             </div>
 
-            <div class="col-md-3">
-                <div class="tnp-widget tnp-number tnp-inactive">
-                    <h3>Overall Reactivity</h3>
-                    <div class="tnp-icon tnp-gray"><i class="fas fa-star"></i></div>
-                    <div class="tnp-value">-%</div>
-                </div>
-            </div>
         </div>
 
-        <div class="row">
+        <div class="tnp-cards-container">
 
-            <div class="col-md-6">
-                <div class="tnp-widget">
-                    <h3>Open rate</h3>
+            <div class="tnp-card">
+                <div class="tnp-card-title">Open rate</div>
 
-                    <div id="tnp-opens-chart">
-                        <canvas id="tnp-opens-chart-canvas"></canvas>
-                    </div>
 
-                    <script type="text/javascript">
-                        var open_config = {
-                            type: 'line',
-                            data: {
-                                labels: <?php echo json_encode($overview_labels) ?>,
-                                datasets: [
-                                    {
-                                        label: "Open",
-                                        fill: false,
-                                        strokeColor: "#2980b9",
-                                        backgroundColor: "#2980b9",
-                                        borderColor: "#2980b9",
-                                        //pointBorderColor: "#27AE60",
-                                        pointBackgroundColor: "#2980b9",
-                                        data: <?php echo json_encode($overview_open_rate) ?>
-                                    }
+                <div id="tnp-opens-chart" style="width: 90%">
+                    <canvas id="tnp-opens-chart-canvas"></canvas>
+                </div>
+
+                <script type="text/javascript">
+                    var open_config = {
+                        type: 'line',
+                        data: {
+                            labels: <?php echo wp_json_encode($overview_labels) ?>,
+                            datasets: [
+                                {
+                                    label: "Open",
+                                    fill: false,
+                                    strokeColor: "#2980b9",
+                                    backgroundColor: "#2980b9",
+                                    borderColor: "#2980b9",
+                                    //pointBorderColor: "#27AE60",
+                                    pointBackgroundColor: "#2980b9",
+                                    data: <?php echo wp_json_encode($overview_open_rate) ?>
+                                }
+                            ]
+                        },
+                        options: {
+                            scales: {
+                                xAxes: [{type: "category", "id": "x-axis-1", gridLines: {display: true}, ticks: {}}],
+                                yAxes: [
+                                    {type: "linear", "id": "y-axis-1", gridLines: {display: true}, ticks: {fontColor: "#333"}}
                                 ]
                             },
-                            options: {
-                                scales: {
-                                    xAxes: [{type: "category", "id": "x-axis-1", gridLines: {display: false}, ticks: {fontFamily: "Source Sans Pro"}}],
-                                    yAxes: [
-                                        {type: "linear", "id": "y-axis-1", gridLines: {display: false}, ticks: {fontColor: "#333", fontFamily: "Source Sans Pro"}}
-                                    ]
-                                },
-                                tooltips: {
-                                    callbacks: {
-                                        afterTitle: function (data) {
-                                            return titles[data[0].index];
-                                        },
-                                        label: function (tooltipItem, data) {
-                                            return data.datasets[0].label + ": " + data.datasets[0].data[tooltipItem.index] + "%";
+                            responsive: true,
+                            tooltips: {
+                                callbacks: {
+                                    afterTitle: function (data) {
+                                        return titles[data[0].index];
+                                    },
+                                    label: function (tooltipItem, data) {
+                                        return data.datasets[0].label + ": " + data.datasets[0].data[tooltipItem.index] + "%";
 
-                                        }
                                     }
                                 }
                             }
-                        };
+                        }
+                    };
 
-                        jQuery(document).ready(function ($) {
-                            eventsLineChart = new Chart("tnp-opens-chart-canvas", open_config);
-                        });
-                    </script>
+                    jQuery(document).ready(function ($) {
+                        eventsLineChart = new Chart("tnp-opens-chart-canvas", open_config);
+                    });
+                </script>
 
-                </div>
+
             </div>
 
-            <div class="col-md-6">
-                <div class="tnp-widget">
-                    <h3>Click rate</h3>
+
+            <div class="tnp-card">
+                <div class="tnp-card-title">Click rate</div>
 
 
-                    <div id="tnp-clicks-chart">
-                        <canvas id="tnp-clicks-chart-canvas"></canvas>
-                    </div>
+                <div id="tnp-clicks-chart" style="width: 90%">
+                    <canvas id="tnp-clicks-chart-canvas"></canvas>
+                </div>
 
-                    <script type="text/javascript">
-                        var click_config = {
-                            type: 'line',
-                            data: {
-                                labels: <?php echo json_encode($overview_labels) ?>,
-                                datasets: [
+                <script type="text/javascript">
+                    var click_config = {
+                        type: 'line',
+                        data: {
+                            labels: <?php echo wp_json_encode($overview_labels) ?>,
+                            datasets: [
 
-                                    {
-                                        label: "Click",
-                                        fill: false,
-                                        strokeColor: "#2980b9",
-                                        backgroundColor: "#2980b9",
-                                        borderColor: "#2980b9",
-                                        pointBorderColor: "#2980b9",
-                                        pointBackgroundColor: "#2980b9",
-                                        data: <?php echo json_encode($overview_click_rate) ?>,
-                                    }
+                                {
+                                    label: "Click",
+                                    fill: false,
+                                    strokeColor: "#2980b9",
+                                    backgroundColor: "#2980b9",
+                                    borderColor: "#2980b9",
+                                    pointBorderColor: "#2980b9",
+                                    pointBackgroundColor: "#2980b9",
+                                    data: <?php echo wp_json_encode($overview_click_rate) ?>,
+                                }
+                            ]
+                        },
+                        options: {
+                            scales: {
+                                xAxes: [{type: "category", "id": "x-axis-1", gridLines: {display: true}, ticks: {}}],
+                                yAxes: [
+                                    {type: "linear", "id": "y-axis-1", gridLines: {display: true}, ticks: {fontColor: "#333"}}
                                 ]
                             },
-                            options: {
-                                scales: {
-                                    xAxes: [{type: "category", "id": "x-axis-1", gridLines: {display: false}, ticks: {fontFamily: "Source Sans Pro"}}],
-                                    yAxes: [
-                                        {type: "linear", "id": "y-axis-1", gridLines: {display: false}, ticks: {fontColor: "#333", fontFamily: "Source Sans Pro"}}
-                                    ]
-                                },
-                                tooltips: {
-                                    callbacks: {
-                                        afterTitle: function (data) {
-                                            return titles[data[0].index];
-                                        },
-                                        label: function (tooltipItem, data) {
-                                            return data.datasets[0].label + ": " + data.datasets[0].data[tooltipItem.index] + "%";
-                                        }
+                            responsive: true,
+                            tooltips: {
+                                callbacks: {
+                                    afterTitle: function (data) {
+                                        return titles[data[0].index];
+                                    },
+                                    label: function (tooltipItem, data) {
+                                        return data.datasets[0].label + ": " + data.datasets[0].data[tooltipItem.index] + "%";
                                     }
                                 }
                             }
-                        };
+                        }
+                    };
 
-                        jQuery(document).ready(function ($) {
-                            eventsLineChart = new Chart("tnp-clicks-chart-canvas", click_config);
-                        });
-                    </script>
-
-
-                </div>
+                    jQuery(document).ready(function ($) {
+                        eventsLineChart = new Chart("tnp-clicks-chart-canvas", click_config);
+                    });
+                </script>
 
             </div>
         </div>
 
     </div>
-    <?php include NEWSLETTER_DIR . '/tnp-footer.php' ?>
+
 </div>

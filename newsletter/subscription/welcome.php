@@ -50,6 +50,8 @@ if (!$controls->is_action()) {
         $controls->add_toast_saved();
         $controls->data = $options;
         TNP_Composer::prepare_controls($controls, $email);
+
+        NewsletterMainAdmin::instance()->set_completed_step('welcome-email');
     }
 }
 

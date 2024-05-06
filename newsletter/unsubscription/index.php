@@ -89,11 +89,11 @@ $advanced = !empty($controls->data['advanced']);
 
                 <ul>
                     <?php if (!$one_step) { ?>
-                        <li><a href="#tabs-cancellation"><?php _e('Confirm', 'newsletter') ?></a></li>
+                        <li><a href="#tabs-cancellation"><?php esc_html_e('Confirm', 'newsletter') ?></a></li>
                     <?php } ?>
-                    <li><a href="#tabs-goodbye"><?php _e('Goodbye', 'newsletter') ?></a></li>
-                    <li><a href="#tabs-reactivation"><?php _e('Resubscribe', 'newsletter') ?></a></li>
-                    <li><a href="#tabs-advanced" style="font-style: italic"><?php _e('Advanced', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-goodbye"><?php esc_html_e('Goodbye', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-reactivation"><?php esc_html_e('Resubscribe', 'newsletter') ?></a></li>
+                    <li><a href="#tabs-advanced" style="font-style: italic"><?php esc_html_e('Advanced', 'newsletter') ?></a></li>
                         <?php if (NEWSLETTER_DEBUG) { ?>
                         <li><a href="#tabs-debug">Debug</a></li>
                     <?php } ?>
@@ -198,7 +198,7 @@ $advanced = !empty($controls->data['advanced']);
                                 </td>
                             </tr>
                             <tr>
-                                <th><?php _e('On error', 'newsletter') ?></th>
+                                <th><?php esc_html_e('On error', 'newsletter') ?></th>
                                 <td>
                                     <?php $controls->checkbox2('error_text_custom', 'Customize', ['onchange' => 'tnp_refresh_binds()']); ?>
                                     <div data-bind="options-error_text_custom">
@@ -248,7 +248,6 @@ $advanced = !empty($controls->data['advanced']);
                 <?php } ?>
 
             </div>
-
 
             <p>
                 <?php $controls->button_save() ?>

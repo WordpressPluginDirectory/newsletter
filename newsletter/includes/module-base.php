@@ -184,6 +184,16 @@ class NewsletterModuleBase {
         return $r;
     }
 
+    function get_row($query) {
+        global $wpdb;
+        $r = $wpdb->get_row($query);
+        if ($r === false) {
+            $this->logger->fatal($query);
+            $this->logger->fatal($wpdb->last_error);
+        }
+        return $r;
+    }
+
     /**
      *
      * @global wpdb $wpdb

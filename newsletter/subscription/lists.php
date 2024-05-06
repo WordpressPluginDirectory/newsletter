@@ -23,7 +23,7 @@ if (!$controls->is_action()) {
         $controls->add_toast_saved();
     }
     if ($controls->is_action('unlink')) {
-        $wpdb->query("update " . NEWSLETTER_USERS_TABLE . " set list_" . ((int) $controls->button_data) . "=0");
+        $this->query("update " . NEWSLETTER_USERS_TABLE . " set list_" . ((int) $controls->button_data) . "=0");
         $controls->add_toast_done();
     }
 }
@@ -36,12 +36,11 @@ for ($i = 1; $i <= NEWSLETTER_LIST_MAX; $i++) {
 
 $main_options = $this->get_options('lists', '');
 
-$status = array(0 => __('Private', 'newsletter'), 1 => __('Public', 'newsletter'));
+$status = [0 => __('Private', 'newsletter'), 1 => __('Public', 'newsletter')];
 
-$count = $wpdb->get_row("select " . implode(',', $conditions) . ' from ' . NEWSLETTER_USERS_TABLE);
+$count = $this->get_row("select " . implode(',', $conditions) . ' from ' . NEWSLETTER_USERS_TABLE);
 
 $panels = (int) (NEWSLETTER_LIST_MAX / 10) + (NEWSLETTER_LIST_MAX % 10 > 0 ? 1 : 0);
-
 ?>
 <script>
     jQuery(function () {
@@ -126,7 +125,7 @@ $panels = (int) (NEWSLETTER_LIST_MAX / 10) + (NEWSLETTER_LIST_MAX % 10 > 0 ? 1 :
                                     <?php } ?>
 
                                     <td>
-                                        <?php //echo $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE . " where list_" . $i . "=1 and status='C'");  ?>
+                                        <?php //echo $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE . " where list_" . $i . "=1 and status='C'");   ?>
                                         <?php
                                         $field = 'list_' . $i;
                                         echo $count->$field;
@@ -159,8 +158,8 @@ $panels = (int) (NEWSLETTER_LIST_MAX / 10) + (NEWSLETTER_LIST_MAX % 10 > 0 ? 1 :
                             <?php } ?>
                         </table>
 
-                </div>
-<?php } ?>
+                    </div>
+                <?php } ?>
                 <?php if (NEWSLETTER_DEBUG) { ?>
                     <div id="tabs-debug">
                         <pre><?php echo esc_html(json_encode($this->get_db_options('lists', $language), JSON_PRETTY_PRINT)) ?></pre>
@@ -175,6 +174,6 @@ $panels = (int) (NEWSLETTER_LIST_MAX / 10) + (NEWSLETTER_LIST_MAX % 10 > 0 ? 1 :
         </form>
     </div>
 
-    <?php include NEWSLETTER_ADMIN_FOOTER ?>
+    <?php include NEWSLETTER_ADMIN_FOOTER; ?>
 
 </div>
