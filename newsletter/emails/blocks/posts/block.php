@@ -32,6 +32,7 @@ $defaults = array(
     'nocrop' => 0,
     'max' => 4,
     'private' => '',
+    'reverse' => '',
     'categories' => '',
     'tags' => '',
     'layout' => 'one',
@@ -125,6 +126,10 @@ if ($context['type'] != 'automated') {
             }
         }
     }
+}
+
+if (!empty($options['reverse'])) {
+    $posts = array_reverse($posts);
 }
 
 if ($posts) {

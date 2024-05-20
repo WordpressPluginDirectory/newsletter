@@ -85,16 +85,17 @@ $fields->select('layout', __('Layout', 'newsletter'),
 </div>
 
 <div class="tnp-field-row">
-    <div class="tnp-field-col-3">
+    <div class="tnp-field-col-4">
         <?php $fields->select_number('max', __('Max posts', 'newsletter'), 1, 40); ?>
     </div>
-    <div class="tnp-field-col-3">
+    <div class="tnp-field-col-4">
         <?php $fields->select_number('post_offset', __('Posts offset', 'newsletter'), 0, 20); ?>
     </div>
     <div class="tnp-field-col-4">
-        <div class="tnp-field-col-3">
             <?php $fields->yesno('private', __('Private', 'newsletter')) ?>
-        </div>
+    </div>
+    <div class="tnp-field-col-4">
+            <?php $fields->yesno('reverse', __('Reverse', 'newsletter')) ?>
     </div>
     <div style="clear: both"></div>
 </div>

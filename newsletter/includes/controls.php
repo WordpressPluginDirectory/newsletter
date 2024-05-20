@@ -750,7 +750,7 @@ class NewsletterControls {
         $options['url'] = 'Custom URL';
         $this->select($name . '_id', $options, __('None', 'newsletter'), ['onchange' => 'jQuery(\'#options-' . esc_attr($name) . '_url\').toggle(this.value===\'url\');']);
         echo '<br><br>';
-        $this->text_url($name . '_url', ['visible' => $this->get_value($name . '_id') === 'url']);
+        $this->text($name . '_url', ['visible' => $this->get_value($name . '_id') === 'url']);
     }
 
     /** Used to create a select which is part of a group of controls identified by $name that will
@@ -1322,7 +1322,7 @@ class NewsletterControls {
             $value = implode("\n", $value);
         }
 
-        if (is_string($attrs)) {
+        if (!is_array($attrs)) {
             echo '<textarea id="options-' . esc_attr($name) . '" class="dynamic" name="options[' . esc_attr($name) . ']" wrap="off" style="width:' . esc_attr($attrs) . ';height:' . esc_attr($height) . '">';
             echo esc_html($value);
             echo '</textarea>';
