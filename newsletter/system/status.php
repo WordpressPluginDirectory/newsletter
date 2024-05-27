@@ -63,7 +63,6 @@ if ($controls->is_action('stats_email_column_upgrade')) {
     update_option('newsletter_stats_email_column_upgraded', true);
 }
 
-
 // Trick to access the private function (!)
 class TNP_WPDB extends wpdb {
 
@@ -107,7 +106,6 @@ function tnp_describe_table($table) {
     </table>
     <?php
 }
-
 ?>
 
 <style>
@@ -811,6 +809,13 @@ function tnp_describe_table($table) {
                     <tr>
                         <?php
                         $condition = function_exists('curl_version');
+                        $version = null;
+                        if ($condition) {
+                            $version = curl_version();
+                            if (strpos($version['ssl_version'], '3.0.7') !== false) {
+                                $condition = false;
+                            }
+                        }
                         ?>
                         <td>Curl version</td>
                         <td>
@@ -824,11 +829,11 @@ function tnp_describe_table($table) {
                         <td>
                             <?php
                             if (!$condition) {
-                                echo 'cUrl is not available, ask the provider to install it and activate the PHP cUrl library';
-                            } else {
-                                $version = curl_version();
-                                echo 'Version: ' . $version['version'] . '<br>';
-                                echo 'SSL Version: ' . $version['ssl_version'] . '<br>';
+                                echo 'cUrl is not available, ask the provider to install it and activate the PHP cUrl library or openssl version is the bugged 3.0.7<br>';
+                            }
+                            if ($version) {
+                                echo 'Version: ' . esc_html($version['version']) . '<br>';
+                                echo 'SSL Version: ' . esc_html($version['ssl_version']) . '<br>';
                             }
                             ?>
                         </td>
@@ -956,7 +961,7 @@ function tnp_describe_table($table) {
                     </tr>
 
                     <?php
-                    // Clean up
+// Clean up
                     $res = $wpdb->query("drop table if exists {$wpdb->prefix}newsletter_test");
                     ?>
 
@@ -1163,7 +1168,8 @@ function tnp_describe_table($table) {
                         </td>
                     </tr>
                     <?php
-                    if (!defined('NEWSLETTER_ANTIBOT')) define('NEWSLETTER_ANTIBOT', true);
+                    if (!defined('NEWSLETTER_ANTIBOT'))
+                        define('NEWSLETTER_ANTIBOT', true);
                     ?>
                     <tr>
                         <td>NEWSLETTER_ANTIBOT</td>

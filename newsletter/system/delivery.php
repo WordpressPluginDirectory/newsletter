@@ -30,10 +30,14 @@ if ($controls->is_action('test')) {
 
         if (!is_wp_error($r)) {
             $options['mail'] = 1;
-            $controls->messages .= '<strong>SUCCESS</strong><br>';
-            $controls->messages .= 'Anyway if the message does not appear the mailbox (check even the spam folder) you can ';
-            $controls->messages .= '<a href="https://www.thenewsletterplugin.com/documentation/?p=15170" target="_blank"><strong>read more here</strong></a>.';
+
+            $controls->messages .= 'A test email has been sent.<br>';
+            $controls->messages .= 'If you did not receive the message in your mailbox within 5 minutes '
+                    . '(check also the spam folder), please contact your hosting provider.<br>'
+                    . '<a href="https://www.thenewsletterplugin.com/documentation/?p=15170" target="_blank"><strong>Read more here</strong></a>.';
+
             NewsletterMainAdmin::instance()->set_completed_step('test-email');
+
         } else {
             $options['mail'] = 0;
             $options['mail_error'] = $r->get_error_message();

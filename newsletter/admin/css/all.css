@@ -902,12 +902,12 @@ iframe.tnp-editor-preview-desktop {
 
 /* Spectru, color picker */
 
-/* Down arrow */
-.sp-dd {
+/* Down arrow, both for original and prefixed */
+.sp-dd, .tnp-sp-dd {
     display: none;
 }
 
-.sp-replacer {
+.sp-replacer, .tnp-sp-replacer {
     width:  30px!important;
     height: 30px!important;
 }

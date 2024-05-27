@@ -600,28 +600,6 @@ class NewsletterModuleAdmin extends NewsletterModuleBase {
         return self::add_qs($url, $params, false);
     }
 
-    /**
-     * Builds a standard Newsletter action URL for the specified action.
-     *
-     * @param string $action
-     * @param TNP_User $user
-     * @param TNP_Email $email
-     * @return string
-     */
-    function build_action_url($action, $user = null, $email = null) {
-        $url = $this->get_action_base_url();
-
-        $url = $this->add_qs($url, 'na=' . urlencode($action));
-
-        if ($user) {
-            $url .= '&nk=' . urlencode($this->get_user_key($user));
-        }
-        if ($email) {
-            $url .= '&nek=' . urlencode($this->get_email_key($email));
-        }
-        return $url;
-    }
-
     function get_subscribe_url() {
         return $this->build_action_url('s');
     }

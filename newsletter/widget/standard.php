@@ -63,7 +63,7 @@ class NewsletterWidget extends WP_Widget {
             else {
                 if (strpos($buffer, '{subscription_form_') !== false) {
                     // TODO: Optimize with a method to replace only the custom forms
-                    $buffer = $newsletter->replace($buffer);
+                    $buffer = $newsletter->replace($buffer, null, null, 'page');
                 } else {
                     $buffer .= $form;
                 }
@@ -74,7 +74,7 @@ class NewsletterWidget extends WP_Widget {
         }
 
         // That replace all the remaining tags
-        $buffer = $newsletter->replace($buffer);
+        $buffer = $newsletter->replace($buffer, null, null, 'page');
 
         echo $buffer;
         echo $args['after_widget'];

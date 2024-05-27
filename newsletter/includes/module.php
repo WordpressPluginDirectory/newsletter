@@ -723,26 +723,6 @@ class NewsletterModule extends NewsletterModuleBase {
         return self::add_qs($url, $params, false);
     }
 
-    /**
-     * Builds a standard Newsletter action URL for the specified action.
-     *
-     * @param string $action
-     * @param TNP_User $user
-     * @param TNP_Email $email
-     * @return string
-     */
-    function build_action_url($action, $user = null, $email = null) {
-        $url = $this->add_qs($this->get_home_url(), 'na=' . urlencode($action));
-        //$url = $this->add_qs(admin_url('admin-ajax.php'), 'action=newsletter&na=' . urlencode($action));
-        if ($user) {
-            $url .= '&nk=' . urlencode($this->get_user_key($user));
-        }
-        if ($email) {
-            $url .= '&nek=' . urlencode($this->get_email_key($email));
-        }
-        return $url;
-    }
-
     function get_subscribe_url() {
         return $this->build_action_url('s');
     }
@@ -766,19 +746,19 @@ class NewsletterModule extends NewsletterModuleBase {
      * @param string $text
      * @param mixed $user Can be an object, associative array or id
      * @param mixed $email Can be an object, associative array or id
-     * @param type $referrer
+     * @param string $context (set to 'page' when used for the public page)
      * @return type
      */
-    function replace($text, $user = null, $email = null, $referrer = null) {
+    function replace($text, $user = null, $email = null, $context = null) {
         global $wpdb;
 
         if (empty($text))
             return $text;
 
         if (strpos($text, '<p') !== false) {
-            $esc_html = true;
+            $html = true;
         } else {
-            $esc_html = false;
+            $html = false;
         }
 
         static $home_url = false;
@@ -813,7 +793,7 @@ class NewsletterModule extends NewsletterModuleBase {
         }
 
 
-        $text = apply_filters('newsletter_replace', $text, $user, $email, $esc_html);
+        $text = apply_filters('newsletter_replace', $text, $user, $email, $html, $context);
 
         $text = $this->replace_url($text, 'blog_url', $home_url);
         $text = $this->replace_url($text, 'home_url', $home_url);
@@ -821,7 +801,9 @@ class NewsletterModule extends NewsletterModuleBase {
         $text = str_replace('{blog_title}', html_entity_decode(get_bloginfo('name')), $text);
         $text = str_replace('{blog_description}', get_option('blogdescription'), $text);
 
-        $text = $this->replace_date($text);
+        if ($email) {
+            $text = $this->replace_date($text, $email->send_on);
+        }
 
         if ($user) {
             //$this->logger->debug('Replace with user ' . $user->id);

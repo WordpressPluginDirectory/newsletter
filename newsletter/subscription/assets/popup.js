@@ -23,7 +23,7 @@ const NewsletterPopup = {
                 var modal = document.getElementById('tnp-modal');
                 modal.style.display = 'block';
                 var form = document.getElementById('tnp-subscription-popup');
-                //form.addEventListener("submit", NewsletterPopup.submit);
+                //form.addEventListener("submit", NewsletterPopup.submit); // Do not use can be overwritten by other plugins
                 form.onsubmit = NewsletterPopup.submit;
             });
         }).catch(error => {

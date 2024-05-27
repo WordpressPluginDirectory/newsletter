@@ -150,7 +150,7 @@ class NewsletterEmails extends NewsletterModule {
                 if ($id == 'last') {
                     $email = $wpdb->get_row("select * from " . NEWSLETTER_EMAILS_TABLE . " where private=0 and type='message' and status='sent' order by send_on desc limit 1");
                 } else {
-                    $email = $this->get_email($_GET['id']);
+                    $email = $this->get_email($id);
                 }
                 if (empty($email)) {
                     header("HTTP/1.0 404 Not Found");

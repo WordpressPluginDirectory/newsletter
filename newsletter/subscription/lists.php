@@ -22,8 +22,14 @@ if (!$controls->is_action()) {
         $this->save_options($controls->data, 'lists', $language);
         $controls->add_toast_saved();
     }
+
     if ($controls->is_action('unlink')) {
         $this->query("update " . NEWSLETTER_USERS_TABLE . " set list_" . ((int) $controls->button_data) . "=0");
+        $controls->add_toast_done();
+    }
+
+    if ($controls->is_action('link')) {
+        $this->query("update " . NEWSLETTER_USERS_TABLE . " set list_" . ((int) $controls->button_data) . "=1");
         $controls->add_toast_done();
     }
 }
@@ -66,6 +72,10 @@ $panels = (int) (NEWSLETTER_LIST_MAX / 10) + (NEWSLETTER_LIST_MAX % 10 > 0 ? 1 :
 
         <p>
             Configure the lists visibility on the <a href="?page=newsletter_subscription_form" target="_blank">Subscription form</a> and <a href="?page=newsletter_profile_index" target="_blank">Profile page</a>.
+        </p>
+        <p>
+            List wide operations on subscribers (delete, move, add, ...) can be performed on the <a href="?page=newsletter_users_massive" target="_blank">Subscribers Maintenance page</a>.
+        </p>
 
         <form method="post" action="">
             <?php $controls->init(); ?>
@@ -132,9 +142,10 @@ $panels = (int) (NEWSLETTER_LIST_MAX / 10) + (NEWSLETTER_LIST_MAX % 10 > 0 ? 1 :
                                         ?>
                                     </td>
 
-                                    <td>
+                                    <td style="white-space: nowrap">
                                         <?php if (!$language) { ?>
                                             <?php $controls->button_confirm('unlink', __('Unlink everyone', 'newsletter'), '', $i); ?>
+                                            <?php $controls->button_confirm('link', __('Add everyone', 'newsletter'), '', $i); ?>
                                         <?php } ?>
                                     </td>
                                 </tr>

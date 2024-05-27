@@ -154,8 +154,8 @@ class NewsletterAdmin extends NewsletterModuleAdmin {
 
             wp_register_script('tnp-chart', $url . '/vendor/chartjs/Chart.min.js', ['jquery'], NEWSLETTER_VERSION);
 
-            wp_enqueue_script('tnp-color-picker', $url . '/vendor/spectrum/spectrum.min.js', ['jquery'], NEWSLETTER_VERSION);
-            wp_enqueue_style('tnp-color-picker', $url . '/vendor/spectrum/spectrum.min.css', [], NEWSLETTER_VERSION);
+            wp_enqueue_script('tnp-color-picker', $url . '/vendor/spectrum-prefixed/spectrum.js', ['jquery'], NEWSLETTER_VERSION);
+            wp_enqueue_style('tnp-color-picker', $url . '/vendor/spectrum-prefixed/spectrum.css', [], NEWSLETTER_VERSION);
 
             wp_enqueue_script('tnp-toastify', $url . '/vendor/toastify/toastify.js', [], NEWSLETTER_VERSION);
             wp_enqueue_style('tnp-toastify', $url . '/vendor/toastify/toastify.css', [], NEWSLETTER_VERSION);
