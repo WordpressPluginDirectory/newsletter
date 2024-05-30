@@ -15,7 +15,7 @@ if ($controls->is_action()) {
     if ($controls->is_action('reset')) {
         $redirect = $this->get_admin_page_url('composer');
         if (isset($_GET['id'])) {
-            $redirect = $this->add_qs($redirect, 'id=' . ((int) $_GET['id']), false);
+            $redirect = $this->add_qs($redirect, 'id=' . ((int) $_GET['id']));
         }
         $controls->js_redirect($redirect);
     }

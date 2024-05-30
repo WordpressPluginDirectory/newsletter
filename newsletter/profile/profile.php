@@ -48,7 +48,7 @@ class NewsletterProfile extends NewsletterModule {
     }
 
     function hook_newsletter_action_dummy($action, $user, $email) {
-        if (!in_array($action, ['p', 'profile', 'pe', 'profile-save', 'profile_export', 'ps'])) {
+        if (!in_array($action, ['p', 'profile', 'pe', 'profile-save', 'ps'])) {
             return;
         }
 
@@ -68,11 +68,15 @@ class NewsletterProfile extends NewsletterModule {
 
     function hook_newsletter_action($action, $user, $email) {
 
-        if (!in_array($action, ['p', 'profile', 'pe', 'profile-save', 'profile_export', 'ps'])) {
+        if (!in_array($action, ['p', 'profile', 'pe', 'profile-save', 'ps'])) {
             return;
         }
 
         if (!$user || $user->status != TNP_User::STATUS_CONFIRMED) {
+            $this->dienow(__('Subscriber not found or not confirmed or started from a test newsletter.', 'newsletter'), 'From a test newsletter or subscriber key not valid or subscriber not confirmed', 404);
+        }
+
+        if (!isset($user->editable) || !$user->editable) {
             $this->dienow(__('Subscriber not found or not confirmed or started from a test newsletter.', 'newsletter'), 'From a test newsletter or subscriber key not valid or subscriber not confirmed', 404);
         }
 
@@ -97,20 +101,7 @@ class NewsletterProfile extends NewsletterModule {
 
                 $this->redirect($this->message_url($user, $email));
                 break;
-
-            case 'profile_export':
-                header('Content-Type: application/json;charset=UTF-8');
-                echo $this->to_json($user);
-                die();
         }
-    }
-
-    /**
-     *
-     * @param stdClass $user
-     */
-    function get_profile_export_url($user) {
-        return $this->build_action_url('profile_export', $user);
     }
 
     /**
@@ -133,12 +124,13 @@ class NewsletterProfile extends NewsletterModule {
         // Profile edit page URL and link
         $url = $this->get_profile_url($user, $email);
         $text = $this->replace_url($text, 'profile_url', $url);
-        // Profile export URL and link
-        $url = $this->get_profile_export_url($user);
-        $text = $this->replace_url($text, 'profile_export_url', $url);
 
         if (strpos($text, '{profile_form}') !== false) {
-            $text = str_replace('{profile_form}', $this->get_profile_form($user), $text);
+            if (isset($user->editable) && $user->editable) {
+                $text = str_replace('{profile_form}', $this->get_profile_form($user), $text);
+            } else {
+                $text = str_replace('{profile_form}', '', $text);
+            }
         }
         return $text;
     }
@@ -159,6 +151,9 @@ class NewsletterProfile extends NewsletterModule {
             if (!$user || $user->status === TNP_User::STATUS_UNSUBSCRIBED) {
                 return __('Subscriber not found.', 'newsletter');
             }
+            if (!isset($user->editable) || !$user->editable) {
+                return __('Subscriber not found.', 'newsletter');
+            }
         }
 
         $text = $this->get_text('text');
@@ -176,7 +171,7 @@ class NewsletterProfile extends NewsletterModule {
         if ($this->is_current_user_dummy()) {
             $user = $this->get_dummy_user();
         } else {
-            $user = $this->check_user();
+            $user = $this->get_current_user();
         }
 
         if (empty($user)) {
@@ -185,6 +180,13 @@ class NewsletterProfile extends NewsletterModule {
             } else {
                 return $content;
             }
+        }
+
+        if (!$user->editable) {
+            if (current_user_can('administrator')) {
+                return '<p style="background-color: #eee; color: #000; padding: 1rem; margin: 1rem 0"><strong>Visible only to administrators</strong>. The subscriber edit form has been hidden. The current subscriber has been recognized but with a non editable token.</p>';
+            }
+            return '';
         }
 
         return $this->get_profile_form($user);
@@ -207,7 +209,7 @@ class NewsletterProfile extends NewsletterModule {
         $buffer = '';
 
         $buffer .= '<div class="tnp tnp-form tnp-profile">';
-        $buffer .= '<form action="' . $this->build_action_url('ps') . '" method="post">';
+        $buffer .= '<form action="' . esc_attr($this->build_action_url('ps')) . '" method="post">';
         $buffer .= '<input type="hidden" name="nk" value="' . esc_attr($user->id . '-' . $user->token) . '">';
 
         if (!empty($options['email'])) {
@@ -219,22 +221,25 @@ class NewsletterProfile extends NewsletterModule {
 
 
         if (!empty($options['name'])) {
+            $value = $this->sanitize_name($user->name);
             $buffer .= '<div class="tnp-field tnp-field-firstname">';
             $buffer .= '<label>' . esc_html($subscription->get_form_text('name')) . '</label>';
-            $buffer .= '<input class="tnp-firstname" type="text" name="nn" value="' . esc_attr($user->name) . '"' . (!empty($options['name_required']) ? ' required' : '') . '>';
+            $buffer .= '<input class="tnp-firstname" type="text" name="nn" value="' . esc_attr($value) . '"' . (!empty($options['name_required']) ? ' required' : '') . '>';
             $buffer .= "</div>\n";
         }
 
         if (!empty($options['surname'])) {
+            $value = $this->sanitize_name($user->surname);
             $buffer .= '<div class="tnp-field tnp-field-lastname">';
             $buffer .= '<label>' . esc_html($subscription->get_form_text('surname')) . '</label>';
-            $buffer .= '<input class="tnp-lastname" type="text" name="ns" value="' . esc_attr($user->surname) . '"' . (!empty($options['surname_required']) ? ' required' : '') . '>';
+            $buffer .= '<input class="tnp-lastname" type="text" name="ns" value="' . esc_attr($value) . '"' . (!empty($options['surname_required']) ? ' required' : '') . '>';
             $buffer .= "</div>\n";
         }
 
         if (!empty($options['sex'])) {
-            if (empty($user->sex))
+            if (empty($user->sex)) {
                 $user->sex = 'n';
+            }
             $buffer .= '<div class="tnp-field tnp-field-gender">';
             $buffer .= '<label>' . esc_html($subscription->get_form_text('sex')) . '</label>';
             $buffer .= '<select name="nx" class="tnp-gender"';
@@ -275,20 +280,19 @@ class NewsletterProfile extends NewsletterModule {
                     continue;
                 }
 
-                $i = $profile->id; // I'm lazy
+                $field = 'profile_' . $profile->id;
+                $value = $this->sanitize_user_field($user->$field);
 
                 $buffer .= '<div class="tnp-field tnp-field-profile">';
                 $buffer .= '<label>' . esc_html($profile->name) . '</label>';
 
-                $field = 'profile_' . $i;
-
                 if ($profile->is_text()) {
-                    $buffer .= '<input class="tnp-profile tnp-profile-' . esc_attr($i) . '" type="text" name="np' . esc_attr($i) . '" value="' . esc_attr($user->$field) . '"' .
+                    $buffer .= '<input class="tnp-profile tnp-profile-' . esc_attr($profile->id) . '" type="text" name="np' . esc_attr($profile->id) . '" value="' . esc_attr($value) . '"' .
                             ($profile->is_required() ? ' required' : '') . '>';
                 }
 
                 if ($profile->is_select()) {
-                    $buffer .= '<select class="tnp-profile tnp-profile-' . esc_attr($i) . '" name="np' . esc_attr($i) . '"' . ($profile->is_required() ? ' required' : '') . '>';
+                    $buffer .= '<select class="tnp-profile tnp-profile-' . esc_attr($profile->id) . '" name="np' . esc_attr($profile->id) . '"' . ($profile->is_required() ? ' required' : '') . '>';
                     foreach ($profile->options as $option) {
                         $buffer .= '<option';
                         if ($option == $user->$field) {
@@ -312,7 +316,7 @@ class NewsletterProfile extends NewsletterModule {
                     continue;
                 }
                 $tmp .= '<div class="tnp-field tnp-field-list">';
-                $tmp .= '<label><input class="tnp-list tnp-list-' . $list->id . '" type="checkbox" name="nl[]" value="' . $list->id . '"';
+                $tmp .= '<label><input class="tnp-list tnp-list-' . esc_attr($list->id) . '" type="checkbox" name="nl[]" value="' . esc_attr($list->id) . '"';
                 $field = 'list_' . $list->id;
                 // isset() for dummy subscribers
                 if (isset($user->$field) && $user->$field == 1) {
@@ -375,8 +379,10 @@ class NewsletterProfile extends NewsletterModule {
 
         $email_changed = false;
 
+        $posted = stripslashes_deep($_POST);
+
         if ($options['email']) {
-            $email = $this->normalize_email(stripslashes($_REQUEST['ne']));
+            $email = $this->normalize_email($posted['ne']);
 
             if ($antispam->is_address_blacklisted($email)) {
                 return new WP_Error('spam', $this->get_text('error'));
@@ -403,44 +409,37 @@ class NewsletterProfile extends NewsletterModule {
             }
         }
 
-        if (isset($_REQUEST['nn'])) {
-            $data['name'] = $this->normalize_name(stripslashes($_REQUEST['nn']));
-            if ($antispam->is_spam_text($data['name'])) {
+        if (isset($posted['nn'])) {
+            if ($antispam->is_spam_text($posted['nn'])) {
                 return new WP_Error('spam', $this->get_text('error'));
             }
+            $data['name'] = $this->sanitize_name($posted['nn']);
         }
-        if (isset($_REQUEST['ns'])) {
-            $data['surname'] = $this->normalize_name(stripslashes($_REQUEST['ns']));
-            if ($antispam->is_spam_text($data['surname'])) {
+
+        if (isset($posted['ns'])) {
+            if ($antispam->is_spam_text($posted['ns'])) {
                 return new WP_Error('spam', $this->get_text('error'));
             }
+            $data['surname'] = $this->sanitize_name($posted['ns']);
         }
-        if (isset($_REQUEST['nx'])) {
-            $data['sex'] = substr($_REQUEST['nx'], 0, 1);
-            // Wrong data injection check
-            if ($data['sex'] != 'm' && $data['sex'] != 'f' && $data['sex'] != 'n') {
-                die('Wrong sex field');
-            }
+
+        if (isset($posted['nx'])) {
+            $data['sex'] = $this->sanitize_gender($posted['nx']);
         }
-        if (isset($_REQUEST['nlng'])) {
-            $languages = $this->get_languages();
-            if (isset($languages[$_REQUEST['nlng']])) {
-                $data['language'] = trim($_REQUEST['nlng']);
-            }
+
+        if (isset($posted['nlng'])) {
+            $data['language'] = $this->sanitize_language($posted['nlng']);
         }
 
         // Lists. If not list is present or there is no list to choose or all are unchecked.
-        $nl = [];
-        if (isset($_REQUEST['nl']) && is_array($_REQUEST['nl'])) {
-            $nl = $_REQUEST['nl'];
-        }
+        $nl = $posted['nl'] ?? [];
 
-        // Every possible list shown in the profile must be processed
         $ids = $this->get_main_option('lists');
         foreach ($ids as $id) {
             $list = $this->get_list($id);
-            if (!$list || $list->is_private())
+            if (!$list || $list->is_private()) {
                 continue;
+            }
             $field_name = 'list_' . $id;
             $data['list_' . $id] = in_array($id, $nl) ? 1 : 0;
         }
@@ -448,12 +447,14 @@ class NewsletterProfile extends NewsletterModule {
         // Profile
         $ids = $this->get_main_option('profiles');
         if ($ids) {
+
             foreach ($ids as $id) {
-                $profile = $this->get_profile($id);
-                if (!$profile || $profile->is_private())
-                    continue;
-                if (isset($_REQUEST['np' . $id])) {
-                    $data['profile_' . $id] = wp_kses_post(stripslashes($_REQUEST['np' . $id]));
+                if (isset($posted['np' . $id])) {
+                    echo $posted['np' . $id], ' - ';
+                    $profile = $this->get_profile($id);
+                    if ($profile && $profile->is_public()) {
+                        $data['profile_' . $id] = $this->sanitize_user_field($posted['np' . $id]);
+                    }
                 }
             }
         }
@@ -482,44 +483,6 @@ class NewsletterProfile extends NewsletterModule {
             $sub = 'main';
         }
         return parent::get_prefix($sub, $language);
-    }
-
-    function to_json($user) {
-        global $wpdb;
-
-        $fields = array('name', 'surname', 'sex', 'created', 'ip', 'email');
-        $data = array(
-            'email' => $user->email,
-            'name' => $user->name,
-            'last_name' => $user->surname,
-            'gender' => $user->sex,
-            'created' => $user->created,
-            'ip' => $user->ip,
-        );
-
-        // Lists
-        $lists = $this->get_lists_public();
-        $data['lists'] = [];
-        foreach ($lists as $list) {
-            $field = 'list_' . $list->id;
-            if ($user->$field == 1) {
-                $data['lists'][] = $list->name;
-            }
-        }
-
-        // Profile
-        $profiles = $this->get_profiles_public();
-        $data['profiles'] = [];
-        foreach ($profiles as $profile) {
-            $field = 'profile_' . $profile->id;
-            $data['profiles'][] = array('name' => $profile->name, 'value' => $user->$field);
-        }
-
-        $extra = apply_filters('newsletter_profile_export_extra', []);
-
-        $data = array_merge($extra, $data);
-
-        return json_encode($data, JSON_PRETTY_PRINT);
     }
 }
 

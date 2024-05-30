@@ -284,8 +284,14 @@ if (empty($controls->errors) && ($controls->is_action('send') || $controls->is_a
         } else {
             $controls->messages = __('Scheduled.', 'newsletter');
         }
-        if ($controls->is_action('send') && $email['total'] < 20) {
-            Newsletter::instance()->hook_newsletter();
+
+        // Immadiate first batch sending since people has no patience
+        if ($controls->is_action('send') && $email['total'] < 15) {
+            // Avoid the first batch if there are other newsletters delivering otherwise we can get over the per hour quota
+            $sending_count = $wpdb->get_results("select count(*) from " . NEWSLETTER_EMAILS_TABLE . " where status='sending' and send_on<" . time());
+            if ($sending_count <= 1) { // This newsletter is counted as well
+                Newsletter::instance()->hook_newsletter();
+            }
         }
 
         NewsletterMainAdmin::instance()->set_completed_step('first-newsletter');

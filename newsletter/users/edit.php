@@ -14,7 +14,7 @@ if (!$user) {
 
 if ($controls->is_action('save')) {
 
-    $email = $this->normalize_email($controls->data['email']);
+    $email = $this->sanitize_email($controls->data['email']);
     if (empty($email)) {
         $controls->errors = esc_html__('Wrong email address', 'newsletter');
     } else {
@@ -42,13 +42,25 @@ if ($controls->is_action('save')) {
         }
 
         $controls->data['id'] = $user->id;
+
+        // Sanitize
+        $controls->data['name'] = $this->sanitize_name($controls->data['name']);
+        $controls->data['surname'] = $this->sanitize_name($controls->data['surname']);
+        $controls->data['wp_user_id'] = (int) $controls->data['wp_user_id'];
+
+        for ($i = 1; $i <= NEWSLETTER_PROFILE_MAX; $i++) {
+            if (isset($controls->data['profile_' . $i])) {
+                $controls->data['profile_' . $i] = $this->sanitize_user_field($controls->data['profile_' . $i]);
+            }
+        }
+
         $user = $this->save_user($controls->data);
         $this->add_user_log($user, 'edit');
         //$this->save_user_meta($id, 'ip', $controls->data['ip']);
         if ($user === false) {
             $controls->errors = esc_html__('Error. Check the log files.', 'newsletter');
         } else {
-            $controls->add_message_saved();
+            $controls->add_toast_saved();
             $controls->data = (array) $user;
         }
     }
@@ -79,7 +91,6 @@ function percentValue($value, $total) {
     }
     return round($value / $total * 100);
 }
-
 ?>
 
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>

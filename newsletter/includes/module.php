@@ -325,15 +325,7 @@ class NewsletterModule extends NewsletterModuleBase {
                 }
             }
         }
-
-        if ($user == null && is_user_logged_in()) {
-            $user = $this->get_user_by_wp_user_id(get_current_user_id());
-            if (!$user) {
-                $wp_user = wp_get_current_user();
-                $user = $this->get_user($wp_user->user_email);
-            }
-        }
-        return $user;
+        return apply_filters('newsletter_current_user', $user);
     }
 
     /**
@@ -442,12 +434,19 @@ class NewsletterModule extends NewsletterModuleBase {
 
         if ($id) {
             $user = $this->get_user($id);
-            if ($user && $token !== $user->token && $token !== md5($user->token)) {
-                $user = null;
+            if ($user) {
+                $token_md5 = md5($user->token);
+                if ($token !== $user->token && $token !== $token_md5) {
+                    $user = null;
+                } else {
+                    $user->editable = $token === $user->token;
+                }
             }
         }
 
-        return apply_filters('newsletter_current_user', $user);
+        $user = apply_filters('newsletter_current_user', $user);
+
+        return $user;
     }
 
     /**
@@ -456,9 +455,6 @@ class NewsletterModule extends NewsletterModuleBase {
      * @return TNP_User
      */
     function get_user_from_logged_in_user() {
-        if (is_user_logged_in()) {
-            return $this->get_user_by_wp_user_id(get_current_user_id());
-        }
         return null;
     }
 
@@ -696,11 +692,8 @@ class NewsletterModule extends NewsletterModuleBase {
             if (!is_object($user)) {
                 $user = $this->get_user($user);
             }
-            if ($message_key == 'confirmation') {
-                $params .= '&nk=' . urlencode($this->get_user_key($user, 'preconfirm'));
-            } else {
-                $params .= '&nk=' . urlencode($this->get_user_key($user));
-            }
+
+            $params .= '&nk=' . urlencode($this->get_user_key($user));
 
             $language = $this->get_user_language($user);
         }
@@ -792,7 +785,6 @@ class NewsletterModule extends NewsletterModuleBase {
             Newsletter::instance()->switch_language($user->language);
         }
 
-
         $text = apply_filters('newsletter_replace', $text, $user, $email, $html, $context);
 
         $text = $this->replace_url($text, 'blog_url', $home_url);
@@ -806,11 +798,15 @@ class NewsletterModule extends NewsletterModuleBase {
         }
 
         if ($user) {
-            //$this->logger->debug('Replace with user ' . $user->id);
+            $editable = $user->editable ?? true;
             $nk = $this->get_user_key($user);
-            $options_profile = NewsletterSubscription::instance()->get_options('form', $this->get_user_language($user));
+            $token = $editable ? $user->token : md5($user->token);
+
             $text = str_replace('{email}', $user->email, $text);
+
             $name = apply_filters('newsletter_replace_name', $user->name, $user);
+            $name = $this->sanitize_user_field($name);
+
             if (empty($name)) {
                 $text = str_replace(' {name}', '', $text);
                 $text = str_replace('{name}', '', $text);
@@ -823,18 +819,15 @@ class NewsletterModule extends NewsletterModuleBase {
                     break;
                 case 'f': $text = str_replace('{title}', $this->get_text('title_female', 'form'), $text);
                     break;
-                //case 'n': $text = str_replace('{title}', $options_profile['title_none'], $text);
-                //    break;
                 default:
                     $text = str_replace('{title}', $this->get_text('title_none', 'form'), $text);
             }
 
+            $surname = $this->sanitize_user_field($user->surname);
+            $text = str_replace('{surname}', esc_html($surname), $text);
+            $text = str_replace('{last_name}', esc_html($surname), $text);
 
-            // Deprecated
-            $text = str_replace('{surname}', esc_html($user->surname), $text);
-            $text = str_replace('{last_name}', esc_html($user->surname), $text);
-
-            $full_name = esc_html(trim($user->name . ' ' . $user->surname));
+            $full_name = esc_html(trim($name . ' ' . $surname));
             if (empty($full_name)) {
                 $text = str_replace(' {full_name}', '', $text);
                 $text = str_replace('{full_name}', '', $text);
@@ -842,8 +835,8 @@ class NewsletterModule extends NewsletterModuleBase {
                 $text = str_replace('{full_name}', $full_name, $text);
             }
 
-            $text = str_replace('{token}', $user->token, $text);
-            $text = str_replace('%7Btoken%7D', $user->token, $text);
+            $text = str_replace('{token}', $token, $text);
+            $text = str_replace('%7Btoken%7D', $token, $text);
             $text = str_replace('{id}', $user->id, $text);
             $text = str_replace('%7Bid%7D', $user->id, $text);
             $text = str_replace('{ip}', $user->ip, $text);
@@ -852,11 +845,12 @@ class NewsletterModule extends NewsletterModuleBase {
 
             for ($i = 1; $i <= NEWSLETTER_PROFILE_MAX; $i++) {
                 $p = 'profile_' . $i;
-                $text = str_replace('{profile_' . $i . '}', $user->$p, $text);
+                $value = $this->sanitize_user_field($user->$p);
+                $text = str_replace('{profile_' . $i . '}', $value, $text);
             }
 
             $base = (empty($this->options_main['url']) ? get_option('home') : $this->options_main['url']);
-            $id_token = '&amp;ni=' . $user->id . '&amp;nt=' . $user->token;
+            $id_token = '&amp;ni=' . $user->id . '&amp;nt=' . $token;
 
             $text = $this->replace_url($text, 'subscription_confirm_url', $this->build_action_url('c', $user));
             $text = $this->replace_url($text, 'activation_url', $this->build_action_url('c', $user));
@@ -886,22 +880,8 @@ class NewsletterModule extends NewsletterModuleBase {
             $text = $this->replace_url($text, 'email_url', '#');
         }
 
-        /*
-          Moved to the subscription module
-          if (strpos($text, '{subscription_form}') !== false) {
-          $text = str_replace('{subscription_form}', NewsletterSubscription::instance()->get_subscription_form($referrer), $text);
-          } else {
-          for ($i = 1; $i <= 10; $i++) {
-          if (strpos($text, "{subscription_form_$i}") !== false) {
-          $text = str_replace("{subscription_form_$i}", NewsletterSubscription::instance()->get_form($i), $text);
-          break;
-          }
-          }
-          }
-         */
-
-// Company info
-// TODO: Move to another module
+        // Company info
+        // TODO: Move to another module
         $options = Newsletter::instance()->get_options('info');
         $text = str_replace('{company_address}', $options['footer_contact'], $text);
         $text = str_replace('{company_name}', $options['footer_title'], $text);

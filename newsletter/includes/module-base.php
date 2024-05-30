@@ -94,7 +94,7 @@ class NewsletterModuleBase {
      * @param string $language
      */
     function switch_language($language) {
-        if ($this->is_multilanguage() && $language && $language !== self::$language) {
+        if ($language && $this->is_multilanguage() && $language !== self::$language) {
             self::$previous_language = self::$language;
             self::$previous_locale = self::$locale;
             self::$language = $language;
@@ -213,7 +213,7 @@ class NewsletterModuleBase {
      * Returns an array of languages with key the language code and value the language name.
      * An empty array is returned if no language is available.
      */
-    function get_languages() {
+    static function get_languages() {
         $language_options = [];
 
         // WPML
@@ -293,6 +293,7 @@ class NewsletterModuleBase {
         $dummy_user->surname = 'Doe';
         $dummy_user->sex = 'n';
         $dummy_user->language = '';
+        $dummy_user->editable = true;
 
         for ($i = 1; $i <= NEWSLETTER_PROFILE_MAX; $i++) {
             $profile_key = "profile_$i";
@@ -338,6 +339,7 @@ class NewsletterModuleBase {
 
     /**
      * Returns the user unique key
+     *
      * @param TNP_User $user
      * @return string
      */
@@ -346,7 +348,7 @@ class NewsletterModuleBase {
             $this->refresh_user_token($user);
         }
 
-        if ($context == 'preconfirm') {
+        if ($context === 'preconfirm' || isset($user->editable) && !$user->editable) {
             return $user->id . '-' . md5($user->token);
         }
         return $user->id . '-' . $user->token;
@@ -362,7 +364,7 @@ class NewsletterModuleBase {
         if (empty($user->token)) {
             $this->refresh_user_token($user);
         }
-        if ($user->status === TNP_User::STATUS_NOT_CONFIRMED) {
+        if ($user->status === TNP_User::STATUS_NOT_CONFIRMED || isset($user->editable) && !$user->editable) {
             return md5($user->token);
         } else {
             return $user->token;
@@ -382,6 +384,7 @@ class NewsletterModuleBase {
         if (is_object($user)) {
             $user = (array) $user;
         }
+        unset($user['editable']);
         if (empty($user['id'])) {
             $existing = $this->get_user($user['email']);
             if ($existing != null) {
@@ -842,13 +845,9 @@ class NewsletterModuleBase {
      * @param boolean $amp If the method must use the &amp; instead of the plain & (default true)
      * @return string
      */
-    static function add_qs($url, $qs, $amp = true) {
+    static function add_qs($url, $qs) {
         if (strpos($url, '?') !== false) {
-            if ($amp) {
-                return $url . '&amp;' . $qs;
-            } else {
-                return $url . '&' . $qs;
-            }
+            return $url . '&' . $qs;
         } else {
             return $url . '?' . $qs;
         }
@@ -884,25 +883,56 @@ class NewsletterModuleBase {
         return $url;
     }
 
-    static function normalize_name($name) {
-        $name = html_entity_decode($name, ENT_QUOTES);
-        $name = str_replace(';', ' ', $name);
-        $name = strip_tags($name);
-        if (mb_strlen($name) > 100) {
-            $name = mb_substr($name, 0, 100);
-        }
+    function build_action_url_ajax($action, $user = null, $email = null) {
+        $url = admin_url('admin-ajax.php') . '?action=tnp&na=' . urlencode($action);
 
-        return $name;
+        if ($user) {
+            $url .= '&nk=' . urlencode($this->get_user_key($user));
+        }
+        if ($email) {
+            $url .= '&nek=' . urlencode($this->get_email_key($email));
+        }
+        return $url;
     }
 
-    static function sanitize_name($name) {
-        return self::normalize_name($name);
+    static function sanitize_user_field($value, $max = 250) {
+        $value = html_entity_decode($value, ENT_QUOTES);
+        $value = wp_strip_all_tags($value, true);
+        $value = str_replace(['{', '}', '[', ']', '>', '<'], '', $value); // Tags cannot be used on user's fields
+        $value = str_replace(';', ' ', $value);
+        if (mb_strlen($value) > $max) {
+            $value = mb_substr($value, 0, $max);
+        }
+        return $value;
+    }
+
+    /**
+     * Sanitize the subscriber first and last name
+     *
+     * @param string $value
+     * @return string
+     */
+    static function sanitize_name($value) {
+        $value = self::sanitize_user_field($value);
+        if (mb_strlen($value) > 100) {
+            $value = mb_substr($value, 0, 100);
+        }
+        return $value;
+    }
+
+    /**
+     * @see sanitize_name
+     * @deprecated
+     */
+    static function normalize_name($value) {
+        return self::sanitize_name($value);
     }
 
     static function sanitize_gender($gender) {
         $gender = trim(strtolower($gender));
-        if (empty($gender))
+        if (empty($gender)) {
             return 'n';
+        }
         $gender = substr($gender, 0, 1);
         if ($gender !== 'f' && $gender !== 'm') {
             $gender = 'n';
@@ -910,8 +940,52 @@ class NewsletterModuleBase {
         return $gender;
     }
 
+    static function sanitize_language($value) {
+        $languages = self::get_languages();
+        return isset($languages[$value]) ? $value : '';
+    }
+
+    /**
+     * @see sanitize_gender
+     * @deprecated
+     */
     static function normalize_sex($sex) {
         return self::sanitize_gender($sex);
+    }
+
+    /**
+     *
+     * @param TNP_Subscription_Data $data
+     */
+    static function sanitize_subscription_data($data) {
+        $data->email = self::sanitize_email($data->email);
+        $data->name = self::sanitize_name($data->name);
+        $data->surname = self::sanitize_name($data->surname);
+        $data->sex = self::sanitize_gender($data->sex);
+        $data->language = self::sanitize_language($data->language);
+
+        if (isset($data->city)) {
+            $data->city = self::sanitize_user_field($data->city, 50);
+        }
+
+        if (isset($data->region)) {
+            $data->region = self::sanitize_user_field($data->region, 50);
+        }
+
+        if (isset($data->http_referer)) {
+            $data->http_referer = self::sanitize_user_field($data->http_referer, 200);
+        }
+
+        if (isset($data->referrer)) {
+            $data->referrer = self::sanitize_user_field($data->http_referer, 50);
+        }
+
+        for ($i = 1; $i < NEWSLETTER_PROFILE_MAX; $i++) {
+            $field = 'profile_' . $i;
+            if (isset($data->$field)) {
+                $data->$field = self::sanitize_user_field($data->$field);
+            }
+        }
     }
 
     static function is_email($email, $empty_ok = false) {
@@ -1249,7 +1323,7 @@ class NewsletterModuleBase {
 
         $row = $wpdb->get_row($wpdb->prepare("SELECT * FROM $wpdb->options WHERE option_name = %s LIMIT 1", 'newsletter_lock_' . $name));
         if ($row) {
-            $value = (int)$row->option_value;
+            $value = (int) $row->option_value;
             if ($value < time()) {
                 $wpdb->query($wpdb->prepare("update $wpdb->options set option_value=%s where option_id=%d limit 1", '' . (time() + $duration), $row->option_id));
                 return true;

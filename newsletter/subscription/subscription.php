@@ -50,7 +50,7 @@ class NewsletterSubscription extends NewsletterModule {
 
     function hook_wp_footer() {
         if (!$this->popup_test) {
-            $user = Newsletter::instance()->check_user();
+            $user = Newsletter::instance()->get_current_user();
             if ($user && $user->status === 'C') {
                 return;
             }
@@ -122,6 +122,10 @@ class NewsletterSubscription extends NewsletterModule {
                         $this->dienow('Subscriber not found or not confirmed.', 'Even the wrong subscriber token can lead to this error.', 404);
                     }
 
+                    if (!isset($user->editable) || !$user->editable) {
+                        $this->dienow('Subscriber not found or not confirmed.', 'Even the wrong subscriber token can lead to this error.', 404);
+                    }
+
                     if (!$email) {
                         $this->dienow('Newsletter not found', 'The newsletter containing the link has been deleted.', 404);
                     }
@@ -184,6 +188,13 @@ class NewsletterSubscription extends NewsletterModule {
                         $this->dienow(__('Registration failed.', 'newsletter'), $user->get_error_message(), 400);
                     }
 
+                    // A subscriber can access the profile edit if it's new and confirmed.
+                    // If it was existing, we don't know if the current visitor is the original subscriber
+                    // or just using its email. If not confirmed (from the activation email) it cannot
+                    // perform other actions. In this cases, the show message will use a low
+                    // privilege token.
+                    $user->editable = $user->is_new && $user->status == TNP_User::STATUS_CONFIRMED;
+
                     if ($user->status == TNP_User::STATUS_CONFIRMED) {
                         $this->show_message('confirmed', $user);
                     }
@@ -191,7 +202,7 @@ class NewsletterSubscription extends NewsletterModule {
                         $this->show_message('confirmation', $user);
                     }
                 } else {
-                    $language = isset($_REQUEST['nlang']) ? $_REQUEST['nlang'] : '';
+                    $language = $this->sanitize_language($_REQUEST['nlang'] ?? '');
                     Newsletter::instance()->switch_language($language);
                     $this->antibot_subscription($this->get_form_text('subscribe'), $captcha);
                 }
@@ -217,6 +228,9 @@ class NewsletterSubscription extends NewsletterModule {
                         $this->dienow(__('Registration failed.', 'newsletter'), $user->get_error_message(), 400);
                     }
                 } else {
+
+                    $user->editable = $user->is_new && $user->status == TNP_User::STATUS_CONFIRMED;
+
                     if ($user->status == TNP_User::STATUS_CONFIRMED) {
                         $key = 'confirmed';
                     }
@@ -235,6 +249,10 @@ class NewsletterSubscription extends NewsletterModule {
             case 'c':
             case 'confirm':
                 if (!$user) {
+                    $this->dienow(__('Subscriber not found.', 'newsletter'), 'Or it is not present or the secret key does not match.', 404);
+                }
+
+                if (!isset($user->editable) || !$user->editable) {
                     $this->dienow(__('Subscriber not found.', 'newsletter'), 'Or it is not present or the secret key does not match.', 404);
                 }
 
@@ -299,48 +317,6 @@ class NewsletterSubscription extends NewsletterModule {
     }
 
     /**
-     * Sanitize the subscription data collected before process them. Cleanup the lists, the optin mode, email, first name,
-     * last name, adds mandatory lists, get (if not provided) and process the IP.
-     *
-     * @param TNP_Subscription_Data $data
-     */
-    private function sanitize($data) {
-        $data->email = $this->normalize_email($data->email);
-        if (!empty($data->name)) {
-            $data->name = $this->normalize_name($data->name);
-        }
-        if (!empty($data->surname)) {
-            $data->surname = $this->normalize_name($data->surname);
-        }
-
-        if (empty($data->ip)) {
-            $data->ip = $this->get_remote_ip();
-        }
-        $data->ip = $this->process_ip($data->ip);
-
-        if (isset($data->http_referer)) {
-            $data->http_referer = mb_substr(strip_tags($data->http_referer), 0, 200);
-        }
-
-        if (isset($data->sex)) {
-            $data->sex = $this->sanitize_gender($data->sex);
-        }
-
-        if (!isset($data->language)) {
-            $data->language = $this->language();
-        } else {
-            $data->language = strtolower(strip_tags($data->language));
-        }
-
-        for ($i = 1; $i <= NEWSLETTER_PROFILE_MAX; $i++) {
-            $key = 'profile_' . $i;
-            if (isset($data->$key)) {
-                $data->$key = trim($data->$key);
-            }
-        }
-    }
-
-    /**
      * Builds a default subscription object to be used to collect data and subscription options.
      *
      * @return TNP_Subscription
@@ -398,18 +374,21 @@ class NewsletterSubscription extends NewsletterModule {
 
         $this->logger->debug($subscription);
 
-        $this->sanitize($subscription->data);
-
-        if (empty($subscription->data->email)) {
-            return new WP_Error('email', 'Wrong email address');
-        }
-
         if (!empty($subscription->data->country) && strlen($subscription->data->country) != 2) {
             return new WP_Error('country', 'Country code length error. ISO 3166-1 alpha-2 format (2 letters)');
         }
 
-        // Here we should have a clean subscription data
-        // Filter?
+        // Fill in optional data
+
+        if (empty($data->ip)) {
+            $subscription->data->ip = $this->get_remote_ip();
+        }
+
+        if (empty($data->language)) {
+            $subscription->data->language = $this->language();
+        }
+
+        // Spam check before sanitization: we could remove relevant information to evaluate spam
 
         if ($subscription->spamcheck) {
             // TODO: Use autoload
@@ -427,11 +406,20 @@ class NewsletterSubscription extends NewsletterModule {
 
         $subscription = apply_filters('newsletter_subscription', $subscription, $user);
 
+        $this->sanitize_subscription_data($subscription->data);
+
+        if (empty($subscription->data->email)) {
+            return new WP_Error('email', 'Wrong email address');
+        }
+
+        $subscription->data->ip = $this->process_ip($subscription->data->ip);
+
         // Do we accept repeated subscriptions?
         if ($user != null && $subscription->if_exists === TNP_Subscription::EXISTING_ERROR) {
             return new WP_Error('exists', 'Email address already registered and Newsletter sets to block repeated registrations. You can change this behavior or the user message above on subscription configuration panel.');
         }
 
+        $is_new = false;
 
         if ($user != null) {
 
@@ -473,6 +461,8 @@ class NewsletterSubscription extends NewsletterModule {
             // Can be updated on the fly?
             $subscription->data->merge_in($user);
         } else {
+            $is_new = true;
+
             $this->logger->info('New subscriber');
 
             $user = new TNP_User();
@@ -514,12 +504,14 @@ class NewsletterSubscription extends NewsletterModule {
         if ($user->status == TNP_User::STATUS_CONFIRMED) {
             do_action('newsletter_user_confirmed', $user);
             $this->notify_admin_on_subscription($user);
-            setcookie('newsletter', $user->id . '-' . $user->token, time() + 60 * 60 * 24 * 365, '/');
+            setcookie('newsletter', $this->get_user_key($user, 'preconfirm'), time() + 60 * 60 * 24 * 365, '/');
         }
 
         if ($subscription->send_emails) {
             $this->send_message(($user->status == TNP_User::STATUS_CONFIRMED) ? 'confirmed' : 'confirmation', $user);
         }
+
+        $user->is_new = $is_new;
 
         // Used by Autoresponder (probably)
         do_action('newsletter_user_post_subscribe', $user);
@@ -528,130 +520,10 @@ class NewsletterSubscription extends NewsletterModule {
     }
 
     /**
-     * Create a subscription using the $_REQUEST data. Does security checks.
-     *
      * @deprecated since version 6.9.0
-     * @param string $status The status to use for this subscription (confirmed, not confirmed, ...)
-     * @param bool $emails If the confirmation/welcome email should be sent or the subscription should be silent
-     * @return TNP_User
-     *
-     * @deprecated
      */
     function subscribe($status = null, $emails = true) {
-
-        $this->logger->debug('Subscription start');
-
-        // Validation
-        $ip = $this->get_remote_ip();
-        $email = $this->normalize_email(stripslashes($_REQUEST['ne']));
-        $first_name = '';
-        if (isset($_REQUEST['nn'])) {
-            $first_name = $this->normalize_name(stripslashes($_REQUEST['nn']));
-        }
-
-        $last_name = '';
-        if (isset($_REQUEST['ns'])) {
-            $last_name = $this->normalize_name(stripslashes($_REQUEST['ns']));
-        }
-
-        $opt_in = (int) $this->get_option('noconfirmation'); // 0 - double, 1 - single
-        if (!empty($this->get_option('optin_override')) && isset($_REQUEST['optin'])) {
-            switch ($_REQUEST['optin']) {
-                case 'single': $opt_in = self::OPTIN_SINGLE;
-                    break;
-                case 'double': $opt_in = self::OPTIN_DOUBLE;
-                    break;
-            }
-        }
-
-        if ($status != null) {
-            // If a status is forced and it is requested to be "confirmed" is like a single opt in
-            // $status here can only be confirmed or not confirmed
-            // TODO: Add a check on status values
-            if ($status == TNP_User::STATUS_CONFIRMED) {
-                $opt_in = self::OPTIN_SINGLE;
-            } else {
-                $opt_in = self::OPTIN_DOUBLE;
-            }
-        }
-
-        $user = $this->get_user($email);
-
-        if ($user != null) {
-            // Email already registered in our database
-            $this->logger->info('Subscription of an address with status ' . $user->status);
-
-            // Bounced
-            // TODO: Manage other cases when added
-            if ($user->status == 'B') {
-                // Non persistent status to decide which message to show (error)
-                $user->status = 'E';
-                return $user;
-            }
-
-            // Is there any relevant data change? If so we can proceed otherwise if repeated subscriptions are disabled
-            // show an already subscribed message
-
-            if (empty($this->options['multiple'])) {
-                $user->status = 'E';
-                return $user;
-            }
-
-            // If the subscriber is confirmed, we cannot change his data in double opt in mode, we need to
-            // temporary store and wait for activation
-            if ($user->status == TNP_User::STATUS_CONFIRMED && $opt_in == self::OPTIN_DOUBLE) {
-
-                set_transient($this->get_user_key($user), $_REQUEST, 3600 * 48);
-
-                // This status is *not* stored it indicate a temporary status to show the correct messages
-                $user->status = 'S';
-
-                $this->send_message('confirmation', $user);
-
-                return $user;
-            }
-        }
-
-        // Here we have a new subscription or we can process the subscription even with a pre-existant user for example
-        // because it is not confirmed
-        if ($user != null) {
-            $this->logger->info("Email address subscribed but not confirmed");
-            $user = array('id' => $user->id);
-        } else {
-            $this->logger->info("New email address");
-            $user = array('email' => $email);
-        }
-
-        $user = $this->update_user_from_request($user);
-
-        $user['token'] = $this->get_token();
-        $ip = $this->process_ip($ip);
-        $user['ip'] = $ip;
-        $user['geo'] = 0;
-        $user['status'] = $opt_in == self::OPTIN_SINGLE ? TNP_User::STATUS_CONFIRMED : TNP_User::STATUS_NOT_CONFIRMED;
-
-        $user['updated'] = time();
-
-        $user = apply_filters('newsletter_user_subscribe', $user);
-
-        $user = $this->save_user($user);
-
-        $this->add_user_log($user, 'subscribe');
-
-        // Notification to admin (only for new confirmed subscriptions)
-        if ($user->status == TNP_User::STATUS_CONFIRMED) {
-            do_action('newsletter_user_confirmed', $user);
-            $this->notify_admin_on_subscription($user);
-            setcookie('newsletter', $user->id . '-' . $user->token, time() + 60 * 60 * 24 * 365, '/');
-        }
-
-        if ($emails) {
-            $this->send_message(($user->status == TNP_User::STATUS_CONFIRMED) ? 'confirmed' : 'confirmation', $user);
-        }
-
-        $user = apply_filters('newsletter_user_post_subscribe', $user);
-
-        return $user;
+        return false;
     }
 
     function add_microdata($message) {
@@ -664,7 +536,7 @@ class NewsletterSubscription extends NewsletterModule {
 
     /**
      * Builds a subscription object starting from values in the $_REQUEST
-     * global variable. It DOES NOT sanitizie or formally check the values.
+     * global variable. It DOES NOT sanitize or formally check the values.
      * Usually data comes from a form submission.
      * https://www.thenewsletterplugin.com/documentation/subscription/newsletter-forms/
      *
@@ -672,38 +544,34 @@ class NewsletterSubscription extends NewsletterModule {
      */
     function build_subscription() {
 
-        $language = '';
-        if (!empty($_REQUEST['nlang'])) {
-            $language = $_REQUEST['nlang'];
-            $this->switch_language($language);
-        } else {
-            $language = $this->language();
-        }
+        $posted = stripslashes_deep($_REQUEST); // Change to $_POST after compatibility tests
+
+        $language = $this->sanitize_language($posted['nlang'] ?? $this->language());
 
         $subscription = $this->get_default_subscription($language);
         $data = $subscription->data;
 
-        $data->email = $_REQUEST['ne'];
+        $data->email = $posted['ne'];
 
-        if (isset($_REQUEST['nn'])) {
-            $data->name = stripslashes($_REQUEST['nn']);
+        if (isset($posted['nn'])) {
+            $data->name = $posted['nn'];
         }
 
-        if (isset($_REQUEST['ns'])) {
-            $data->surname = stripslashes($_REQUEST['ns']);
+        if (isset($posted['ns'])) {
+            $data->surname = $posted['ns'];
         }
 
-        if (!empty($_REQUEST['nx'])) {
-            $data->sex = $this->sanitize_gender($_REQUEST['nx']);
+        if (isset($posted['nx'])) {
+            $data->sex = $posted['nx'];
         }
 
-        if (isset($_REQUEST['nr'])) {
-            $data->referrer = $_REQUEST['nr'];
+        if (isset($posted['nr'])) {
+            $data->referrer = $posted['nr'];
         }
 
         // From the antibot form
-        if (isset($_REQUEST['nhr'])) {
-            $data->http_referer = stripslashes($_REQUEST['nhr']);
+        if (isset($posted['nhr'])) {
+            $data->http_referer = $posted['nhr'];
         } else if (isset($_SERVER['HTTP_REFERER'])) {
             $data->http_referer = $_SERVER['HTTP_REFERER'];
         }
@@ -711,39 +579,41 @@ class NewsletterSubscription extends NewsletterModule {
         // New profiles
         $customfields = $this->get_options('customfields');
         for ($i = 1; $i <= NEWSLETTER_PROFILE_MAX; $i++) {
-            // Private custom field?
-            if (empty($customfields['profile_' . $i . '_status'])) {
-                continue;
-            }
-            if (isset($_REQUEST['np' . $i])) {
-                $data->profiles['' . $i] = stripslashes($_REQUEST['np' . $i]);
+            if (isset($posted['np' . $i])) {
+                $profile = $this->get_customfield($i);
+                if (!$profile || $profile->is_private()) {
+                    if (current_user_can('administrator')) {
+                        $this->dienow('Invalid custom field', 'Custom field ' . $i . ' has been submitted but it is set as private. Please fix the subscription form.');
+                    }
+                    continue;
+                }
+                $data->profiles['' . $i] = $posted['np' . $i];
             }
         }
 
         // Lists (field name is nl[] and values the list number so special forms with radio button can work)
-        if (isset($_REQUEST['nl']) && is_array($_REQUEST['nl'])) {
-            $this->logger->debug($_REQUEST['nl']);
-            foreach ($_REQUEST['nl'] as $list_id) {
-                $list = $this->get_list($list_id);
-                if (!$list || $list->is_private()) {
-                    // To administrator show an error to make him aware of the wrong form configuration
-                    if (current_user_can('administrator')) {
-                        $this->dienow('Invalid list', 'List ' . $list_id . ' has been submitted but it is set as private. Please fix the subscription form.');
-                    }
-                    // Ignore this list
-                    continue;
+        $nl = $posted['nl'] ?? [];
+
+        foreach ($nl as $list_id) {
+            $list = $this->get_list($list_id);
+            if (!$list || $list->is_private()) {
+                // To administrator show an error to make him aware of the wrong form configuration
+                if (current_user_can('administrator')) {
+                    $this->dienow('Invalid list', 'List ' . $list_id . ' has been submitted but it is set as private. Please fix the subscription form.');
                 }
-                $data->lists['' . $list_id] = 1;
+                // Ignore this list
+                continue;
             }
+            $data->lists['' . $list_id] = 1;
         }
 
         if (isset($_REQUEST['welcome_page_id'])) {
-            $subscription->welcome_page_id = (int) $_REQUEST['welcome_page_id'];
+            $subscription->welcome_page_id = (int) $posted['welcome_page_id'];
         }
 
         if (class_exists('NewsletterAutoresponder') && method_exists('NewsletterAutoresponder', 'is_valid_key')) {
 
-            $keys = wp_parse_list($_REQUEST['nar'] ?? []);
+            $keys = wp_parse_list($posted['nar'] ?? []);
             if ($keys) {
                 $subscription->autoresponders = []; // Remove the default one
                 // Check the keys
@@ -755,10 +625,9 @@ class NewsletterSubscription extends NewsletterModule {
             }
         }
 
-
         // Opt-in mode
-        if (!empty($this->get_main_option('optin_override')) && isset($_REQUEST['optin'])) {
-            switch ($_REQUEST['optin']) {
+        if (!empty($this->get_main_option('optin_override')) && isset($posted['optin'])) {
+            switch ($posted['optin']) {
                 case 'single': $subscription->optin = 'single';
                     break;
                 case 'double': $subscription->optin = 'double';
@@ -778,104 +647,7 @@ class NewsletterSubscription extends NewsletterModule {
      * @return array The filled array representing a subscriber
      */
     function update_user_from_request($user) {
-
-        if (isset($_REQUEST['nn'])) {
-            $user['name'] = $this->normalize_name(stripslashes($_REQUEST['nn']));
-        }
-        // TODO: required checking
-
-        if (isset($_REQUEST['ns'])) {
-            $user['surname'] = $this->normalize_name(stripslashes($_REQUEST['ns']));
-        }
-        // TODO: required checking
-
-        if (!empty($_REQUEST['nx'])) {
-            $user['sex'] = $this->sanitize_gender($_REQUEST['nx']);
-        }
-        // TODO: valid values check
-
-        if (isset($_REQUEST['nr'])) {
-            $user['referrer'] = strip_tags(trim($_REQUEST['nr']));
-        }
-
-        $language = '';
-        if (!empty($_REQUEST['nlang'])) {
-            $language = strtolower(strip_tags($_REQUEST['nlang']));
-            // TODO: Check if it's an allowed language code
-            $user['language'] = $language;
-        } else {
-            $language = $this->get_current_language();
-            $user['language'] = $language;
-        }
-
-        // From the antibot form
-        if (isset($_REQUEST['nhr'])) {
-            $user['http_referer'] = strip_tags(trim($_REQUEST['nhr']));
-        } else if (isset($_SERVER['HTTP_REFERER'])) {
-            $user['http_referer'] = strip_tags(trim($_SERVER['HTTP_REFERER']));
-        }
-
-        if (strlen($user['http_referer']) > 200) {
-            $user['http_referer'] = mb_substr($user['http_referer'], 0, 200);
-        }
-
-        // New profiles
-        for ($i = 1; $i <= NEWSLETTER_PROFILE_MAX; $i++) {
-            // If the profile cannot be set by  subscriber, skip it.
-            if ($this->options_profile['profile_' . $i . '_status'] == 0) {
-                continue;
-            }
-            if (isset($_REQUEST['np' . $i])) {
-                $user['profile_' . $i] = trim(stripslashes($_REQUEST['np' . $i]));
-            }
-        }
-
-        // Extra validation to explain the administrator while the submitted data could
-        // be interpreted only partially
-        if (current_user_can('administrator')) {
-            if (isset($_REQUEST['nl']) && is_array($_REQUEST['nl'])) {
-                foreach ($_REQUEST['nl'] as $list_id) {
-                    $list = $this->get_list($list_id);
-                    if ($list && $list->status == TNP_List::STATUS_PRIVATE) {
-                        $this->dienow('Invalid list', '[old] List ' . $list_id . ' has been submitted but it is set as private. Please fix the subscription form.');
-                    }
-                }
-            }
-        }
-        // Preferences (field names are nl[] and values the list number so special forms with radio button can work)
-        // Permetto l'aggiunta solo delle liste pubbliche
-        if (isset($_REQUEST['nl']) && is_array($_REQUEST['nl'])) {
-            $lists = $this->get_lists_public();
-            //$this->logger->debug($_REQUEST['nl']);
-            foreach ($lists as $list) {
-                if (in_array('' . $list->id, $_REQUEST['nl'])) {
-                    $user['list_' . $list->id] = 1;
-                }
-            }
-        } else {
-            $this->logger->debug('No lists received');
-        }
-
-        // Forced lists (general or by language)
-        // Forzo l'aggiunta delle liste forzate
-        $lists = $this->get_lists();
-        foreach ($lists as $list) {
-            if ($list->forced) {
-                $user['list_' . $list->id] = 1;
-            }
-            if (in_array($language, $list->languages)) {
-                $user['list_' . $list->id] = 1;
-            }
-        }
-
-        // TODO: should be removed!!!
-        if (defined('NEWSLETTER_FEED_VERSION')) {
-            $options_feed = get_option('newsletter_feed', array());
-            if ($options_feed['add_new'] == 1) {
-                $user['feed'] = 1;
-            }
-        }
-        return $user;
+        return false;
     }
 
     /**
@@ -1021,8 +793,6 @@ class NewsletterSubscription extends NewsletterModule {
                 return true;
             }
         }
-
-
 
         $this->switch_language($user->language);
 

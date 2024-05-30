@@ -45,7 +45,7 @@ if ($controls->is_action('delete_selected')) {
 // We build the query condition
 $where = 'where 1=1';
 $query_args = array();
-$text = trim($controls->get_value('search_text'));
+$text = trim($controls->get_value('search_text', ''));
 if ($text) {
     $query_args[] = '%' . $text . '%';
     $query_args[] = '%' . $text . '%';

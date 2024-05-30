@@ -597,7 +597,7 @@ class NewsletterModuleAdmin extends NewsletterModuleBase {
             $url = Newsletter::instance()->get_newsletter_page_url($language);
         }
 
-        return self::add_qs($url, $params, false);
+        return self::add_qs($url, $params);
     }
 
     function get_subscribe_url() {
@@ -721,34 +721,6 @@ class NewsletterModuleAdmin extends NewsletterModuleBase {
 
     function is_default_language() {
         return $this->get_current_language() == $this->get_default_language();
-    }
-
-    /**
-     * Returns an array of languages with key the language code and value the language name.
-     * An empty array is returned if no language is available.
-     */
-    function get_languages() {
-
-        $language_options = [];
-
-        if (class_exists('SitePress')) {
-            $languages = apply_filters('wpml_active_languages', null, ['skip_missing' => 0]);
-            foreach ($languages as $language) {
-                $language_options[$language['language_code']] = $language['translated_name'];
-            }
-
-            return $language_options;
-        } else if (function_exists('pll_languages_list')) {
-            $languages = pll_languages_list(['fields' => '']);
-            foreach ($languages as $data) {
-                $language_options[$data->slug] = $data->name;
-            }
-
-
-            return $language_options;
-        }
-
-        return apply_filters('newsletter_languages', $language_options);
     }
 
     function get_language_label($language) {

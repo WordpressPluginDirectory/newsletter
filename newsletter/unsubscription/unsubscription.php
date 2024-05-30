@@ -36,14 +36,10 @@ class NewsletterUnsubscription extends NewsletterModule {
         if ($this->is_current_user_dummy()) {
             $user = $this->get_dummy_user();
         } else {
-            $user = $this->check_user();
+            $user = $this->get_current_user();
 
-            if (empty($user)) {
-                if (empty($content)) {
-                    return __('Subscriber not found.', 'newsletter');
-                } else {
-                    return $content;
-                }
+            if (empty($user) || !isset($user->editable) || !$user->editable) {
+                return '';
             }
         }
         $label = empty($attrs['label']) ? __('Unsubscribe', 'newsletter') : $attrs['label'];
@@ -59,14 +55,10 @@ class NewsletterUnsubscription extends NewsletterModule {
         if ($this->is_current_user_dummy()) {
             $user = $this->get_dummy_user();
         } else {
-            $user = $this->check_user();
+            $user = $this->get_current_user();
 
-            if (empty($user)) {
-                if (empty($content)) {
-                    return __('Subscriber not found.', 'newsletter');
-                } else {
-                    return $content;
-                }
+            if (empty($user) || !isset($user->editable) || !$user->editable) {
+                return '';
             }
         }
 
@@ -109,6 +101,10 @@ class NewsletterUnsubscription extends NewsletterModule {
 
         if (!$user) {
             $this->dienow(__('Subscriber not found', 'newsletter'), 'From a test newsletter or already deleted or using the wrong subscriber key in the URL', 404);
+        }
+
+        if (!isset($user->editable) || !$user->editable) {
+            $this->dienow(__('Subscriber not found or not confirmed or started from a test newsletter.', 'newsletter'), 'From a test newsletter or subscriber key not valid or subscriber not confirmed', 404);
         }
 
         if (isset($_SERVER['HTTP_USER_AGENT'])) {
@@ -279,35 +275,26 @@ class NewsletterUnsubscription extends NewsletterModule {
      * @return type
      */
     function hook_newsletter_page_text($text, $key, $user = null) {
+
+        // For this module?
+        if (!in_array($key, ['unsubscribe', 'unsubscribed', 'reactivated'])) {
+            return $text;
+        }
+
         $message = '';
-        if ($key === 'unsubscribe') {
-            if (!$user) {
-                $message = $this->get_text('error_text');
-            }
-            $message = $this->get_text('unsubscribe_text');
-        }
-        if ($key === 'unsubscribed') {
-            if (!$user) {
-                $message = $this->get_text('error_text');
-            }
-            $message = $this->get_text('unsubscribed_text');
-        }
-        if ($key === 'reactivated') {
-            if (!$user) {
-                $message = $this->get_text('error_text');
-            }
-            $message = $this->get_text('reactivated_text');
+
+        if (!$user || !isset($user->editable) || !$user->editable) {
+            $message = $this->get_text('error_text');
+        } else {
+            $message = $this->get_text($key . '_text');
         }
 
-        if ($message) {
-            if ($user && $user->id === 0 && current_user_can('administrator')) {
-                return '<p style="background-color: #eee; color: #000; padding: 1rem; margin: 1rem 0"><strong>Visible only to administrator</strong>. Preview of the content with a dummy subscriber. <a href="' . admin_url('admin.php?page=newsletter_unsubscription_index') . '" target="_blank">Edit this content</a>.</p>'
-                        . $message;
-            }
-            return $message;
+        if ($user && $user->id === 0 && current_user_can('administrator')) {
+            return '<p style="background-color: #eee; color: #000; padding: 1rem; margin: 1rem 0"><strong>Visible only to administrator</strong>. Preview of the content with a dummy subscriber. <a href="' . admin_url('admin.php?page=newsletter_unsubscription_index') . '" target="_blank">Edit this content</a>.</p>'
+                    . $message;
         }
+        return $message;
 
-        return $text;
     }
 
     /**
