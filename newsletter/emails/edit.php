@@ -1,5 +1,6 @@
 <?php
 /* @var $this NewsletterEmails */
+/* @var $controls NewsletterControls */
 defined('ABSPATH') || exit;
 
 function tnp_prepare_controls($email, $controls) {
@@ -273,7 +274,7 @@ if ($controls->is_action('test') || $controls->is_action('save') || $controls->i
 
 if (empty($controls->errors) && ($controls->is_action('send') || $controls->is_action('schedule'))) {
 
-    if ($email['subject'] == '') {
+    if (empty($email['subject'])) {
         $controls->errors = __('A subject is required to send', 'newsletter');
     } else {
         NewsletterStatistics::instance()->reset_stats($email);
@@ -286,7 +287,7 @@ if (empty($controls->errors) && ($controls->is_action('send') || $controls->is_a
         }
 
         // Immadiate first batch sending since people has no patience
-        if ($controls->is_action('send') && $email['total'] < 15) {
+        if ($controls->is_action('send') && $email['total'] < 20) {
             // Avoid the first batch if there are other newsletters delivering otherwise we can get over the per hour quota
             $sending_count = $wpdb->get_results("select count(*) from " . NEWSLETTER_EMAILS_TABLE . " where status='sending' and send_on<" . time());
             if ($sending_count <= 1) { // This newsletter is counted as well
@@ -326,9 +327,9 @@ if ($email['status'] != 'sent') {
     <?php include NEWSLETTER_ADMIN_HEADER; ?>
 
     <div id="tnp-heading">
-        <?php $controls->title_help('/newsletter-targeting') ?>
+        <?php $controls->title_help('/newsletter-targeting'); ?>
 
-        <h2><?php echo esc_html($email['subject']) ?></h2>
+        <h2><?php echo esc_html($email['subject']); ?></h2>
 
     </div>
 
@@ -337,7 +338,7 @@ if ($email['status'] != 'sent') {
 
         <form method="post" action="" id="newsletter-form">
             <?php $controls->init(['cookie_name' => 'newsletter_emails_edit_tab']); ?>
-            <?php $controls->hidden('updated') ?>
+            <?php $controls->hidden('updated'); ?>
 
             <div class="tnp-emails-header">
                 <div class="tnp-submit">

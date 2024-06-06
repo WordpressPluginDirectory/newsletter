@@ -118,11 +118,7 @@ class NewsletterSubscription extends NewsletterModule {
             case 'profile-change':
                 if ($this->antibot_form_check()) {
 
-                    if (!$user || $user->status != TNP_user::STATUS_CONFIRMED) {
-                        $this->dienow('Subscriber not found or not confirmed.', 'Even the wrong subscriber token can lead to this error.', 404);
-                    }
-
-                    if (!isset($user->editable) || !$user->editable) {
+                    if (!$user || $user->status != TNP_user::STATUS_CONFIRMED || !$user->_trusted) {
                         $this->dienow('Subscriber not found or not confirmed.', 'Even the wrong subscriber token can lead to this error.', 404);
                     }
 
@@ -158,11 +154,6 @@ class NewsletterSubscription extends NewsletterModule {
 
                 die();
 
-            case 'm':
-            case 'message':
-                include __DIR__ . '/page.php';
-                die();
-
             // normal subscription
             case 's':
             case 'subscribe':
@@ -183,7 +174,7 @@ class NewsletterSubscription extends NewsletterModule {
 
                     if (is_wp_error($user)) {
                         if ($user->get_error_code() === 'exists') {
-                            $this->show_message('error');
+                            $this->redirect($this->build_message_url('', 'error'));
                         }
                         $this->dienow(__('Registration failed.', 'newsletter'), $user->get_error_message(), 400);
                     }
@@ -193,13 +184,13 @@ class NewsletterSubscription extends NewsletterModule {
                     // or just using its email. If not confirmed (from the activation email) it cannot
                     // perform other actions. In this cases, the show message will use a low
                     // privilege token.
-                    $user->editable = $user->is_new && $user->status == TNP_User::STATUS_CONFIRMED;
+                    $user->_trusted = $user->is_new && $user->status == TNP_User::STATUS_CONFIRMED;
 
                     if ($user->status == TNP_User::STATUS_CONFIRMED) {
-                        $this->show_message('confirmed', $user);
+                        $this->redirect_to_confirmed($user);
                     }
                     if ($user->status == TNP_User::STATUS_NOT_CONFIRMED) {
-                        $this->show_message('confirmation', $user);
+                        $this->redirect_to_confirmation($user);
                     }
                 } else {
                     $language = $this->sanitize_language($_REQUEST['nlang'] ?? '');
@@ -229,7 +220,7 @@ class NewsletterSubscription extends NewsletterModule {
                     }
                 } else {
 
-                    $user->editable = $user->is_new && $user->status == TNP_User::STATUS_CONFIRMED;
+                    $user->_trusted = $user->is_new && $user->status == TNP_User::STATUS_CONFIRMED;
 
                     if ($user->status == TNP_User::STATUS_CONFIRMED) {
                         $key = 'confirmed';
@@ -248,26 +239,18 @@ class NewsletterSubscription extends NewsletterModule {
 
             case 'c':
             case 'confirm':
-                if (!$user) {
-                    $this->dienow(__('Subscriber not found.', 'newsletter'), 'Or it is not present or the secret key does not match.', 404);
-                }
-
-                if (!isset($user->editable) || !$user->editable) {
+                if (!$user || !$user->_trusted) {
                     $this->dienow(__('Subscriber not found.', 'newsletter'), 'Or it is not present or the secret key does not match.', 404);
                 }
 
                 if ($this->antibot_form_check()) {
                     $user = $this->confirm($user);
                     $this->set_user_cookie($user);
-                    $this->show_message('confirmed', $user);
+                    $this->redirect_to_confirmed($user);
                 } else {
                     $this->antibot_subscription('Confirm');
                 }
                 die();
-                break;
-
-            default:
-                return;
         }
     }
 
@@ -380,12 +363,8 @@ class NewsletterSubscription extends NewsletterModule {
 
         // Fill in optional data
 
-        if (empty($data->ip)) {
+        if (empty($subscription->data->ip)) {
             $subscription->data->ip = $this->get_remote_ip();
-        }
-
-        if (empty($data->language)) {
-            $subscription->data->language = $this->language();
         }
 
         // Spam check before sanitization: we could remove relevant information to evaluate spam
@@ -844,6 +823,49 @@ class NewsletterSubscription extends NewsletterModule {
         }
 
         return $this->send_message('confirmation', $user, true);
+    }
+
+    function redirect_to_confirmed($user) {
+        if (!$user) {
+            die('Subscriber not found.');
+        }
+        $url = '';
+        $this->switch_language($user->language);
+        $welcome_page_id = $this->get_user_meta($user->id, 'welcome_page_id');
+        if ($welcome_page_id) {
+            $url = get_permalink($welcome_page_id);
+        } else {
+            if (isset($_REQUEST['ncu'])) {
+                // Custom URL from the form
+                $url = sanitize_url($_REQUEST['ncu']);
+            } else {
+                // Per message custom URL from configuration (language variants could not be supported)
+                $page_id = $this->get_option('confirmed_id');
+                if (!empty($page_id)) {
+                    if ($page_id === 'url') {
+                        $url = trim($this->get_option('confirmed_url'));
+                    } else {
+                        $url = get_permalink((int) $page_id);
+                    }
+                }
+            }
+        }
+        $url = apply_filters('newsletter_welcome_url', $url, $user);
+        $url = Newsletter::instance()->build_message_url($url, 'confirmed', $user);
+        $this->redirect($url);
+    }
+
+    function redirect_to_confirmation($user) {
+        $url = '';
+        if (isset($_REQUEST['ncu'])) {
+            // Custom URL from the form
+            $url = $_REQUEST['ncu'];
+        } else {
+            // Per message custom URL from configuration (language variants could not be supported)
+            $url = $this->get_option('confirmation_url');
+        }
+        $url = $this->build_message_url($url, 'confirmation', $user);
+        $this->redirect($url);
     }
 
     /**
@@ -1743,7 +1765,16 @@ class NewsletterSubscription extends NewsletterModule {
 
         $admin_notice = '';
         if (current_user_can('administrator')) {
-            $admin_notice = '<p style="background-color: #eee; color: #000; padding: 1rem; margin: 1rem 0"><strong>Visible only to administrators</strong>. <a href="' . admin_url('admin.php?page=newsletter_subscription_options') . '" target="_blank">Edit this content</a>.</p>';
+            if ($this->is_multilanguage()) {
+                $language = $this->language();
+                if (empty($language)) {
+                    $language = 'all';
+                }
+                $admin_notice = '<p style="background-color: #eee; color: #000; padding: 1rem; margin: 1rem 0"><strong>Visible only to administrators</strong>. <a href="' . admin_url('admin.php?page=newsletter_subscription_options&lang=' . urlencode($language)) . '" target="_blank">Edit this content</a>.</p>';
+            } else {
+                $admin_notice = '<p style="background-color: #eee; color: #000; padding: 1rem; margin: 1rem 0"><strong>Visible only to administrators</strong>. <a href="' . admin_url('admin.php?page=newsletter_subscription_options') . '" target="_blank">Edit this content</a>.</p>';
+
+            }
         }
 
         return $admin_notice . $text;

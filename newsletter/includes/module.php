@@ -421,6 +421,10 @@ class NewsletterModule extends NewsletterModuleBase {
         return $id === '0';
     }
 
+    /**
+     *
+     * @return TNP_User
+     */
     function get_current_user() {
 
         $id = 0;
@@ -428,6 +432,10 @@ class NewsletterModule extends NewsletterModuleBase {
 
         if (isset($_REQUEST['nk'])) {
             list($id, $token) = explode('-', $_REQUEST['nk'], 2);
+            if (current_user_can('administrator') && $id === '0') {
+                $user = $this->get_dummy_user();
+                return $user;
+            }
         } else if (isset($_COOKIE['newsletter'])) {
             list ($id, $token) = explode('-', $_COOKIE['newsletter'], 2);
         }
@@ -435,11 +443,12 @@ class NewsletterModule extends NewsletterModuleBase {
         if ($id) {
             $user = $this->get_user($id);
             if ($user) {
+                $user->_dummy = false;
                 $token_md5 = md5($user->token);
                 if ($token !== $user->token && $token !== $token_md5) {
                     $user = null;
                 } else {
-                    $user->editable = $token === $user->token;
+                    $user->_trusted = $token === $user->token;
                 }
             }
         }
@@ -798,9 +807,9 @@ class NewsletterModule extends NewsletterModuleBase {
         }
 
         if ($user) {
-            $editable = $user->editable ?? true;
+            $trusted = $user->_trusted ?? true;
             $nk = $this->get_user_key($user);
-            $token = $editable ? $user->token : md5($user->token);
+            $token = $trusted ? $user->token : md5($user->token);
 
             $text = str_replace('{email}', $user->email, $text);
 

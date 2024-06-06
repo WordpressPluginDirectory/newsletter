@@ -556,55 +556,6 @@ class NewsletterModuleAdmin extends NewsletterModuleBase {
     }
 
     /**
-     * Add to a destination URL the parameters to identify the user, the email and to show
-     * an alert message, if required. The parameters are then managed by the [newsletter] shortcode.
-     *
-     * @param string $url If empty the standard newsletter page URL is used (usually it is empty, but sometime a custom URL has been specified)
-     * @param string $message_key The message identifier
-     * @param TNP_User|int $user
-     * @param TNP_Email|int $email
-     * @param string $alert An optional alter message to be shown. Does not work with custom URLs
-     * @return string The final URL with parameters
-     */
-    function build_message_url($url = '', $message_key = '', $user = null, $email = null, $alert = '') {
-        $params = 'nm=' . urlencode($message_key);
-        $language = '';
-        if ($user) {
-            if (!is_object($user)) {
-                $user = $this->get_user($user);
-            }
-            if ($message_key == 'confirmation') {
-                $params .= '&nk=' . urlencode($this->get_user_key($user, 'preconfirm'));
-            } else {
-                $params .= '&nk=' . urlencode($this->get_user_key($user));
-            }
-
-            $language = $this->get_user_language($user);
-        }
-
-        if ($email) {
-            if (!is_object($email)) {
-                $email = $this->get_email($email);
-            }
-            $params .= '&nek=' . urlencode($this->get_email_key($email));
-        }
-
-        if ($alert) {
-            $params .= '&alert=' . urlencode($alert);
-        }
-
-        if (empty($url)) {
-            $url = Newsletter::instance()->get_newsletter_page_url($language);
-        }
-
-        return self::add_qs($url, $params);
-    }
-
-    function get_subscribe_url() {
-        return $this->build_action_url('s');
-    }
-
-    /**
      * Returns the user language IF there is a supported mutilanguage plugin installed.
      * @param TNP_User $user
      * @return string Language code or empty
@@ -614,44 +565,6 @@ class NewsletterModuleAdmin extends NewsletterModuleBase {
             return $user->language;
         }
         return '';
-    }
-
-    function replace_date($text) {
-        $text = str_replace('{date}', date_i18n(get_option('date_format')), $text);
-
-// Date processing
-        $x = 0;
-        while (($x = strpos($text, '{date_', $x)) !== false) {
-            $y = strpos($text, '}', $x);
-            if ($y === false)
-                continue;
-            $f = substr($text, $x + 6, $y - $x - 6);
-            $text = substr($text, 0, $x) . date_i18n($f) . substr($text, $y + 1);
-        }
-        return $text;
-    }
-
-    function replace_url($text, $tag, $url) {
-        static $home = false;
-        if (!$home) {
-            $home = trailingslashit(home_url());
-        }
-        $tag_lower = strtolower($tag);
-        $text = str_replace('http://{' . $tag_lower . '}', $url, $text);
-        $text = str_replace('https://{' . $tag_lower . '}', $url, $text);
-        $text = str_replace($home . '{' . $tag_lower . '}', $url, $text);
-        $text = str_replace($home . '%7B' . $tag_lower . '%7D', $url, $text);
-        $text = str_replace('{' . $tag_lower . '}', $url, $text);
-        $text = str_replace('%7B' . $tag_lower . '%7D', $url, $text);
-
-        $url_encoded = urlencode($url);
-        $text = str_replace('%7B' . $tag_lower . '_encoded%7D', $url_encoded, $text);
-        $text = str_replace('{' . $tag_lower . '_encoded}', $url_encoded, $text);
-
-// for compatibility
-        $text = str_replace($home . $tag, $url, $text);
-
-        return $text;
     }
 
     static function extract_body($html) {

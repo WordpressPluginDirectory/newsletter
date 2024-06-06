@@ -415,42 +415,18 @@ function tnp_describe_table($table) {
             </table>
 
             <h3>Filters</h3>
+            <p>
+                Filters can be used by 3rd party plugins to change the standard behavior of Newsletters.
+                <a href="https://www.thenewsletterplugin.com/documentation/developers/dev-newsletter-hooks/" target="_blank">Read more</a>.
+            </p>
             <table class="widefat" id="tnp-status-table">
                 <thead>
                     <tr>
-                        <th>Plugin</th>
-                        <th>Action</th>
+                        <th>Filter</th>
+                        <th>Function</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td><code>newsletter_message_headers</code></td>
-                        <td>
-                            <?php echo has_filter('newsletter_message_headers') ? '' : '-' ?>
-                            <?php echo $this->get_hook_functions('newsletter_message_headers') ?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><code>newsletter_message_html</code></td>
-                        <td>
-                            <?php echo has_filter('newsletter_message_html') ? '' : '-' ?><br>
-                            <?php echo $this->get_hook_functions('newsletter_message_html') ?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><code>newsletter_message_text</code></td>
-                        <td>
-                            <?php echo has_filter('newsletter_message_text') ? '' : '-' ?><br>
-                            <?php echo $this->get_hook_functions('newsletter_message_text') ?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><code>newsletter_message_subject</code></td>
-                        <td>
-                            <?php echo has_filter('newsletter_message_subject') ? '' : '-' ?>
-                            <?php echo $this->get_hook_functions('newsletter_message_subject') ?>
-                        </td>
-                    </tr>
                     <tr>
                         <td><code>newsletter_message</code></td>
                         <td>
@@ -458,6 +434,43 @@ function tnp_describe_table($table) {
                             <?php echo $this->get_hook_functions('newsletter_message') ?>
                         </td>
                     </tr>
+                    <tr>
+                        <td><code>newsletter_message_headers</code></td>
+                        <td>
+                            <?php echo has_filter('newsletter_message_headers') ? '' : '-' ?>
+                            <?php echo $this->get_hook_functions('newsletter_message_headers') ?>
+                            <br>
+                            Deprecated, use <code>newsletter_message</code>.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>newsletter_message_html</code></td>
+                        <td>
+                            <?php echo has_filter('newsletter_message_html') ? '' : '-' ?><br>
+                            <?php echo $this->get_hook_functions('newsletter_message_html') ?>
+                            <br>
+                            Deprecated, use <code>newsletter_message</code>.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>newsletter_message_text</code></td>
+                        <td>
+                            <?php echo has_filter('newsletter_message_text') ? '' : '-' ?><br>
+                            <?php echo $this->get_hook_functions('newsletter_message_text') ?>
+                            <br>
+                            Deprecated, use <code>newsletter_message</code>.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>newsletter_message_subject</code></td>
+                        <td>
+                            <?php echo has_filter('newsletter_message_subject') ? '' : '-' ?>
+                            <?php echo $this->get_hook_functions('newsletter_message_subject') ?>
+                            <br>
+                            Deprecated, use <code>newsletter_message</code>.
+                        </td>
+                    </tr>
+
                     <tr>
                         <td><code>newsletter_replace</code></td>
                         <td>
@@ -484,13 +497,6 @@ function tnp_describe_table($table) {
                         <td>
                             <?php echo has_filter('newsletter_languages') ? '' : '-' ?>
                             <?php echo $this->get_hook_functions('newsletter_languages') ?>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><code>newsletter_languages</code></td>
-                        <td>
-                            <?php echo has_filter('newsletter_is_multilanguage') ? '' : '-' ?>
-                            <?php echo $this->get_hook_functions('newsletter_is_multilanguage') ?>
                         </td>
                     </tr>
                     <tr>
@@ -590,7 +596,7 @@ function tnp_describe_table($table) {
                         </td>
                         <td>
                             <?php if (defined('WP_DEBUG') && WP_DEBUG) { ?>
-                                WordPress is in debug mode it is not recommended on a production system. See the constant <code>WP_DEBUG</code> inside the <code>wp-config.php</code>.
+                                WordPress is in debug mode it is not recommended on a public site. See the constant <code>WP_DEBUG</code> inside the <code>wp-config.php</code>.
                             <?php } else { ?>
 
                             <?php } ?>

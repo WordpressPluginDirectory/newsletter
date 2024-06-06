@@ -723,6 +723,13 @@ class NewsletterControls {
         $this->select($name, $options, $first);
     }
 
+    /**
+     * Selector for a WP page or a custom URL.
+     *
+     * @param string $name
+     * @param string $language
+     * @param bool $show_id
+     */
     function page_or_url($name = 'page', $language = '', $show_id = true) {
         $args = array(
             'post_type' => 'page',
@@ -735,7 +742,7 @@ class NewsletterControls {
 
         $pages = get_posts($args);
         //$pages = get_pages();
-        $options = array();
+        $options = ['url' => 'Custom URL'];
         foreach ($pages as $page) {
             /* @var $page WP_Post */
             $label = $page->post_title;
@@ -747,10 +754,10 @@ class NewsletterControls {
             }
             $options[$page->ID] = $label;
         }
-        $options['url'] = 'Custom URL';
+
         $this->select($name . '_id', $options, __('None', 'newsletter'), ['onchange' => 'jQuery(\'#options-' . esc_attr($name) . '_url\').toggle(this.value===\'url\');']);
         echo '<br><br>';
-        $this->text($name . '_url', ['visible' => $this->get_value($name . '_id') === 'url']);
+        $this->text($name . '_url', ['visible' => $this->get_value($name . '_id') === 'url', 'placeholder' => 'https://']);
     }
 
     /** Used to create a select which is part of a group of controls identified by $name that will
@@ -942,14 +949,20 @@ class NewsletterControls {
         if (!is_array($attrs)) {
             $attrs = ['size' => $attrs, 'placeholder' => $placeholder];
         }
-        $attrs = array_merge(['placeholder' => '', 'size' => 40, 'required' => false], $attrs);
+        $attrs = array_merge(['placeholder' => '', 'size' => 40, 'required' => false, 'visible' => true], $attrs);
         $value = $this->get_value($name);
-        $name = esc_attr($name);
-        echo '<input id="options-', $name, '" placeholder="' . esc_attr($attrs['placeholder']) . '" title="' . esc_attr($attrs['placeholder']) . '" name="options[', $name, ']" type="text" ';
-        if (!empty($attrs['size'])) {
-            echo 'size="', esc_attr($attrs['size']), '" ';
+        $name_esc = esc_attr($name);
+        $style = '';
+        if (!$attrs['visible']) {
+            $style .= 'display: none;';
         }
-        echo 'value="', esc_attr($value), '">';
+        echo '<input id="options-', $name_esc, '" placeholder="', esc_attr($attrs['placeholder']), '" title="',
+        esc_attr($attrs['placeholder']), '" name="options[', $name_esc, ']" type="text" ',
+        'style="', esc_attr($style), '"';
+        if (!empty($attrs['size'])) {
+            echo ' size="', esc_attr($attrs['size']), '" ';
+        }
+        echo ' value="', esc_attr($value), '">';
     }
 
     function text_email($name, $attrs = []) {
@@ -1848,11 +1861,16 @@ class NewsletterControls {
         $this->select($name, $days);
     }
 
-    function init($options = array()) {
-        $cookie_name = 'newsletter_tab';
+    function init($options = []) {
+
         if (isset($options['cookie_name'])) {
-            $cookie_name = $options['cookie_name'];
+            $cookie_name = sanitize_key($options['cookie_name']);
+        } else if (isset($_GET['page'])) {
+            $cookie_name = sanitize_key($_GET['page']);
+        } else {
+            $cookie_name = 'newsletter_tab';
         }
+
         echo '<script type="text/javascript">
     jQuery(document).ready(function(){
 
@@ -1863,9 +1881,9 @@ tnp_controls_init();
             jQuery(this).css("height", "400px");
         });
       tabs = jQuery("#tabs").tabs({
-        active : jQuery.cookie("' . $cookie_name . '"),
+        active : jQuery.cookie("' . esc_js($cookie_name) . '"),
         activate : function( event, ui ){
-            jQuery.cookie("' . $cookie_name . '", ui.newTab.index(),{expires: 1});
+            jQuery.cookie("' . esc_js($cookie_name) . '", ui.newTab.index(),{expires: 1});
         }
       });
       jQuery(".tnp-tabs").tabs({});

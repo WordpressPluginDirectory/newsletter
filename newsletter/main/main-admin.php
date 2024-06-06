@@ -105,10 +105,19 @@ class NewsletterMainAdmin extends NewsletterModuleAdmin {
 
     function hook_display_post_states($post_states, $post) {
 
-        if ($post->ID == $this->get_option('page')) {
-            $post_states[] = __('Newsletter public page, keep public and published', 'newsletter');
+        if ($this->is_multilanguage()) {
+            $languages = $this->get_languages();
+            foreach ($languages as $id => $name) {
+                $page_id = $this->get_option('page', '', $id);
+                if ($page_id == $post->ID) {
+                    $post_states[] = __('Newsletter public page, keep public and published', 'newsletter');
+                }
+            }
+        } else {
+            if ($post->ID == $this->get_option('page')) {
+                $post_states[] = __('Newsletter public page, keep public and published', 'newsletter');
+            }
         }
-
         return $post_states;
     }
 

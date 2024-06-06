@@ -4,7 +4,7 @@
   Plugin Name: Newsletter
   Plugin URI: https://www.thenewsletterplugin.com
   Description: Newsletter is a cool plugin to create your own subscriber list, to send newsletters, to build your business. <strong>Before update give a look to <a href="https://www.thenewsletterplugin.com/category/release">this page</a> to know what's changed.</strong>
-  Version: 8.3.5
+  Version: 8.3.8
   Author: Stefano Lissa & The Newsletter Team
   Author URI: https://www.thenewsletterplugin.com
   Disclaimer: Use at your own risk. No warranty expressed or implied is provided.
@@ -30,16 +30,9 @@
 
  */
 
-if (version_compare(phpversion(), '7.0', '<')) {
-    add_action('admin_notices', function () {
-        echo '<div class="notice notice-error"><p>PHP version 7.0 or greater is required for Newsletter. Ask your provider to upgrade. <a href="https://www.php.net/supported-versions.php" target="_blank">Read more on PHP versions</a></p></div>';
-    });
-    return;
-}
+define('NEWSLETTER_VERSION', '8.3.8');
 
-define('NEWSLETTER_VERSION', '8.3.5');
-
-global $newsletter, $wpdb;
+global $wpdb, $newsletter;
 
 // For acceptance tests, DO NOT CHANGE
 if (!defined('NEWSLETTER_DEBUG'))
@@ -185,6 +178,9 @@ class Newsletter extends NewsletterModule {
         register_deactivation_hook(__FILE__, [$this, 'hook_deactivate']);
     }
 
+    /**
+     * Action request via AJAX.
+     */
     function action() {
         if (isset($_REQUEST['na'])) {
             $this->action = $_REQUEST['na'];
@@ -285,16 +281,18 @@ class Newsletter extends NewsletterModule {
             $this->dienow('This link is not active on newsletter preview', 'You can send a test message to test subscriber to have the real working link.');
         }
 
-        if ($this->is_current_user_dummy()) {
-            $user = $this->get_dummy_user();
+        $user = $this->get_current_user();
+
+        if ($user && $user->_dummy) {
             $email = $this->get_email_from_request();
             do_action('newsletter_action_dummy', $this->action, $user, $email);
+            return;
         }
 
-        $user = $this->get_current_user();
         if ($user && !empty($user->language)) {
             $this->switch_language($user->language);
         }
+
         $email = $this->get_email_from_request();
         do_action('newsletter_action', $this->action, $user, $email);
     }
@@ -418,11 +416,7 @@ class Newsletter extends NewsletterModule {
 
         $message_key = $this->get_message_key_from_request();
 
-        if ($this->is_current_user_dummy()) {
-            $user = $this->get_dummy_user();
-        } else {
-            $user = $this->get_current_user();
-        }
+        $user = $this->get_current_user();
 
         // Lets modules to provie its own text
         $message = apply_filters('newsletter_page_text', '', $message_key, $user);
@@ -430,11 +424,6 @@ class Newsletter extends NewsletterModule {
 
         $email = $this->get_email_from_request();
         $message = $this->replace($message, $user, $email, 'page');
-
-//        if ($user && $user->id === 0 && current_user_can('administrator')) {
-//            $message = '<div style="border:1px solid #ddd; padding: 1rem; line-height: normal; background-color: #eee; margin-bottom: 1rem;"><strong>Visible only to administrators</strong>. Preview of the content with a dummy subscriber.</div>'
-//                    .$message;
-//        }
 
         if (isset($_REQUEST['alert'])) {
             // slashes are already added by wordpress!
@@ -447,7 +436,7 @@ class Newsletter extends NewsletterModule {
 
     function shortcode_newsletter_replace($attrs, $content) {
         $content = do_shortcode($content);
-        $content = $this->replace($content, $this->get_user_from_request(), $this->get_email_from_request(), 'page');
+        $content = $this->replace($content, $this->get_current_user(), $this->get_email_from_request(), 'page');
         return $content;
     }
 
@@ -463,7 +452,7 @@ class Newsletter extends NewsletterModule {
         $this->logger->debug(__METHOD__ . '> Start');
 
         if (!$this->set_lock('engine', NEWSLETTER_CRON_INTERVAL * 2)) {
-            $this->logger->fatal('Delivery lock already set!');
+            $this->logger->fatal('Delivery engine lock already set: can be due to concurrente executions or fatal error during delivery');
             return;
         }
 
@@ -503,13 +492,18 @@ class Newsletter extends NewsletterModule {
         return $speed;
     }
 
+    /**
+     * Returns the delay in milliseconds between emails to respect a per second max speed.
+     *
+     * @return int Milliseconds
+     */
     function get_send_delay() {
         if (NEWSLETTER_SEND_DELAY) {
             return NEWSLETTER_SEND_DELAY;
         }
         $max = (float) $this->get_main_option('max_per_second');
         if ($max > 0) {
-            return (int)(1000 / $max);
+            return (int) (1000 / $max);
         }
         return 0;
     }
@@ -668,8 +662,13 @@ class Newsletter extends NewsletterModule {
 
             foreach ($users as $user) {
 
-                $this->logger->debug(__METHOD__ . '> Processing user ID: ' . $user->id);
+                if ($this->logger->is_debug) $this->logger->debug(__METHOD__ . '> Processing user ID: ' . $user->id);
+
                 $user = apply_filters('newsletter_send_user', $user);
+                if (!$user) {
+                    continue;
+                }
+
                 if (!$this->is_email($user->email)) {
                     $this->logger->error('Subscriber ' . $user->id . ' with invalid email, skipped');
                     if (!$test) {
@@ -677,6 +676,7 @@ class Newsletter extends NewsletterModule {
                     }
                     continue;
                 }
+
                 $message = $this->build_message($email, $user);
 
                 // Save even test emails since people wants to see some stats even for test emails. Stats are reset upon the real "send" of a newsletter
@@ -688,6 +688,9 @@ class Newsletter extends NewsletterModule {
                 }
 
                 $r = $mailer->send($message);
+
+                $this->max_emails--;
+                $count++;
 
                 if ($delay) {
                     usleep($delay * 1000);
@@ -712,10 +715,8 @@ class Newsletter extends NewsletterModule {
                     $result = false;
                     break;
                 }
-            }
 
-            $this->max_emails--;
-            $count++;
+            }
         } else {
 
             $chunks = array_chunk($users, $batch_size);
@@ -896,7 +897,8 @@ class Newsletter extends NewsletterModule {
 
         $error = mb_substr($message->error, 0, 250);
 
-        $this->query($wpdb->prepare("insert into " . $wpdb->prefix . 'newsletter_sent (user_id, email_id, time, status, error) values (%d, %d, %d, %d, %s) on duplicate key update time=%d, status=%d, error=%s', $message->user_id, $message->email_id, time(), $status, $error, time(), $status, $error));
+        $this->query($wpdb->prepare("insert into " . $wpdb->prefix . 'newsletter_sent (user_id, email_id, time, status, error) values (%d, %d, %d, %d, %s) on duplicate key update time=%d, status=%d, error=%s',
+                $message->user_id, $message->email_id, time(), $status, $error, time(), $status, $error));
     }
 
     /**
@@ -1176,14 +1178,10 @@ class Newsletter extends NewsletterModule {
         delete_transient('tnp_extensions_json');
     }
 
-    var $panels = array();
-
+    /**
+     * @deprecated
+     */
     function add_panel($key, $panel) {
-        if (!isset($this->panels[$key]))
-            $this->panels[$key] = array();
-        if (!isset($panel['id']))
-            $panel['id'] = sanitize_key($panel['label']);
-        $this->panels[$key][] = $panel;
     }
 
     function has_license() {
@@ -1196,6 +1194,10 @@ class Newsletter extends NewsletterModule {
 
     function get_sender_email() {
         return $this->get_main_option('sender_email');
+    }
+
+    function get_reply_to() {
+        return $this->get_main_option('reply_to');
     }
 
     /**

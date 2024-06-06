@@ -287,7 +287,8 @@ class TNP_Subscription {
  * @property string $language The subscriber language code 2 chars lowercase
  * @property string $token The subscriber secret token
  * @property string $country The subscriber country code 2 chars uppercase
- * @property bool $editable
+ * @property bool $_trusted
+ * @property bool $_dummy
  */
 #[\AllowDynamicProperties]
 class TNP_User {

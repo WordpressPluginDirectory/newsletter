@@ -29,67 +29,63 @@ $system_warnings = NewsletterSystemAdmin::instance()->get_warnings_count();
             <a href="?page=newsletter_main_index"><img src="<?php echo plugins_url('newsletter'); ?>/admin/images/logo.png" class="tnp-header-logo" style="vertical-align: bottom;"></a>
 
         </li>
-        <li><a href="#"><i class="fas fa-users"></i> <?php _e('Subscribers', 'newsletter') ?></a>
+        <li><a href="#"><i class="fas fa-users"></i> <?php esc_html_e('Subscribers', 'newsletter') ?></a>
             <ul>
                 <li>
-                    <a href="?page=newsletter_users_index"><?php _e('All subscribers', 'newsletter') ?></a>
+                    <a href="?page=newsletter_users_index"><?php esc_html_e('All subscribers', 'newsletter') ?></a>
                 </li>
 
                 <li>
-                    <a href="?page=newsletter_profile_index"><?php _e('Profile page', 'newsletter') ?></a>
+                    <a href="?page=newsletter_profile_index"><?php esc_html_e('Profile page', 'newsletter') ?></a>
                 </li>
 
                 <li>
-                    <a href="?page=newsletter_unsubscription_index"><?php _e('Unsubscription', 'newsletter') ?></a>
+                    <a href="?page=newsletter_unsubscription_index"><?php esc_html_e('Unsubscription', 'newsletter') ?></a>
                 </li>
 
                 <?php newsletter_print_entries('subscribers') ?>
 
                 <li>
-                    <a href="?page=newsletter_users_statistics"><?php _e('Statistics', 'newsletter') ?></a>
+                    <a href="?page=newsletter_users_statistics"><?php esc_html_e('Statistics', 'newsletter') ?></a>
                 </li>
 
                 <?php if (!class_exists('NewsletterImport')) { ?>
                     <li>
-                        <a href="?page=newsletter_users_import"><?php _e('Import', 'newsletter') ?></a>
+                        <a href="?page=newsletter_users_import"><?php esc_html_e('Import/Export', 'newsletter') ?></a>
                     </li>
                 <?php } ?>
 
                 <li>
-                    <a href="?page=newsletter_users_export"><?php _e('Export', 'newsletter') ?></a>
-                </li>
-
-                <li>
-                    <a href="?page=newsletter_users_massive"><?php _e('Maintenance', 'newsletter') ?></a>
+                    <a href="?page=newsletter_users_massive"><?php esc_html_e('Maintenance', 'newsletter') ?></a>
                 </li>
 
 
             </ul>
         </li>
-        <li><a href="#"><i class="fas fa-list"></i> <?php _e('Subscription', 'newsletter') ?></a>
+        <li><a href="#"><i class="fas fa-list"></i> <?php esc_html_e('Subscription', 'newsletter') ?></a>
             <ul>
 
                 <li>
-                    <a href="?page=newsletter_subscription_options"><?php _e('Settings', 'newsletter') ?></a>
+                    <a href="?page=newsletter_subscription_options"><?php esc_html_e('Settings', 'newsletter') ?></a>
                 </li>
 
                 <li>
-                    <a href="?page=newsletter_subscription_sources"><?php _e('Forms', 'newsletter') ?></a>
+                    <a href="?page=newsletter_subscription_sources"><?php esc_html_e('Forms', 'newsletter') ?></a>
                 </li>
 
                 <li>
-                    <a href="?page=newsletter_subscription_lists"><?php _e('Lists', 'newsletter') ?></a>
+                    <a href="?page=newsletter_subscription_lists"><?php esc_html_e('Lists', 'newsletter') ?></a>
                 </li>
                 <li>
-                    <a href="?page=newsletter_subscription_customfields"><?php _e('Custom fields', 'newsletter') ?></a>
-                </li>
-
-                <li>
-                    <a href="?page=newsletter_subscription_antispam"><?php _e('Antispam', 'newsletter') ?></a>
+                    <a href="?page=newsletter_subscription_customfields"><?php esc_html_e('Custom fields', 'newsletter') ?></a>
                 </li>
 
                 <li>
-                    <a href="?page=newsletter_unsubscription_index"><?php _e('Unsubscription', 'newsletter') ?></a>
+                    <a href="?page=newsletter_subscription_antispam"><?php esc_html_e('Antispam', 'newsletter') ?></a>
+                </li>
+
+                <li>
+                    <a href="?page=newsletter_unsubscription_index"><?php esc_html_e('Unsubscription', 'newsletter') ?></a>
                 </li>
 
                 <?php newsletter_print_entries('subscription') ?>
@@ -97,18 +93,18 @@ $system_warnings = NewsletterSystemAdmin::instance()->get_warnings_count();
         </li>
 
         <li>
-            <a href="#"><i class="fas fa-newspaper"></i> <?php _e('Newsletters', 'newsletter') ?></a>
+            <a href="#"><i class="fas fa-newspaper"></i> <?php esc_html_e('Newsletters', 'newsletter') ?></a>
             <ul>
                 <li>
-                    <a href="?page=newsletter_emails_index"><?php _e('All newsletters', 'newsletter') ?></a>
+                    <a href="?page=newsletter_emails_index"><?php esc_html_e('All newsletters', 'newsletter') ?></a>
                 </li>
 
                 <li>
-                    <a href="?page=newsletter_emails_composer"><?php _e('Create newsletter', 'newsletter') ?></a>
+                    <a href="?page=newsletter_emails_composer"><?php esc_html_e('Create newsletter', 'newsletter') ?></a>
                 </li>
 
                 <li>
-                    <a href="?page=newsletter_emails_presets"><?php _e('Templates', 'newsletter') ?></a>
+                    <a href="?page=newsletter_emails_presets"><?php esc_html_e('Templates', 'newsletter') ?></a>
                 </li>
 
                 <li>
@@ -120,20 +116,20 @@ $system_warnings = NewsletterSystemAdmin::instance()->get_warnings_count();
         </li>
 
         <li>
-            <a href="#"><i class="fas fa-cog"></i> <?php _e('Settings', 'newsletter') ?></a>
+            <a href="#"><i class="fas fa-cog"></i> <?php esc_html_e('Settings', 'newsletter') ?></a>
             <ul>
                 <?php if ($is_administrator) { ?>
                     <li>
-                        <a href="?page=newsletter_main_main"><?php _e('General Settings', 'newsletter') ?></a>
+                        <a href="?page=newsletter_main_main"><?php esc_html_e('General Settings', 'newsletter') ?></a>
                     </li>
                 <?php } ?>
 
                 <li>
-                    <a href="?page=newsletter_main_info"><?php _e('Company Info', 'newsletter') ?></a>
+                    <a href="?page=newsletter_main_info"><?php esc_html_e('Company Info', 'newsletter') ?></a>
                 </li>
 
                 <li>
-                    <a href="?page=newsletter_subscription_template"><?php _e('Messages Template', 'newsletter') ?></a>
+                    <a href="?page=newsletter_subscription_template"><?php esc_html_e('Messages Template', 'newsletter') ?></a>
                 </li>
 
                 <?php newsletter_print_entries('settings') ?>

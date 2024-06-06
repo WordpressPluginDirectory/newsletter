@@ -10,6 +10,7 @@
  * @property string $from_name
  */
 class TNP_Mailer_Message {
+
     var $ch; // Transient variable for mailers with turbo send option
     var $to = '';
     var $to_name = '';
@@ -202,7 +203,6 @@ class NewsletterMailer {
     function get_last_run() {
         return (int) get_option($this->prefix . '_last_run', 0);
     }
-
 }
 
 /**
@@ -255,16 +255,16 @@ class NewsletterDefaultMailer extends NewsletterMailer {
         if (isset($this->current_message->encoding)) {
             $mailer->Encoding = $this->current_message->encoding;
         } else {
-            if (!empty($newsletter->options['content_transfer_encoding'])) {
-                $mailer->Encoding = $newsletter->options['content_transfer_encoding'];
+            $encoding = $newsletter->get_main_option('content_transfer_encoding');
+            if (!empty($encoding)) {
+                $mailer->Encoding = $encoding;
             } else {
-                // Setting and encoding sometimes conflict with SMTP plugins
                 //$mailer->Encoding = 'base64';
             }
         }
 
         /* @var $mailer PHPMailer */
-        $mailer->Sender = $newsletter->options['return_path'];
+        $mailer->Sender = $newsletter->get_main_option('return_path');
 
         // If there is an HTML body AND a text body, add the text part.
         if (!empty($this->current_message->body) && !empty($this->current_message->body_text)) {
@@ -298,8 +298,9 @@ class NewsletterDefaultMailer extends NewsletterMailer {
 
         $wp_mail_headers[] = 'From: "' . $message->from_name . '" <' . $message->from . '>';
 
-        if (!empty($newsletter->options['reply_to'])) {
-            $wp_mail_headers[] = 'Reply-To: ' . $newsletter->options['reply_to'];
+        $reply_to = $newsletter->get_reply_to();
+        if (!empty($reply_to)) {
+            $wp_mail_headers[] = 'Reply-To: ' . $reply_to;
         }
 
         // Manage from and from name
@@ -361,5 +362,4 @@ class NewsletterDefaultMailer extends NewsletterMailer {
         }
         return true;
     }
-
 }

@@ -176,8 +176,7 @@ $blocks[] = ['title' => 'Events', 'active' => $active, 'url' => $url];
                         <div class="tnp-flow-arrow">▼</div>
                         <div>
                             <div class="tnp-flow-item"><a href="?page=newsletter_users_index" target="_blank">Manage</a></div>
-                            <div class="tnp-flow-item"><a href="?page=newsletter_users_import" target="_blank">Import</a></div>
-                            <div class="tnp-flow-item"><a href="?page=newsletter_users_export" target="_blank">Export</a></div>
+                            <div class="tnp-flow-item"><a href="?page=newsletter_users_import" target="_blank">Import/Export</a></div>
                             <div class="tnp-flow-item"><a href="?page=newsletter_users_statistics" target="_blank">Statistics</a></div>
                         </div>
 

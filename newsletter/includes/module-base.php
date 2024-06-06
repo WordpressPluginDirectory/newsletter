@@ -293,7 +293,9 @@ class NewsletterModuleBase {
         $dummy_user->surname = 'Doe';
         $dummy_user->sex = 'n';
         $dummy_user->language = '';
-        $dummy_user->editable = true;
+        $dummy_user->status = TNP_User::STATUS_CONFIRMED;
+        $dummy_user->_trusted = true;
+        $dummy_user->_dummy = true;
 
         for ($i = 1; $i <= NEWSLETTER_PROFILE_MAX; $i++) {
             $profile_key = "profile_$i";
@@ -348,7 +350,7 @@ class NewsletterModuleBase {
             $this->refresh_user_token($user);
         }
 
-        if ($context === 'preconfirm' || isset($user->editable) && !$user->editable) {
+        if ($context === 'preconfirm' || isset($user->_trusted) && !$user->_trusted) {
             return $user->id . '-' . md5($user->token);
         }
         return $user->id . '-' . $user->token;
@@ -364,7 +366,7 @@ class NewsletterModuleBase {
         if (empty($user->token)) {
             $this->refresh_user_token($user);
         }
-        if ($user->status === TNP_User::STATUS_NOT_CONFIRMED || isset($user->editable) && !$user->editable) {
+        if ($user->status === TNP_User::STATUS_NOT_CONFIRMED || isset($user->_trusted) && !$user->_trusted) {
             return md5($user->token);
         } else {
             return $user->token;
@@ -384,7 +386,6 @@ class NewsletterModuleBase {
         if (is_object($user)) {
             $user = (array) $user;
         }
-        unset($user['editable']);
         if (empty($user['id'])) {
             $existing = $this->get_user($user['email']);
             if ($existing != null) {
@@ -738,6 +739,8 @@ class NewsletterModuleBase {
      * @return string
      */
     function get_email_key($email) {
+        if (!$email) return '0-0';
+
         if (!isset($email->token)) {
             return $email->id . '-';
         }

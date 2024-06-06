@@ -7,6 +7,8 @@ $p = $_GET['page'];
     <li class="<?php echo $p === 'newsletter_unsubscription_index'?'active':''?>"><a href="?page=newsletter_unsubscription_index"><?php esc_html_e('Unsubscribe', 'newsletter')?></a></li>
     <li class="<?php echo $p === 'newsletter_users_statistics'?'active':''?>"><a href="?page=newsletter_users_statistics"><?php esc_html_e('Statistics', 'newsletter')?></a></li>
     <li class="<?php echo $p === 'newsletter_users_massive'?'active':''?>"><a href="?page=newsletter_users_massive"><?php esc_html_e('Maintenance', 'newsletter')?></a></li>
+    <li class="<?php echo $p === 'newsletter_users_export'?'active':''?>"><a href="?page=newsletter_users_export"><?php esc_html_e('Export', 'newsletter')?></a></li>
+    <li class="<?php echo $p === 'newsletter_users_import'?'active':''?>"><a href="?page=newsletter_users_import"><?php esc_html_e('Import', 'newsletter')?></a></li>
 </ul>
 <?php
 unset($p);

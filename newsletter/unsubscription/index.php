@@ -40,8 +40,7 @@ foreach (['unsubscribe_text', 'error_text', 'unsubscribed_text', 'unsubscribed_m
     }
 }
 
-$one_step = $controls->data['mode'] == '1';
-$advanced = !empty($controls->data['advanced']);
+$one_step = false; //$controls->data['mode'] == '1';
 ?>
 
 <?php if ($controls->data['mode'] == '1') { ?>
@@ -70,7 +69,7 @@ $advanced = !empty($controls->data['advanced']);
             <?php $controls->init(); ?>
 
             <p>
-                <?php $controls->select('mode', ['1' => 'One-step', '2' => 'Two-step (recommended)'], null, ['onchange' => 'this.form.act.value="change";this.form.submit()']); ?>
+                <?php //$controls->select('mode', ['1' => 'One-step', '2' => 'Two-step (recommended)'], null, ['onchange' => 'this.form.act.value="change";this.form.submit()']); ?>
                 <?php if (current_user_can('administrator')) { ?>
                 <a href="<?php echo esc_attr($this->build_action_url('u')); ?>&nk=0-0" target="_blank">Preview online</a>
                 <?php } ?>
