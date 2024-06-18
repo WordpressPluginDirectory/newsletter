@@ -56,8 +56,9 @@ $emails_with_error = $this->get_emails_by_status(TNP_Email::STATUS_ERROR);
 
 if ($emails_with_error) {
     foreach ($emails_with_error as $e) {
-        if (!$e->type === 'message') continue;
-        $controls->errors .= 'A newsletter has been stopped by an error: ' . esc_html($email->options['error_message']??'[not set]');
+        if ($e->type !== 'message') continue;
+        $controls->errors .= 'A newsletter has been stopped due to an error: ' . esc_html($e->options['error_message']??'[not set]') . '<br>';
+        $controls->errors .= '<a href="?page=newsletter_emails_edit&id=' . urlencode($e->id) . '">' . __('Check it', 'newsletter') . '</a><br>';
         break;
     }
 }

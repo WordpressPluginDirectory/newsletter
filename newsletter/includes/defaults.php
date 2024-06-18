@@ -75,7 +75,7 @@ class NewsletterDefaults {
 
         if ($sub === 'template') {
             return [
-                'template' => @file_get_contents(__DIR__ . '/email.html')
+                'template' => file_get_contents(__DIR__ . '/email.html')
             ];
         }
 
@@ -222,7 +222,7 @@ class NewsletterDefaults {
         if ($sub === 'profile') {
             switch ($key) {
                 case 'text': return '[newsletter_profile]<p>' . __('If you change your email address a confirmation email will be sent to activate it.', 'newsletter') .
-                            '</p><p><a href="{unsubscription_confirm_url}">' . __('Cancel your subscription', 'newsletter') . '</a></p>';
+                            '</p>';
 
                 case 'email_changed': return __("Your email has been changed, an activation email has been sent with instructions.", 'newsletter');
                 case 'error': return __("Your email is not valid or already in use.", 'newsletter');
@@ -234,9 +234,9 @@ class NewsletterDefaults {
 
         if ($sub === 'unsubscription') {
             switch ($key) {
-                case 'unsubscribe_text': return '<p>' . __('Please confirm you want to unsubscribe.', 'newsletter') . '</p><p>[newsletter_unsubscribe_button label=""]</p>';
+                case 'unsubscribe_text': return '<p>' . __('Please confirm you want to unsubscribe.', 'newsletter') . '</p><p>[newsletter_unsubscribe_button label="" /]</p>';
                 case 'error_text': return '<p>' . __("Subscriber not found, it probably has already been removed. No further actions are required.", 'newsletter') . '</p>';
-                case 'unsubscribed_text': return "<p>" . __('Your subscription has been deleted. If that was an error you can subscribe again.', 'newsletter') . '</p><p>[newsletter_resubscribe_button label=""]</p>';
+                case 'unsubscribed_text': return "<p>" . __('Your subscription has been deleted. If that was an error you can subscribe again.', 'newsletter') . '</p><p>[newsletter_resubscribe_button label="" /]</p>';
                 case 'unsubscribed_subject': return __("Goodbye", 'newsletter');
                 case 'unsubscribed_message': return '<p>' . __('This message confirms that you have unsubscribed from our newsletter. Thank you.', 'newsletter') . '</p>';
                 case 'reactivated_text': return '<p>' . __('Your subscription has been reactivated.', 'newsletter') . '</p>';

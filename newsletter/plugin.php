@@ -4,7 +4,7 @@
   Plugin Name: Newsletter
   Plugin URI: https://www.thenewsletterplugin.com
   Description: Newsletter is a cool plugin to create your own subscriber list, to send newsletters, to build your business. <strong>Before update give a look to <a href="https://www.thenewsletterplugin.com/category/release">this page</a> to know what's changed.</strong>
-  Version: 8.3.8
+  Version: 8.3.9
   Author: Stefano Lissa & The Newsletter Team
   Author URI: https://www.thenewsletterplugin.com
   Disclaimer: Use at your own risk. No warranty expressed or implied is provided.
@@ -30,7 +30,7 @@
 
  */
 
-define('NEWSLETTER_VERSION', '8.3.8');
+define('NEWSLETTER_VERSION', '8.3.9');
 
 global $wpdb, $newsletter;
 
@@ -138,10 +138,10 @@ class Newsletter extends NewsletterModule {
 
         // Grab it before a plugin decides to remove it.
         if (isset($_GET['na'])) {
-            $this->action = $_GET['na'];
+            $this->action = sanitize_key($_GET['na']);
         }
         if (isset($_POST['na'])) {
-            $this->action = $_POST['na'];
+            $this->action = sanitize_key($_POST['na']);
         }
 
         $this->time_start = time();
@@ -183,7 +183,7 @@ class Newsletter extends NewsletterModule {
      */
     function action() {
         if (isset($_REQUEST['na'])) {
-            $this->action = $_REQUEST['na'];
+            $this->action = sanitize_key($_REQUEST['na']);
         }
     }
 
@@ -271,7 +271,7 @@ class Newsletter extends NewsletterModule {
             return;
         }
 
-        if ($this->action == 'test') {
+        if ($this->action === 'test') {
             // This response is tested, do not change it!
             echo 'ok';
             die();
@@ -445,6 +445,20 @@ class Newsletter extends NewsletterModule {
     }
 
     /**
+     *
+     * @global wpdb $wpdb
+     * @param TNP_Email $email
+     */
+    function update_email_total($email) {
+        global $wpdb;
+        $total = (int) $wpdb->get_var(str_replace('*', 'count(*)', $email->query));
+        if ($total > $email->total) {
+            $wpdb->update(NEWSLETTER_EMAILS_TABLE, ['total' => $total], ['id' => $email->id], ['%d', '%d'], ['%d']);
+            $email->total = $total;
+        }
+    }
+
+    /**
      * Runs every 5 minutes and look for emails that need to be processed.
      */
     function hook_newsletter() {
@@ -463,6 +477,7 @@ class Newsletter extends NewsletterModule {
         foreach ($emails as $email) {
 
             $email->options = maybe_unserialize($email->options);
+            $this->update_email_total($email);
             $r = $this->send($email);
 
             if (!$r) {
@@ -662,7 +677,8 @@ class Newsletter extends NewsletterModule {
 
             foreach ($users as $user) {
 
-                if ($this->logger->is_debug) $this->logger->debug(__METHOD__ . '> Processing user ID: ' . $user->id);
+                if ($this->logger->is_debug)
+                    $this->logger->debug(__METHOD__ . '> Processing user ID: ' . $user->id);
 
                 $user = apply_filters('newsletter_send_user', $user);
                 if (!$user) {
@@ -715,7 +731,6 @@ class Newsletter extends NewsletterModule {
                     $result = false;
                     break;
                 }
-
             }
         } else {
 
@@ -843,7 +858,7 @@ class Newsletter extends NewsletterModule {
 
         $message->body = preg_replace('/data-json=".*?"/is', '', $email->message);
         $message->body = preg_replace('/  +/s', ' ', $message->body);
-        $message->body = $this->replace($message->body, $user, $email);
+        $message->body = $this->replace_for_email($message->body, $user, $email);
         $message->body = do_shortcode($message->body);
 
         $message->body = apply_filters('newsletter_message_html', $message->body, $email, $user);
@@ -898,7 +913,7 @@ class Newsletter extends NewsletterModule {
         $error = mb_substr($message->error, 0, 250);
 
         $this->query($wpdb->prepare("insert into " . $wpdb->prefix . 'newsletter_sent (user_id, email_id, time, status, error) values (%d, %d, %d, %d, %s) on duplicate key update time=%d, status=%d, error=%s',
-                $message->user_id, $message->email_id, time(), $status, $error, time(), $status, $error));
+                        $message->user_id, $message->email_id, time(), $status, $error, time(), $status, $error));
     }
 
     /**
@@ -1182,6 +1197,7 @@ class Newsletter extends NewsletterModule {
      * @deprecated
      */
     function add_panel($key, $panel) {
+
     }
 
     function has_license() {
@@ -1282,9 +1298,9 @@ class Newsletter extends NewsletterModule {
 
         $license_data_url = 'https://www.thenewsletterplugin.com/wp-content/plugins/file-commerce-pro/get-license-data.php';
 
-        $response = wp_remote_post($license_data_url, array(
-            'body' => array('k' => $license_key)
-        ));
+        $response = wp_remote_post($license_data_url, [
+            'body' => ['k' => $license_key]
+        ]);
 
         // Fall back to http...
         if (is_wp_error($response)) {

@@ -27,15 +27,13 @@ class NewsletterProfile extends NewsletterModule {
 
     function get_profile_page_url($user, $alert = null) {
         $this->switch_language($user->language);
-        $url = trim($this->get_option('url')); // Compatibility with old parameter
-        if (!$url) {
-            $page_id = $this->get_option('page_id');
-            if (!empty($page_id)) {
-                if ($page_id === 'url') {
-                    $url = trim($this->get_option('page_url'));
-                } else {
-                    $url = get_permalink((int) $page_id);
-                }
+        $url = '';
+        $page_id = $this->get_option('page_id');
+        if (!empty($page_id)) {
+            if ($page_id === 'url') {
+                $url = sanitize_url($this->get_option('page_url'));
+            } else {
+                $url = get_permalink((int) $page_id);
             }
         }
         $url = parent::build_message_url($url, 'profile', $user, null, $alert);
@@ -97,12 +95,12 @@ class NewsletterProfile extends NewsletterModule {
      * @param stdClass $user
      */
     function get_profile_url($user, $email = null) {
-        return $this->build_action_url('profile', $user, $email);
+        return $this->build_action_url('p', $user, $email);
     }
 
     function hook_newsletter_replace($text, $user, $email, $html = true) {
         if (!$user) {
-            $text = $this->replace_url($text, 'PROFILE_URL', $this->build_action_url('nul'));
+            $text = $this->replace_url($text, 'profile_url', $this->build_action_url('nul'));
             return $text;
         }
 
@@ -242,9 +240,9 @@ class NewsletterProfile extends NewsletterModule {
 
             $buffer .= '>';
 
-            $buffer .= '<option value="n"' . ($user->sex == 'n' ? ' selected' : '') . '>' . esc_html($subscription->get_form_text('sex_none')) . '</option>';
-            $buffer .= '<option value="f"' . ($user->sex == 'f' ? ' selected' : '') . '>' . esc_html($subscription->get_form_text('sex_female')) . '</option>';
-            $buffer .= '<option value="m"' . ($user->sex == 'm' ? ' selected' : '') . '>' . esc_html($subscription->get_form_text('sex_male')) . '</option>';
+            $buffer .= '<option value="n"' . ($user->sex === 'n' ? ' selected' : '') . '>' . esc_html($subscription->get_form_text('sex_none')) . '</option>';
+            $buffer .= '<option value="f"' . ($user->sex === 'f' ? ' selected' : '') . '>' . esc_html($subscription->get_form_text('sex_female')) . '</option>';
+            $buffer .= '<option value="m"' . ($user->sex === 'm' ? ' selected' : '') . '>' . esc_html($subscription->get_form_text('sex_male')) . '</option>';
             $buffer .= '</select>';
             $buffer .= "</div>\n";
         }

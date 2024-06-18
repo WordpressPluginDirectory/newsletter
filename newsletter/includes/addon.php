@@ -323,8 +323,11 @@ class NewsletterMailerAddon extends NewsletterAddon {
 
     function hook_admin_menu() {
 
-        add_submenu_page('newsletter_main_index', $this->menu_title, '<span class="tnp-side-menu">' . $this->menu_title . '</span>', 'manage_options', $this->index_page,
+        add_submenu_page('newsletter_main_index', $this->menu_title, '<span class="tnp-side-menu">' . esc_html($this->menu_title) . '</span>', 'manage_options', $this->index_page,
                 function () {
+                    /** @since 8.4.0 */
+                    require_once NEWSLETTER_INCLUDES_DIR . '/controls.php';
+                    $controls = new NewsletterControls();
                     if (file_exists($this->dir . '/admin/index.php')) {
                         require $this->dir . '/admin/index.php';
                     } else {
@@ -334,8 +337,11 @@ class NewsletterMailerAddon extends NewsletterAddon {
         );
 
         if (file_exists($this->dir . '/admin/logs.php')) {
-            add_submenu_page('admin.php', 'Logs', 'Logs', 'manage_options', $this->logs_page,
+            add_submenu_page('admin.php', __('Logs', 'newsletter'), __('Logs', 'newsletter'), 'manage_options', $this->logs_page,
                     function () {
+                        /** @since 8.4.0 */
+                        require_once NEWSLETTER_INCLUDES_DIR . '/controls.php';
+                        $controls = new NewsletterControls();
                         require $this->dir . '/admin/logs.php';
                     }
             );
@@ -359,14 +365,29 @@ class NewsletterMailerAddon extends NewsletterAddon {
 
     function get_status_badge() {
         if ($this->enabled) {
-            return '<span class="tnp-badge-green">' . esc_html('Enabled', 'newsletter') . '</span>';
+            return '<span class="tnp-badge-green">' . esc_html__('Enabled', 'newsletter') . '</span>';
         } else {
-            return '<span class="tnp-badge-orange">' . esc_html('Disabled', 'newsletter') . '</span>';
+            return '<span class="tnp-badge-orange">' . esc_html__('Disabled', 'newsletter') . '</span>';
+        }
+    }
+
+    /** @since 8.4.0 */
+    function echo_status_badge() {
+        if ($this->enabled) {
+            echo '<span class="tnp-badge-green">', esc_html__('Enabled', 'newsletter'), '</span>';
+        } else {
+            echo '<span class="tnp-badge-orange">', esc_html__('Disabled', 'newsletter'), '</span>';
         }
     }
 
     function get_title() {
         return esc_html($this->menu_title) . $this->get_status_badge();
+    }
+
+    /** @since 8.4.0 */
+    function echo_title() {
+        echo esc_html($this->menu_title);
+        $this->echo_status_badge();
     }
 
     function set_bounced($email) {
@@ -518,9 +539,9 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
             // Too many years of development
             if (!empty($form_options['lists']) && is_array($form_options['lists']) && in_array($list_id, $form_options['lists'])) {
                 $ok = true;
-            } else if (!empty($form_options['preferences_' . $list_id])) {
+            } elseif (!empty($form_options['preferences_' . $list_id])) {
                 $ok = true;
-            } else if (!empty($form_options['preferences']) && is_array($form_options['preferences']) && in_array($list_id, $form_options['preferences'])) {
+            } elseif (!empty($form_options['preferences']) && is_array($form_options['preferences']) && in_array($list_id, $form_options['preferences'])) {
                 $ok = true;
             }
             if ($ok) {
@@ -559,7 +580,8 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
     function hook_admin_menu() {
         add_submenu_page('newsletter_main_index', $this->menu_title, '<span class="tnp-side-menu">' . $this->menu_title . '</span>', 'exist', $this->index_page,
                 function () {
-
+                    require_once NEWSLETTER_INCLUDES_DIR . '/controls.php';
+                    $controls = new NewsletterControls();
                     require $this->dir . '/admin/index.php';
                 }
         );
@@ -568,7 +590,7 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
                     require_once NEWSLETTER_INCLUDES_DIR . '/controls.php';
                     $controls = new NewsletterControls();
 
-                    $form = $this->get_form($_GET['id']);
+                    $form = $this->get_form(sanitize_key($_GET['id'] ?? ''));
                     if (!$form) {
                         echo 'Form not found';
                         return;
@@ -576,9 +598,21 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
                     require $this->dir . '/admin/edit.php';
                 }
         );
+
         if (file_exists($this->dir . '/admin/welcome.php')) {
             add_submenu_page('admin.php', $this->menu_title, '<span class="tnp-side-menu">' . $this->menu_title . '</span>', 'exist', $this->welcome_page,
                     function () {
+                        /** @since 8.3.9 */
+                        require_once NEWSLETTER_INCLUDES_DIR . '/controls.php';
+                        $controls = new NewsletterControls();
+
+                        /** @since 8.3.9 */
+                        $form = $this->get_form(sanitize_key($_GET['id'] ?? ''));
+                        if (!$form) {
+                            echo 'Form not found';
+                            return;
+                        }
+
                         require $this->dir . '/admin/welcome.php';
                     }
             );
@@ -590,7 +624,7 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
                         require_once NEWSLETTER_INCLUDES_DIR . '/controls.php';
                         $controls = new NewsletterControls();
 
-                        $form = $this->get_form($_GET['id']);
+                        $form = $this->get_form(sanitize_key($_GET['id'] ?? ''));
                         if (!$form) {
                             echo 'Form not found';
                             return;
@@ -640,7 +674,7 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
      * @return array
      */
     public function get_form_options($form_id) {
-        return get_option('newsletter_' . $this->name . '_' . $form_id, []);
+        return Newsletter::get_option_array('newsletter_' . $this->name . '_' . $form_id);
     }
 }
 

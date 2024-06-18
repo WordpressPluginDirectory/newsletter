@@ -139,7 +139,6 @@ class NewsletterUnsubscription extends NewsletterModule {
         //if ($this->get_main_option('mode') == '1' && $action === 'u') {
         //    $action = 'uc';
         //}
-
         // Action conversion from old links from the email headers
         if (isset($_POST['List-Unsubscribe']) && 'One-Click' === $_POST['List-Unsubscribe']) {
             $action = 'ocu';
@@ -297,11 +296,11 @@ class NewsletterUnsubscription extends NewsletterModule {
     }
 
     /**
-     * @param array $headers
+     *
+     * @param TNP_Mailer_Message $message
      * @param TNP_Email $email
      * @param TNP_User $user
-     *
-     * @return array
+     * @return TNP_Mailer_Message
      */
     function hook_newsletter_message($message, $email, $user) {
 

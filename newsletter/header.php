@@ -283,13 +283,13 @@ if (NEWSLETTER_DEBUG || NEWSLETTER_PAGE_WARNING) {
                 update_option('newsletter_public_page_check', 0, false);
                 ?>
                 <div class="tnp-notice tnp-notice-warning">
-                    Some Newsletter public page(s) do not contain the <code>[newsletter]</code> shortcode: <?php echo implode(', ', $missing_shortcode); ?>
+                    Some Newsletter's public page(s) do not contain the <code>[newsletter]</code> shortcode that is required: <?php echo implode(', ', $missing_shortcode); ?>
                 </div>
                 <?php
             }
         } else {
 
-            $tnp_page_id = NewsletterMainAdmin::instance()->get_option('page');
+            $tnp_page_id = NewsletterMainAdmin::instance()->get_main_option('page');
             if (get_post_status($tnp_page_id) !== 'publish') {
                 update_option('newsletter_public_page_check', 0, false);
                 echo '<div class="tnp-notice tnp-notice-warning">The Newsletter public page is not published. <a href="', esc_attr(admin_url('post.php')) . '?post=', esc_attr($tnp_page_id), '&action=edit"><strong>Edit the page</strong></a> or <a href="admin.php?page=newsletter_main_main"><strong>review the main settings</strong></a>.</div>';

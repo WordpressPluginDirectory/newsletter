@@ -252,7 +252,7 @@ $speed = Newsletter::instance()->get_send_speed();
                         $stats = $this->get_send_stats();
                         $condition = 1;
                         if ($stats) {
-                            $condition = $stats->mean > 5 ? 2 : 1;
+                            $condition = $stats->mean > 3 ? 2 : 1;
                         }
                         ?>
                         <div class="tnp-card-title">Statistics <?php $this->condition_flag($condition) ?></div>
@@ -265,7 +265,7 @@ $speed = Newsletter::instance()->get_send_speed();
 
                             <?php if ($condition == 2) { ?>
                                 <p>
-                                    <strong>Sending a single email is taking more than 5 seconds (by mean), too slow.</strong>
+                                    <strong>Sending a single email is taking more than 3 seconds (by mean), too slow.</strong>
                                     <a href="https://www.thenewsletterplugin.com/documentation/installation/status-panel/#email-speed" target="_blank">Read more</a>.
                                 </p>
                             <?php } ?>

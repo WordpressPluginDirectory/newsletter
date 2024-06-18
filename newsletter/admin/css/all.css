@@ -1919,6 +1919,11 @@ span.tnp-user-status {
     /*border-left: 5px solid #dd0000;*/
 }
 
+#tnp-body .tnpc-error a, #tnp-body .tnp-error a {
+    color: yellow;
+    font-weight: bold;
+}
+
 .tnpc-warning, .tnp-warning {
     background-color: var(--tnp-orange-lighter);
     border-color: var(--tnp-orange-light);

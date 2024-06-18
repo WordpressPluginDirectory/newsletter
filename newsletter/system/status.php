@@ -520,6 +520,17 @@ function tnp_describe_table($table) {
                     </tr>
                 </thead>
                 <tbody>
+                    <?php if (is_plugin_active('wp-html-email/wp-html-email.php')) { ?>
+                        <tr>
+                            <td><a href="https://wordpress.org/plugins/wp-html-email/" target="_blank">WP HMTL Email</a></td>
+                            <td>
+                                <span class="tnp-maybe">MAY BE</span>
+                            </td>
+                            <td>
+                                Usually it add code to newsletters breacking the formatting.
+                            </td>
+                        </tr>
+                    <?php } ?>
                     <?php if (is_plugin_active('plugin-load-filter/plugin-load-filter.php')) { ?>
                         <tr>
                             <td><a href="https://wordpress.org/plugins/plugin-load-filter/" target="_blank">Plugin load filter</a></td>

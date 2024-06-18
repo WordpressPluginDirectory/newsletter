@@ -74,6 +74,7 @@ if ($controls->is_action()) {
             $controls->messages .= '<br>If the message is not received, try to change the message text it could trigger some antispam filters.';
         }
     }
+
 } else {
     $controls->data = $this->get_options('', $language);
 }

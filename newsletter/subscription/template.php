@@ -34,12 +34,12 @@ if (!$controls->is_action()) {
             $message .= '<p>Email: {email}</p>';
             $message .= '<p>Here an image as well. Make them styled with the CSS rule "max-width: 100%"</p>';
             $message .= '<p><img src="' . plugins_url('newsletter') . '/images/test.jpg" style="max-width: 100%"></p>';
-            
+
             $message = str_replace('{message}', $message, $template);
             $addresses = array();
             foreach ($users as $user) {
                 $addresses[] = $user->email;
-                Newsletter::instance()->mail($user->email, 'Newsletter Messages Template Test', Newsletter::instance()->replace($message, $user));
+                Newsletter::instance()->mail($user->email, 'Newsletter Messages Template Test', Newsletter::instance()->replace_for_email($message, $user));
             }
             $controls->messages .= 'Test emails sent to ' . count($users) . ' test subscribers: ' .
                     implode(', ', $addresses) . '.' . ' <a href="https://www.thenewsletterplugin.com/plugins/newsletter/subscribers-module#test" target="_blank"><i class="fas fa-info-circle"></i></a>';
@@ -53,7 +53,7 @@ if (strpos($controls->data['template'], '{message}') === false) {
 ?>
 
 <?php include NEWSLETTER_INCLUDES_DIR . '/codemirror.php'; ?>
-<style>    
+<style>
     .CodeMirror {
         height: 100%;
     }
@@ -83,7 +83,7 @@ if (strpos($controls->data['template'], '{message}') === false) {
     </div>
 
     <div id="tnp-body">
-        
+
          <?php $controls->show(); ?>
 
         <form method="post" action="">
@@ -101,6 +101,6 @@ if (strpos($controls->data['template'], '{message}') === false) {
         </form>
     </div>
 
-    <?php include NEWSLETTER_ADMIN_FOOTER ?>
+    <?php include NEWSLETTER_ADMIN_FOOTER; ?>
 
 </div>

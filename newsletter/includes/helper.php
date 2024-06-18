@@ -153,7 +153,7 @@ function tnp_media_resize($media_id, $size) {
     $height = $size[1];
     $crop = false;
     if (isset($size[2])) {
-        $crop = (boolean) $size[2];
+        $crop = (bool) $size[2];
     }
 
     $uploads = wp_upload_dir();
@@ -286,7 +286,7 @@ function tnp_resize($media_id, $size) {
     $height = $size[1];
     $crop = false;
     if (isset($size[2])) {
-        $crop = (boolean) $size[2];
+        $crop = (bool) $size[2];
     }
 
     // Do nothing with GIF (otherwise the animation is lost)
@@ -445,7 +445,7 @@ function tnp_composer_block_posts_get_media($post, $size, $default_image_url = n
 
     if (!empty($post_thumbnail_id)) {
         $media = tnp_resize($post_thumbnail_id, array_values($size));
-    } else if ($default_image_url) {
+    } elseif ($default_image_url) {
         Newsletter::instance()->logger->error('Thumbnail id not found');
         $media = new TNP_Media();
         $media->url = $default_image_url;

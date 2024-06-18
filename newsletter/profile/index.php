@@ -79,8 +79,8 @@ foreach (['text'] as $key) {
                                     <?php echo wp_kses_post($this->get_default_text('text')) ?>
                                 </div>
                                 <p class="description">
-                                    Shown inside the Newsletter public page. Use <code>[newsletter_profile]</code> where you want the edit form
-                                    to be inserted. Create a link with URL <code>{unsubscription_url}</code> to give access to the cancellation page.
+                                    Shown inside the Newsletter public page. Use <code>[newsletter_profile /]</code> where you want the edit form
+                                    to be inserted. Show the unsubscribe button <code>[newsletter_unsubscribe_button /]</code>.
                                 </p>
                             </td>
                         </tr>
@@ -90,7 +90,7 @@ foreach (['text'] as $key) {
                             <td>
                                 <?php $controls->page_or_url('page'); ?>
                                 <p class="description">
-                                    The specified page must contain the <code>[newsletter]</code> shortcode which will be replaced with the
+                                    The specified page must contain the <code>[newsletter /]</code> shortcode which will be replaced with the
                                     custom content above.
                                 </p>
                             </td>

@@ -105,19 +105,29 @@ class NewsletterMainAdmin extends NewsletterModuleAdmin {
 
     function hook_display_post_states($post_states, $post) {
 
+        $for = [];
         if ($this->is_multilanguage()) {
             $languages = $this->get_languages();
             foreach ($languages as $id => $name) {
                 $page_id = $this->get_option('page', '', $id);
                 if ($page_id == $post->ID) {
-                    $post_states[] = __('Newsletter public page, keep public and published', 'newsletter');
+                    $for[] = $name;
                 }
             }
+            if ($post->ID == $this->get_main_option('page')) {
+                $for[] = 'All languages fallback';
+            }
+            if ($for) {
+                $post_states[] = __('Newsletter public page, keep public and published', 'newsletter')
+                        . ' - ' . esc_html(implode(', ', $for));
+            }
         } else {
-            if ($post->ID == $this->get_option('page')) {
+
+            if ($post->ID == $this->get_main_option('page')) {
                 $post_states[] = __('Newsletter public page, keep public and published', 'newsletter');
             }
         }
+
         return $post_states;
     }
 
@@ -143,8 +153,14 @@ class NewsletterMainAdmin extends NewsletterModuleAdmin {
                 return [];
             }
             $news = json_decode(wp_remote_retrieve_body($response), true);
-            update_option('newsletter_news_updated', time());
+
+            // Firewall returns an invalid response
+            if (!$news || !is_array($news)) {
+                $news = [];
+            }
+
             update_option('newsletter_news', $news);
+            update_option('newsletter_news_updated', time());
         }
 
         $news_dismissed = $this->get_option_array('newsletter_news_dismissed');

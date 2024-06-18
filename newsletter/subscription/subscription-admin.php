@@ -19,7 +19,8 @@ class NewsletterSubscriptionAdmin extends NewsletterModuleAdmin {
     function __construct() {
         parent::__construct('subscription');
 
-        add_action('admin_init', array($this, 'hook_admin_init'));
+        add_action('admin_init', [$this, 'hook_admin_init']);
+        add_filter('display_post_states', [$this, 'hook_display_post_states'], 10, 2);
     }
 
     function hook_admin_init() {
@@ -61,6 +62,34 @@ class NewsletterSubscriptionAdmin extends NewsletterModuleAdmin {
 
     function get_form_text($key) {
         return $this->get_text($key, 'form');
+    }
+
+    function hook_display_post_states($post_states, $post) {
+
+        $for = [];
+        if ($this->is_multilanguage()) {
+            $languages = $this->get_languages();
+            foreach ($languages as $id => $name) {
+                $page_id = $this->get_option('confirmed_id', '', $id);
+                if ($page_id == $post->ID) {
+                    $for[] = $name;
+                }
+            }
+            if ($post->ID == $this->get_main_option('confirmed_id')) {
+                $for[] = 'All languages fallback';
+            }
+            if ($for) {
+                $post_states[] = __('Newsletter custom profile page, keep public and published', 'newsletter')
+                        . ' - ' . esc_html(implode(', ', $for));
+            }
+        } else {
+
+            if ($post->ID == $this->get_main_option('confirmed_id')) {
+                $post_states[] = __('Newsletter custom welcome page, keep public and published', 'newsletter');
+            }
+        }
+
+        return $post_states;
     }
 
 }

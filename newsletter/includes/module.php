@@ -399,7 +399,7 @@ class NewsletterModule extends NewsletterModuleBase {
     }
 
     function set_user_cookie($user) {
-        setcookie('newsletter', $user->id . '-' . $user->token, time() + YEAR_IN_SECONDS, COOKIEPATH, COOKIE_DOMAIN, is_ssl());
+        setcookie('newsletter', $this->get_user_key($user), time() + YEAR_IN_SECONDS, COOKIEPATH, COOKIE_DOMAIN, is_ssl());
     }
 
     function delete_user_cookie() {
@@ -695,14 +695,14 @@ class NewsletterModule extends NewsletterModuleBase {
      * @return string The final URL with parameters
      */
     function build_message_url($url = '', $message_key = '', $user = null, $email = null, $alert = '') {
-        $params = 'nm=' . urlencode($message_key);
+        $params = 'nm=' . rawurlencode($message_key);
         $language = '';
         if ($user) {
             if (!is_object($user)) {
                 $user = $this->get_user($user);
             }
 
-            $params .= '&nk=' . urlencode($this->get_user_key($user));
+            $params .= '&nk=' . rawurlencode($this->get_user_key($user));
 
             $language = $this->get_user_language($user);
         }
@@ -711,11 +711,12 @@ class NewsletterModule extends NewsletterModuleBase {
             if (!is_object($email)) {
                 $email = $this->get_email($email);
             }
-            $params .= '&nek=' . urlencode($this->get_email_key($email));
+            $params .= '&nek=' . rawurlencode($this->get_email_key($email));
         }
 
         if ($alert) {
-            $params .= '&alert=' . urlencode($alert);
+            $alert = wp_strip_all_tags($alert, true);
+            $params .= '&alert=' . rawurlencode($alert);
         }
 
         if (empty($url)) {
@@ -739,6 +740,123 @@ class NewsletterModule extends NewsletterModuleBase {
             return $user->language;
         }
         return '';
+    }
+
+    /**
+     *
+     * @global wpdb $wpdb
+     * @param string $text
+     * @param TNP_User $user
+     * @param type $email
+     * @return string
+     */
+    function replace_for_email($text, $user = null, $email = null) {
+        global $wpdb;
+
+        if (empty($text)) {
+            return $text;
+        }
+
+        // When sending email, the subscriber key needs to be the trusted one, since it is sent to the
+        // subscriber mailbox, and it can be accessed only by the subscriber.
+        $trusted = $user->_trusted ?? true;
+        $user->_trusted = true;
+
+        $html = strpos($text, '<p') !== false;
+        $home_url = home_url('/');
+        Newsletter::instance()->switch_language($user->language);
+
+        $text = apply_filters('newsletter_replace', $text, $user, $email, $html, null);
+
+        $text = $this->replace_url($text, 'blog_url', $home_url);
+        $text = $this->replace_url($text, 'home_url', $home_url);
+
+        $text = str_replace('{blog_title}', html_entity_decode(get_bloginfo('name')), $text);
+        $text = str_replace('{blog_description}', get_option('blogdescription'), $text);
+
+        if ($email) {
+            $text = $this->replace_date($text, $email->send_on);
+        }
+
+        $nk = $this->get_user_key($user);
+        $token = $user->token;
+
+        $text = str_replace('{email}', esc_html($user->email), $text);
+
+        $name = $this->sanitize_name($user->name);
+        if (empty($name)) {
+            $text = str_replace(' {name}', '', $text);
+            $text = str_replace('{name}', '', $text);
+            $text = str_replace(' {first_name}', '', $text);
+            $text = str_replace('{first_name}', '', $text);
+        } else {
+            $text = str_replace('{name}', esc_html($name), $text);
+            $text = str_replace('{first_name}', esc_html($name), $text);
+        }
+
+        $surname = $this->sanitize_name($user->surname);
+        $text = str_replace('{surname}', esc_html($surname), $text);
+        $text = str_replace('{last_name}', esc_html($surname), $text);
+
+        $full_name = trim($name . ' ' . $surname);
+        if (empty($full_name)) {
+            $text = str_replace(' {full_name}', '', $text);
+            $text = str_replace('{full_name}', '', $text);
+        } else {
+            $text = str_replace('{full_name}', esc_html($full_name), $text);
+        }
+
+        switch ($user->sex) {
+            case 'm': $text = str_replace('{title}', esc_html($this->get_text('title_male', 'form')), $text);
+                break;
+            case 'f': $text = str_replace('{title}', esc_html($this->get_text('title_female', 'form')), $text);
+                break;
+            default:
+                $text = str_replace('{title}', esc_html($this->get_text('title_none', 'form')), $text);
+        }
+
+        for ($i = 1; $i <= NEWSLETTER_PROFILE_MAX; $i++) {
+            $p = 'profile_' . $i;
+            $value = $this->sanitize_user_field($user->$p);
+            $text = str_replace('{profile_' . $i . '}', esc_html($value), $text);
+        }
+
+        $text = str_replace('{token}', $token, $text);
+        $text = str_replace('%7Btoken%7D', $token, $text);
+        $text = str_replace('{id}', $user->id, $text);
+        $text = str_replace('%7Bid%7D', $user->id, $text);
+        $text = str_replace('{ip}', esc_html($user->ip), $text);
+        $text = str_replace('{key}', $nk, $text);
+        $text = str_replace('%7Bkey%7D', $nk, $text);
+
+        // Links
+        $text = $this->replace_url($text, 'subscription_confirm_url', $this->build_action_url('c', $user));
+        $text = $this->replace_url($text, 'activation_url', $this->build_action_url('c', $user));
+        // To be moved to the "content lock" addon
+        $text = $this->replace_url($text, 'unlock_url', $this->build_action_url('ul', $user));
+
+        if ($email) {
+            $nek = $this->get_email_key($email);
+            $text = str_replace('{email_id}', $email->id, $text);
+            $text = str_replace('{email_key}', $nek, $text);
+            $text = str_replace('{email_subject}', $email->subject, $text);
+            // Deprecated
+            $text = str_replace('{subject}', $email->subject, $text);
+            $text = $this->replace_url($text, 'email_url', $this->build_action_url('v', $user) . '&id=' . $email->id);
+        } else {
+            $text = $this->replace_url($text, 'email_url', '#');
+        }
+
+        $options = Newsletter::instance()->get_options('info');
+        // Do not escape HTML here since it's a free text
+        $text = str_replace('{company_address}', wp_kses_post($options['footer_contact']), $text);
+        $text = str_replace('{company_name}', wp_kses_post($options['footer_title']), $text);
+        $text = str_replace('{company_legal}', wp_kses_post($options['footer_legal']), $text);
+
+        Newsletter::instance()->restore_language();
+        $user->_trusted = $trusted;
+
+        return $text;
     }
 
     /**
@@ -769,7 +887,6 @@ class NewsletterModule extends NewsletterModuleBase {
             $home_url = home_url('/');
         }
 
-//$this->logger->debug('Replace start');
         if ($user !== null && !is_object($user)) {
             if (is_array($user)) {
                 $user = (object) $user;
@@ -867,7 +984,6 @@ class NewsletterModule extends NewsletterModuleBase {
 // Obsolete.
             $text = $this->replace_url($text, 'FOLLOWUP_SUBSCRIPTION_URL', self::add_qs($base, 'nm=fs' . $id_token));
             $text = $this->replace_url($text, 'FOLLOWUP_UNSUBSCRIPTION_URL', self::add_qs($base, 'nm=fu' . $id_token));
-
             $text = $this->replace_url($text, 'UNLOCK_URL', $this->build_action_url('ul', $user));
         } else {
             //$this->logger->debug('Replace without user');
@@ -902,19 +1018,22 @@ class NewsletterModule extends NewsletterModuleBase {
         return $text;
     }
 
-    function replace_date($text, $timestamp = false) {
-        if ($timestamp) {
-            $timestamp += (int) (get_option('gmt_offset') * 3600);
+    function replace_date($text, $timestamp = 0) {
+        if (!$timestamp) {
+            $timestamp = time();
         }
+
+        $timestamp += (int) (get_option('gmt_offset') * 3600);
 
         $text = str_replace('{date}', date_i18n(get_option('date_format'), $timestamp), $text);
 
-// Date processing
+        // Date processing
         $x = 0;
         while (($x = strpos($text, '{date_', $x)) !== false) {
             $y = strpos($text, '}', $x);
-            if ($y === false)
+            if ($y === false) {
                 continue;
+            }
             $f = substr($text, $x + 6, $y - $x - 6);
             $text = substr($text, 0, $x) . date_i18n($f, $timestamp) . substr($text, $y + 1);
         }
@@ -934,7 +1053,7 @@ class NewsletterModule extends NewsletterModuleBase {
         $text = str_replace('{' . $tag_lower . '}', $url, $text);
         $text = str_replace('%7B' . $tag_lower . '%7D', $url, $text);
 
-        $url_encoded = urlencode($url);
+        $url_encoded = rawurlencode($url);
         $text = str_replace('%7B' . $tag_lower . '_encoded%7D', $url_encoded, $text);
         $text = str_replace('{' . $tag_lower . '_encoded}', $url_encoded, $text);
 

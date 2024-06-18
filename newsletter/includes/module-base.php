@@ -673,6 +673,7 @@ class NewsletterModuleBase {
                 $email->options = [];
             }
         });
+
         return $list;
     }
 
@@ -750,15 +751,15 @@ class NewsletterModuleBase {
     function get_posts($filters = [], $language = '') {
 
         if ($language) {
-            if (class_exists('SitePress')) {
+            //if (class_exists('SitePress')) {
                 if (empty($language)) {
                     $language = 'all';
                 }
                 do_action('wpml_switch_language', $language);
                 $filters['suppress_filters'] = false;
-            } else if (class_exists('Polylang')) {
-                $filters['lang'] = $language;
-            }
+            //} else if (class_exists('Polylang')) {
+            //    $filters['lang'] = $language;
+            //}
 
             $filters = apply_filters('newsletter_get_posts_filters', $filters, $language);
         }
@@ -772,9 +773,9 @@ class NewsletterModuleBase {
         $posts = get_posts($filters);
 
         if ($language) {
-            if (class_exists('SitePress')) {
+            //if (class_exists('SitePress')) {
                 do_action('wpml_switch_language', Newsletter::$language);
-            }
+            //}
         }
         return $posts;
     }
@@ -946,6 +947,10 @@ class NewsletterModuleBase {
     static function sanitize_language($value) {
         $languages = self::get_languages();
         return isset($languages[$value]) ? $value : '';
+    }
+
+    static function sanitize_country($value) {
+        return sanitize_user_field($value, 2);
     }
 
     /**
@@ -1319,28 +1324,43 @@ class NewsletterModuleBase {
         die();
     }
 
+    static function redirect_local($url) {
+        $url = wp_sanitize_redirect($url);
+        $local_host = parse_url(home_url(), 'host');
+        $url_host = parse_url($url, 'host');
+
+        if ($url_host !== $local_host) {
+            die('Redirect URL invalid');
+        }
+
+        wp_redirect($url);
+        die();
+    }
+
     function set_lock($name, $duration) {
         global $wpdb;
 
         $duration = (int) $duration;
 
+        $wpdb->flush();
         $row = $wpdb->get_row($wpdb->prepare("SELECT * FROM $wpdb->options WHERE option_name = %s LIMIT 1", 'newsletter_lock_' . $name));
         if ($row) {
             $value = (int) $row->option_value;
             if ($value < time()) {
                 $wpdb->query($wpdb->prepare("update $wpdb->options set option_value=%s where option_id=%d limit 1", '' . (time() + $duration), $row->option_id));
+                $wpdb->flush();
                 return true;
             }
             return false;
         }
         $wpdb->insert($wpdb->options, ['option_name' => 'newsletter_lock_' . $name, 'option_value' => '' . (time() + $duration)]);
+        $wpdb->flush();
         return true;
     }
 
     function reset_lock($name) {
         global $wpdb;
         $wpdb->query($wpdb->prepare("update $wpdb->options set option_value=%s where option_name=%s limit 1", '0', 'newsletter_lock_' . $name));
-        //$wpdb->update($wpdb->options, ['option_value' => 0], ['option_id' => $row->option_id]);
         $wpdb->flush();
     }
 }

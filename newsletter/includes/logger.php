@@ -1,5 +1,7 @@
 <?php
 
+// phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_print_r
+
 defined('ABSPATH') || exit;
 
 if (!defined('NEWSLETTER_LOG_DIR')) {
@@ -18,6 +20,7 @@ class NewsletterLogger {
     var $module;
     var $file;
     var $is_debug = false;
+    var $offset = 0;
 
     function __construct($module) {
         $this->module = $module;
@@ -43,7 +46,9 @@ class NewsletterLogger {
 
         }
 
-        $this->file = NEWSLETTER_LOG_DIR . '/' . $module . '-' . date('Y-m') . '-' . $secret . '.txt';
+        $this->file = NEWSLETTER_LOG_DIR . '/' . $module . '-' . gmdate('Y-m', time() + $this->offset) . '-' . $secret . '.txt';
+
+        $this->offset = (int) (get_option('gmt_offset') * 3600);
     }
 
     /**
@@ -60,13 +65,13 @@ class NewsletterLogger {
 
         if (defined('DOING_CRON') && DOING_CRON) {
             $user = '[cron]';
-        } else if ($current_user) {
+        } elseif ($current_user) {
             $user = $current_user->user_login;
         } else {
             $user = '[no user]';
         }
 
-        $time = date('d-m-Y H:i:s ');
+        $time = gmdate('d-m-Y H:i:s ', time() + $this->offset);
         switch ($level) {
             case self::FATAL: $time .= '- FATAL';
                 break;
@@ -108,8 +113,9 @@ class NewsletterLogger {
     }
 
     function debug($text) {
-        if (!$this->is_debug) return;
+        if (!$this->is_debug) {
+            return;
+        }
         $this->log($text, self::DEBUG);
     }
-
 }

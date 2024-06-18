@@ -6,6 +6,10 @@ defined('ABSPATH') || exit;
 
 class License {
 
+    static function get_data() {
+        
+    }
+
     static function update() {
         \Newsletter::instance()->get_license_data(true);
     }
@@ -27,7 +31,7 @@ class License {
                     $badge = '<span class="' . $class . '">' . esc_html($type) . ' license expires on ' . esc_html(date('Y-m-d', $license_data->expire))
                             . '</span>';
                 } else {
-                    $badge = '<span class="' . $class . '">' . esc_html($type) . ' license expired on ' . esc_html(date('Y-m-d', $license_data->expire))
+                    $badge = '<span class="tnp-badge-red">' . esc_html($type) . ' license expired on ' . esc_html(date('Y-m-d', $license_data->expire))
                             . '</span>';
                 }
             } else {

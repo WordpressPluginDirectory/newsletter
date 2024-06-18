@@ -1,7 +1,7 @@
 === Newsletter - Send awesome emails from WordPress ===
 Tags: newsletter, subscription, email marketing, welcome email, signup forms
 Tested up to: 6.5.4
-Stable tag: 8.3.8
+Stable tag: 8.3.9
 Contributors: satollo,webagile
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -129,6 +129,24 @@ Thank you, The Newsletter Team
 
 == Changelog ==
 
+= 8.3.9 =
+
+* Important review of the subscription process with trusted and untrusted subscriptions
+* Improved notes on WP page list about the pages used as public page and for which language
+* Fixed redirect of the "activation required" message on multilanguage blogs
+* Added note on page list for custom profile page
+* Added note on page list for custom welcome page
+* Added check on get_news() to manager firewall response body corruption
+* Refresh the newsletter total subscriber count to take in account of new subscription and cancellation during a long sending process
+* Fixed license badge color
+* Refactoring of the subscription/subscriber internal status
+* Added check on WP HTML Email plugin
+* Filter "newsletter_message_headers" is now deprecated and will be removed shortly (use "newsletter_message" instead)
+* Filter "newsletter_message_html" is now deprecated and will be removed shortly (use "newsletter_message" instead)
+* Filter "newsletter_message_text" is now deprecated and will be removed shortly (use "newsletter_message" instead)
+* Filter "newsletter_message_subject" is now deprecated and will be removed shortly (use "newsletter_message" instead)
+* Distinct replacement of tags for email and web
+
 = 8.3.8 =
 
 * Fixed problem on table creation on first install
@@ -140,6 +158,10 @@ Thank you, The Newsletter Team
 * Fixed problem with multilanguage plugins
 * Edit link for administrator on subscription form now adds the current language on link
 * Added online profile page edit link for administrators
+* Fixed "date" tag when sending a test
+* Added note on custom CSS field
+* Fixed dashboard error
+* Fixed redirect to welcome page for multilanguage blogs
 
 = 8.3.6 =
 
@@ -147,7 +169,6 @@ Thank you, The Newsletter Team
 * Removed obsolete code
 * Two steps unsubscription now mandatory (old links continue to work)
 * Fixed the page or url selector for the welcome page
-* Added per-status filter on export
 * Fixed internal delivery engine stats (not the subscriber or newsletter stats!)
 * Export feature moved to the Import/Export addon for improvements
 

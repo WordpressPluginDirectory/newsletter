@@ -53,9 +53,12 @@ class NewsletterAntispam {
                 return true;
         }
 
-        // Akismet check
-        $user_agent = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '';
-        $referrer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
+        // Keep the values as-is for spam check
+
+        // phpcs:ignore:WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+        $user_agent = wp_unslash($_SERVER['HTTP_USER_AGENT'] ?? '');
+        // phpcs:ignore:WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+        $referrer = wp_unslash($_SERVER['HTTP_REFERER'] ?? '');
         if ($this->is_spam_by_akismet($email, $full_name, $ip, $user_agent, $referrer)) {
             $this->logger->fatal($email . ' - ' . $ip . ' - Akismet blocked');
 
@@ -103,7 +106,7 @@ class NewsletterAntispam {
         // Not enough reliable, removed.
         return false;
 
-        if ($ip === '::1' || $ip === '127.0.0.1') {
+        if ('::1' === $ip || '127.0.0.1' === $ip) {
             return false;
         }
 
@@ -111,7 +114,7 @@ class NewsletterAntispam {
             return false;
         }
         foreach ($this->options['ip_blacklist'] as $item) {
-            if (substr($item, 0, 1) === '#') {
+            if ('#' === substr($item, 0, 1)) {
                 continue;
             }
             if ($this->ip_match($ip, $item)) {
@@ -176,13 +179,13 @@ class NewsletterAntispam {
             return false;
         }
 
-        $request = 'blog=' . urlencode(home_url()) . '&referrer=' . urlencode($referrer) .
-                '&user_agent=' . urlencode($agent) .
+        $request = 'blog=' . rawurlencode(home_url()) . '&referrer=' . rawurlencode($referrer) .
+                '&user_agent=' . rawurlencode($agent) .
                 '&comment_type=signup' .
-                '&comment_author_email=' . urlencode($email) .
-                '&user_ip=' . urlencode($ip);
+                '&comment_author_email=' . rawurlencode($email) .
+                '&user_ip=' . rawurlencode($ip);
         if (!empty($name)) {
-            $request .= '&comment_author=' . urlencode($name);
+            $request .= '&comment_author=' . rawurlencode($name);
         }
 
         $response = Akismet::http_post($request, 'comment-check');

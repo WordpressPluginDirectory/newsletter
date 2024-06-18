@@ -344,6 +344,9 @@ if (!empty($return_path)) {
                                         <p><strong>Warning: Newsletter styles and custom styles are disable by your theme or a plugin.</strong></p>
                                     <?php } ?>
                                     <?php $controls->textarea('css'); ?>
+                                    <p class="description">
+                                        Styles added to the site for the subscription and profile editing forms.
+                                    </p>
                                 </td>
                             </tr>
 

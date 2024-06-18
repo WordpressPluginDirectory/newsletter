@@ -314,7 +314,7 @@ class NewsletterDefaultMailer extends NewsletterMailer {
         if (!empty($message->body)) {
             $wp_mail_headers[] = 'Content-Type: text/html;charset=UTF-8';
             $body = $message->body;
-        } else if (!empty($message->body_text)) {
+        } elseif (!empty($message->body_text)) {
             $wp_mail_headers[] = 'Content-Type: text/plain;charset=UTF-8';
             $body = $message->body_text;
         } else {

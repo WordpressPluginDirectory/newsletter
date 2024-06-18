@@ -1,94 +1,49 @@
 <?php
 /* @var $this NewsletterMainAdmin */
 /* @var $controls NewsletterControls */
+/* @var $wpdb wpdb */
 
 defined('ABSPATH') || exit;
 
 wp_enqueue_script('tnp-chart');
 
-if ($controls->is_action('feed_enable')) {
-    delete_option('newsletter_feed_demo_disable');
-    $controls->messages = 'Feed by Mail demo panels enabled. On next page reload it will show up.';
-}
-
-if ($controls->is_action('feed_disable')) {
-    update_option('newsletter_feed_demo_disable', 1);
-    $controls->messages = 'Feed by Mail demo panel disabled. On next page reload it will disappear.';
-}
-
 $emails_module = NewsletterEmailsAdmin::instance();
 $statistics_module = NewsletterStatisticsAdmin::instance();
 $emails = $wpdb->get_results("select * from " . NEWSLETTER_EMAILS_TABLE . " where type='message' or type like 'automated_%' and type<> 'automated_template' order by id desc limit 5");
 
-$list = $wpdb->get_results("select * from " . NEWSLETTER_EMAILS_TABLE . " where status='sending' and send_on<" . time() . " order by id asc");
-$total = 0;
-$queued = 0;
-foreach ($list as $email) {
-    $total += $email->total;
-    $queued += $email->total - $email->sent;
-}
-$speed = $newsletter->get_send_speed();
+$row = $wpdb->get_row("select sum(total) as total, sum(sent) as sent from " . NEWSLETTER_EMAILS_TABLE . " where status='sending' and send_on<" . time() . " order by id asc");
+$total = $row->total;
+$queued = $row->total - $row->sent;
+$speed = Newsletter::instance()->get_send_speed();
 
 $total_sent = (int) $wpdb->get_var("select sum(total) from " . NEWSLETTER_EMAILS_TABLE . " where status='sent'");
 
-$users_module = NewsletterUsersAdmin::instance();
-$query = "select * from " . NEWSLETTER_USERS_TABLE . " order by id desc limit 7";
-$subscribers = $wpdb->get_results($query);
+$subscribers = $wpdb->get_results("select * from " . NEWSLETTER_USERS_TABLE . " order by id desc limit 7");
 
 $subscribers_count = (int) $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE . " where status='C'");
 $subscribers_count_last_30_days = (int) $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE . " where status='C' and created>date_sub(now(), interval 30 day)");
-// Retrieves the last standard newsletter
-$last_email = $wpdb->get_row(
-        $wpdb->prepare("select * from " . NEWSLETTER_EMAILS_TABLE . " where type='message' and status in ('sent', 'sending') and send_on<%d order by id desc limit 1", time()));
 
-if ($last_email) {
-    $report = $statistics_module->get_statistics($last_email);
-    $last_email_sent = $report->total;
-    $last_email_opened = $report->open_count;
-    $last_email_notopened = $last_email_sent - $last_email_opened;
-    $last_email_clicked = $report->click_count;
-    $last_email_opened -= $last_email_clicked;
-
-    $overall_sent = $wpdb->get_var("select sum(sent) from " . NEWSLETTER_EMAILS_TABLE . " where type='message' and status in ('sent', 'sending')");
-
-    $overall_opened = $wpdb->get_var("select count(distinct user_id,email_id) from " . NEWSLETTER_STATS_TABLE);
-    $overall_notopened = $overall_sent - $overall_opened;
-    $overall_clicked = $wpdb->get_var("select count(distinct user_id,email_id) from " . NEWSLETTER_STATS_TABLE . " where url<>''");
-    $overall_opened -= $overall_clicked;
-} else {
-    $last_email_opened = 500;
-    $last_email_notopened = 400;
-    $last_email_clicked = 200;
-
-    $overall_opened = 500;
-    $overall_notopened = 400;
-    $overall_clicked = 200;
-}
-
+// Confirmed subscribers
+$confirmed = ['y' => [], 'x' => []];
 $months = $wpdb->get_results("select count(*) as c, concat(year(created), '-', date_format(created, '%m')) as d "
         . "from " . NEWSLETTER_USERS_TABLE . " where status='C' "
         . "group by concat(year(created), '-', date_format(created, '%m')) order by d desc limit 12");
-$values = array();
-$labels = array();
-foreach ($months as $month) {
-    $values[] = (int) $month->c;
-    $labels[] = date("M y", date_create_from_format("Y-m", $month->d)->getTimestamp());
-}
-$values = array_reverse($values);
-$labels = array_reverse($labels);
 
-// Unconfirmed
+foreach (array_reverse($months) as $month) {
+    $confirmed['y'][] = (int) $month->c;
+    $confirmed['x'][] = date_i18n("M y", date_create_from_format("Y-m", $month->d)->getTimestamp());
+}
+
+// Unconfirmed subscribers
 $unconfirmed = ['y' => [], 'x' => []];
 $months = $wpdb->get_results("select count(*) as c, concat(year(created), '-', month(created)) as d "
         . "from " . NEWSLETTER_USERS_TABLE . " where status='S' "
         . "group by year(created), month(created) order by year(created) desc, month(created) desc limit 12");
-$months = array_reverse($months);
-foreach ($months as $month) {
-    $unconfirmed['y'][] = (int) $month->c;
-    $unconfirmed['x'][] = date("M y", date_create_from_format("Y-m", $month->d)->getTimestamp());
-}
 
-$lists = $this->get_lists();
+foreach (array_reverse($months) as $month) {
+    $unconfirmed['y'][] = (int) $month->c;
+    $unconfirmed['x'][] = date_i18n("M y", date_create_from_format("Y-m", $month->d)->getTimestamp());
+}
 
 // Setup
 
@@ -340,13 +295,12 @@ $completed = $completed_steps == $max_steps;
                                 <?php foreach ($subscribers as $s) { ?>
                                     <tr>
                                         <td>
+                                            <small><?php echo esc_html($s->name) ?> <?php echo esc_html($s->surname) ?></small>
                                             <?php echo esc_html($s->email) ?>
                                         </td>
-                                        <td>
-                                            <?php echo esc_html($s->name) ?> <?php echo esc_html($s->surname) ?>
-                                        </td>
+
                                         <td style="text-align: center">
-                                            <?php echo $emails_module->get_user_status_label($s, true) ?>
+                                            <?php echo TNP_User::get_status_label($s->status, true) ?>
                                         </td>
                                         <td style="text-align: right">
                                             <?php $controls->button_icon_edit('?page=newsletter_users_edit&id=' . $s->id, ['tertiary' => true]) ?>
@@ -419,7 +373,7 @@ $completed = $completed_steps == $max_steps;
 
                     <script type="text/javascript">
                         var events_data = {
-                            labels: <?php echo json_encode($labels) ?>,
+                            labels: <?php echo json_encode($confirmed['x']) ?>,
                             datasets: [
                                 {
                                     label: "",
@@ -427,7 +381,7 @@ $completed = $completed_steps == $max_steps;
                                     strokeColor: "#3498db",
                                     backgroundColor: "#72b8e6",
                                     borderColor: "#3498db",
-                                    data: <?php echo wp_json_encode($values) ?>
+                                    data: <?php echo wp_json_encode($confirmed['y']) ?>
                                 }
                             ]
                         };

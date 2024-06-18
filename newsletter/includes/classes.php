@@ -168,8 +168,7 @@ class TNP_Subscription_Data {
     var $profiles = [];
 
     function merge_in($subscriber) {
-        if (!$subscriber)
-            $subscriber = new TNP_User();
+
         if (!empty($this->email))
             $subscriber->email = $this->email;
         if (!empty($this->name))
@@ -232,6 +231,7 @@ class TNP_Subscription {
 
     const EXISTING_ERROR = 1;
     const EXISTING_MERGE = 0;
+    const EXISTING_DOUBLE_OPTIN = 0;
     const EXISTING_SINGLE_OPTIN = 2;
 
     /**
@@ -244,7 +244,7 @@ class TNP_Subscription {
     // optin as empty (for default), 'single' or 'double'.
     var $optin = null;
     // What to do with an existing subscriber???
-    var $if_exists = self::EXISTING_MERGE;
+    var $if_exists = self::EXISTING_DOUBLE_OPTIN;
 
     /**
      * Determines if the welcome or activation email should be sent. Note: sometime an activation email is sent disregarding
@@ -279,16 +279,6 @@ class TNP_Subscription {
 }
 
 /**
- * @property int $id The subscriber unique identifier
- * @property string $email The subscriber email
- * @property string $name The subscriber name or first name
- * @property string $surname The subscriber last name
- * @property string $status The subscriber status
- * @property string $language The subscriber language code 2 chars lowercase
- * @property string $token The subscriber secret token
- * @property string $country The subscriber country code 2 chars uppercase
- * @property bool $_trusted
- * @property bool $_dummy
  */
 #[\AllowDynamicProperties]
 class TNP_User {
@@ -299,7 +289,29 @@ class TNP_User {
     const STATUS_BOUNCED = 'B';
     const STATUS_COMPLAINED = 'P';
 
+    var $id = 0;
+    var $email = '';
+    var $name = '';
+    var $surname = '';
+    var $sex = 'n';
+    var $status = self::STATUS_NOT_CONFIRMED;
     var $ip = '';
+    var $language = '';
+    var $referrer = '';
+    var $http_referer = ''; // Single "r", it's ok
+    var $token = '';
+    var $country = '';
+    var $city = '';
+    var $region = '';
+    var $last_activity = 0; // Unix timestamp
+    var $wp_user_id = 0;
+    var $updated = 0; // Unix timestamp
+
+    var $_dummy = false; // Transient to manage the preview of different actions
+    var $_trusted = true; // Transient indicating the created subscriber can modify the data
+    var $_new = true; // Transient indicating the created subscriber is new
+    var $_activation = true; // Transient indicating the created subscriber needs to be activated
+
 
     public static function get_status_label($status, $html = false) {
         $label = 'Unknown';

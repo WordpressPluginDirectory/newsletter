@@ -309,12 +309,12 @@ class NewsletterFields {
         if ($value == 0) {
             echo ' selected';
         }
-        echo '>', __('No', 'newsletter'), '</option>';
+        echo '>', esc_html__('No', 'newsletter'), '</option>';
         echo '<option value="1"';
         if ($value == 1) {
             echo ' selected';
         }
-        echo '>', __('Yes', 'newsletter'), '</option>';
+        echo '>', esc_html__('Yes', 'newsletter'), '</option>';
         echo '</select>';
 
         $this->_description($attrs);
