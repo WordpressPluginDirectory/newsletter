@@ -137,6 +137,7 @@ class NewsletterStore {
                 }
             }
         } else {
+            unset($data['id']); // for id = 0
             $r = $wpdb->insert($table, $this->sanitize($data));
             if ($r === false) {
                 $this->logger->fatal($wpdb->last_error);
