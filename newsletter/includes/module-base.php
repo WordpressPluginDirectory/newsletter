@@ -444,7 +444,7 @@ class NewsletterModuleBase {
 
         $this->logger->debug('Status change to ' . $status . ' of subscriber ' . $user->id . ' from ' . $_SERVER['REQUEST_URI']);
 
-        $this->query($wpdb->prepare("update " . NEWSLETTER_USERS_TABLE . " set status=%s where id=%d limit 1", $status, $user->id));
+        $this->query($wpdb->prepare("update " . NEWSLETTER_USERS_TABLE . " set status=%s, updated=%d where id=%d limit 1", $status, time(), $user->id));
         $user->status = $status;
         return $this->get_user($user);
     }
@@ -1230,6 +1230,15 @@ class NewsletterModuleBase {
         return __("This email requires a modern e-mail reader.\nView online: {email_url}\nChange your subscription: {profile_url}\nUnsubscribe: {unsubscription_url}", 'newsletter');
     }
 
+    /**
+     * Echos the progress bar of an email. Attributes:
+     *
+     * - scheduled: if true the future date is shown
+     *
+     * @param type $email
+     * @param type $attrs
+     * @return type
+     */
     function show_email_progress_bar($email, $attrs = []) {
 
         $email = (object) $email;
@@ -1238,7 +1247,7 @@ class NewsletterModuleBase {
 
         if ($email->status == 'sending' && $email->send_on > time()) {
             if ($attrs['scheduled']) {
-                echo '<span class="tnp-progress-date">', $this->format_date($email->send_on), '</span>';
+                echo '<span class="tnp-progress-date">', esc_html($this->format_date($email->send_on)), '</span>';
             }
             return;
         } else if ($email->status == 'new') {
@@ -1250,14 +1259,14 @@ class NewsletterModuleBase {
             $percent = $this->get_email_progress($email);
         }
 
-        echo '<div class="tnp-progress tnp-progress--' . $email->status . '">';
-        echo '<div class="tnp-progress-bar" role="progressbar" style="width: ', $percent, '%;">&nbsp;', $percent, '%&nbsp;</div>';
+        echo '<div class="tnp-progress tnp-progress--' . esc_attr($email->status) . '">';
+        echo '<div class="tnp-progress-bar" role="progressbar" style="width: ', esc_attr($percent), '%;">&nbsp;', esc_attr($percent), '%&nbsp;</div>';
         echo '</div>';
         if ($attrs['numbers']) {
             if ($email->status == 'sent') {
-                echo '<div class="tnp-progress-numbers">', $email->total, ' ', __('of', 'newsletter'), ' ', $email->total, '</div>';
+                echo '<div class="tnp-progress-numbers">', ((int)$email->total), ' ', esc_html__('of', 'newsletter'), ' ', ((int)$email->total), '</div>';
             } else {
-                echo '<div class="tnp-progress-numbers">', $email->sent, ' ', __('of', 'newsletter'), ' ', $email->total, '</div>';
+                echo '<div class="tnp-progress-numbers">', ((int)$email->sent), ' ', esc_html__('of', 'newsletter'), ' ', ((int)$email->total), '</div>';
             }
         }
     }

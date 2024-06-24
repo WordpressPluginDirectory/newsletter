@@ -344,13 +344,13 @@ if ($email['status'] != 'sent') {
                 <div class="tnp-submit">
 
                     <?php if ($email['status'] == 'sending' || $email['status'] == 'sent') { ?>
-
-                        <?php $controls->button_back('?page=newsletter_emails_index') ?>
-
+                        <?php if ($email['status'] == 'message') { ?>
+                            <?php $controls->button_back('?page=newsletter_emails_index') ?>
+                        <?php } ?>
                     <?php } else { ?>
 
                         <a class="button-secondary" href="<?php echo $this->get_editor_url($email_id, $editor_type) ?>">
-                            <i class="fas fa-edit"></i> <?php _e('Edit', 'newsletter') ?>
+                            <i class="fas fa-edit"></i> <?php esc_html_e('Edit', 'newsletter') ?>
                         </a>
 
                     <?php } ?>

@@ -1,6 +1,10 @@
 <?php
 /* @var $fields NewsletterFields */
+
+$fields->controls->data['schema'] = '';
 ?>
+
+<?php $fields->select('schema', __('Schema', 'newsletter'), ['' => 'Custom', 'wire' => 'Wire'], ['after-rendering' => 'reload']) ?>
 
 <?php
 $fields->button('button', 'Button layout', [
@@ -12,6 +16,7 @@ $fields->button('button', 'Button layout', [
 ?>
 
 <div class="tnp-field-row">
+
     <div class="tnp-field-col-2">
         <?php $fields->size('button_width', __('Width', 'newsletter')) ?>
     </div>
@@ -32,7 +37,7 @@ $fields->button('button', 'Button layout', [
     </div>
     <div style="clear: both"></div>
     <?php if (!method_exists('NewsletterReports', 'build_lists_change_url')) { ?>
-    <label class="tnp-row-label">Requires the Reports Addon last version</label>
+        <label class="tnp-row-label">Requires the Reports Addon last version</label>
     <?php } ?>
 </div>
 

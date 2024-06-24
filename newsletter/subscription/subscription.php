@@ -101,6 +101,10 @@ class NewsletterSubscription extends NewsletterModule {
             return $content;
         }
 
+        if ('post' !== get_post_type()) {
+            return $content;
+        }
+
         $style = '';
 
         return $content
@@ -752,6 +756,8 @@ class NewsletterSubscription extends NewsletterModule {
         if (!$force && !empty($this->options['confirmation_disabled'])) {
             return true;
         }
+
+        $this->switch_language($user->language);
 
         $message = [];
         $message['html'] = do_shortcode($this->get_text('confirmation_message'));

@@ -455,6 +455,10 @@ class NewsletterControls {
         $this->toasts[] = __('Done.', 'newsletter');
     }
 
+    function add_toast_deleted() {
+        $this->toasts[] = __('Deleted.', 'newsletter');
+    }
+
     function add_message_deleted() {
         if (!empty($this->messages)) {
             $this->messages .= '<br><br>';
@@ -2240,6 +2244,10 @@ tnp_controls_init();
             }
         }
         return $buffer;
+    }
+
+    static function echo_date($time = null, $now = false, $left = false) {
+        echo esc_html(self::print_date($time, $now, $left));
     }
 
     static function delta_time($delta = 0) {

@@ -37,7 +37,6 @@ if ($controls->is_action('test')) {
                     . '<a href="https://www.thenewsletterplugin.com/documentation/?p=15170" target="_blank"><strong>Read more here</strong></a>.';
 
             NewsletterMainAdmin::instance()->set_completed_step('test-email');
-
         } else {
             $options['mail'] = 0;
             $options['mail_error'] = $r->get_error_message();
@@ -64,14 +63,43 @@ if ($controls->is_action('test')) {
 }
 
 // Compute the number of newsletters ongoing and other stats
-$emails = $wpdb->get_results("select * from " . NEWSLETTER_EMAILS_TABLE . " where status='sending' and send_on<" . time() . " order by id asc");
+//$emails = $wpdb->get_results("select * from " . NEWSLETTER_EMAILS_TABLE . " where status='sending' and send_on<" . time() . " order by id asc");
+$emails = $this->get_results("select * from " . NEWSLETTER_EMAILS_TABLE . " where status='sending' and send_on<=" . time() . " order by send_on asc");
+
 $total = 0;
 $queued = 0;
 foreach ($emails as $email) {
     $total += $email->total;
     $queued += $email->total - $email->sent;
+
+    // Type label
+    if ($email->type === 'message') {
+        $email->type_label = 'Standard';
+    } elseif (strpos($email->type, 'automated_') === 0) {
+        $email->type_label = 'Automated ' . substr($email->type, 10);
+    } elseif (strpos($email->type, 'instant_') === 0) {
+        $email->type_label = 'Instant ' . substr($email->type, 8);
+    } else {
+        $email->type_label = $email->type;
+    }
 }
 $speed = $newsletter->get_send_speed();
+
+// Nedded to have access to non regular paused newsletters in a easy way
+$paused_emails = $this->get_results("select * from " . NEWSLETTER_EMAILS_TABLE . " where status='paused' and send_on<=" . time() . " order by send_on asc");
+foreach ($paused_emails as $email) {
+
+    // Type label
+    if ($email->type === 'message') {
+        $email->type_label = 'Standard';
+    } elseif (strpos($email->type, 'automated_') === 0) {
+        $email->type_label = 'Automated ' . substr($email->type, 10);
+    } elseif (strpos($email->type, 'instant_') === 0) {
+        $email->type_label = 'Instant ' . substr($email->type, 8);
+    } else {
+        $email->type_label = $email->type;
+    }
+}
 
 $options = $this->get_options('status');
 
@@ -108,7 +136,7 @@ $speed = Newsletter::instance()->get_send_speed();
 
     <div id="tnp-heading">
 
-        <h2><?php _e('System', 'newsletter') ?></h2>
+        <h2><?php esc_html_e('System', 'newsletter') ?></h2>
         <?php include __DIR__ . '/nav.php' ?>
 
     </div>
@@ -170,7 +198,7 @@ $speed = Newsletter::instance()->get_send_speed();
                                         &nbsp;
                                     </td>
                                     <td>
-                                        <strong><?php echo $speed ?></strong> emails per hour<br>
+                                        <strong><?php echo (int) $speed ?></strong> emails per hour<br>
                                         can be set on
                                         <a href="admin.php?page=newsletter_main_main" target="_blank">Settings/General</a>
                                         or on installed delivery addon if available
@@ -184,8 +212,8 @@ $speed = Newsletter::instance()->get_send_speed();
                                     </td>
                                     <td>
                                         <?php if (count($emails)) { ?>
-                                            Delivering <?php echo count($emails) ?> newsletters to about <?php echo $queued ?> recipients.
-                                            At speed of <?php echo $speed ?> emails per hour it will take <?php printf('%.1f', $queued / $speed) ?> hours to finish.
+                                            Delivering <?php echo count($emails) ?> newsletters to about <?php echo (int) $queued ?> recipients.
+                                            At speed of <?php echo (int) $speed ?> emails per hour it will take <?php esc_html(printf('%.1f', $queued / $speed)) ?> hours to finish.
 
                                         <?php } else { ?>
                                             Nothing delivering right now
@@ -244,6 +272,37 @@ $speed = Newsletter::instance()->get_send_speed();
                 </div>
 
 
+                <div class="tnp-cards-container">
+                    <div class="tnp-card">
+                        <div class="tnp-card-header">
+                            <div class="tnp-card-title"><?php esc_html_e('Sending', 'newsletter') ?></div>
+                            <div class="tnp-card-upper-buttons"><a href="#sending"><i class="fas fa-chart-bar"></i></a></div>
+                        </div>
+                        <div class="tnp-card-value"><?php echo (int) count($emails); ?></div>
+                        <div class="tnp-card-description">Newsletters</div>
+                    </div>
+
+                    <div class="tnp-card">
+                        <div class="tnp-card-header">
+                            <div class="tnp-card-title"><?php esc_html_e('Progress', 'newsletter') ?></div>
+                        </div>
+                        <div class="tnp-card-value"><?php echo $total - $queued, '/', (int) $queued; ?></div>
+                        <div class="tnp-card-description">Emails</div>
+                    </div>
+
+                    <div class="tnp-card">
+                        <div class="tnp-card-header">
+                            <div class="tnp-card-title"><?php esc_html_e('Time to finish', 'newsletter') ?></div>
+                        </div>
+                        <div class="tnp-card-value"><?php printf('%.1f', $queued / $speed) ?></div>
+                        <div class="tnp-card-description">Hours</div>
+                    </div>
+
+
+
+                </div>
+
+
 
                 <div class="tnp-cards-container">
 
@@ -272,17 +331,17 @@ $speed = Newsletter::instance()->get_send_speed();
 
 
                             <p>
-                                Average time to send an email: <?php echo $stats->mean ?> seconds<br>
+                                Average time to send an email: <?php echo (float)$stats->mean ?> seconds<br>
                                 <?php if ($stats->mean > 0) { ?>
-                                    Max speed: <?php echo sprintf("%.2f", 1.0 / $stats->mean * 3600) ?> emails per hour<br>
+                                    Max speed: <?php echo esc_html(sprintf("%.2f", 1.0 / $stats->mean * 3600)) ?> emails per hour<br>
                                 <?php } ?>
 
-                                Max mean time measured: <?php echo $stats->max ?> seconds<br>
-                                Min mean time measured: <?php echo $stats->min ?> seconds<br>
-                                Total emails in the sample: <?php echo $stats->total_emails ?><br>
-                                Total sending time: <?php echo $stats->total_time ?> seconds<br>
-                                Runs in the sample: <?php echo $stats->total_runs ?><br>
-                                Runs prematurely interrupted: <?php echo $stats->interrupted ?><br>
+                                Max mean time measured: <?php echo (int) $stats->max ?> seconds<br>
+                                Min mean time measured: <?php echo (int) $stats->min ?> seconds<br>
+                                Total emails in the sample: <?php echo (int) $stats->total_emails ?><br>
+                                Total sending time: <?php echo (int) $stats->total_time ?> seconds<br>
+                                Runs in the sample: <?php echo (int) $stats->total_runs ?><br>
+                                Runs prematurely interrupted: <?php echo (int) $stats->interrupted ?><br>
                             </p>
 
                             <canvas id="tnp-send-chart" style="width: 100%; height: 200px"></canvas>
@@ -290,11 +349,11 @@ $speed = Newsletter::instance()->get_send_speed();
                             <script>
                                 jQuery(function () {
                                     var sendChartData = {
-                                        labels: <?php echo json_encode(range(1, count($stats->means))) ?>,
+                                        labels: <?php echo wp_json_encode(range(1, count($stats->means))) ?>,
                                         datasets: [
                                             {
                                                 label: "Seconds to complete a batch",
-                                                data: <?php echo json_encode($stats->means) ?>,
+                                                data: <?php echo wp_json_encode($stats->means) ?>,
                                                 borderColor: '#2980b9',
                                                 fill: false
                                             }
@@ -321,11 +380,11 @@ $speed = Newsletter::instance()->get_send_speed();
 
 
                                     var sendSpeedData = {
-                                        labels: <?php echo json_encode(range(1, count($stats->speeds))) ?>,
+                                        labels: <?php echo wp_json_encode(range(1, count($stats->speeds))) ?>,
                                         datasets: [
                                             {
                                                 label: "Emails per second",
-                                                data: <?php echo json_encode($stats->speeds) ?>,
+                                                data: <?php echo wp_json_encode($stats->speeds) ?>,
                                                 borderColor: '#2980b9',
                                                 fill: false
                                             }
@@ -367,7 +426,7 @@ $speed = Newsletter::instance()->get_send_speed();
                                 (max: <?php echo esc_html($speed) ?> emails per hour)
                             </div>
                             <div class="tnp-arrow">&rightarrow;</div>
-                            <div class="tnp-addon"><i class="<?php echo $icon ?>"></i><br><br><?php echo $mailer_name ?></div>
+                            <div class="tnp-addon"><i class="<?php echo esc_attr($icon) ?>"></i><br><br><?php echo esc_html($mailer_name) ?></div>
                             <div class="tnp-arrow">&rightarrow;</div>
                             <div class="tnp-service"><i class="fas fa-cog"></i><br><br>
                                 <?php echo esc_html($service_name) ?>
@@ -378,6 +437,86 @@ $speed = Newsletter::instance()->get_send_speed();
                     </div>
                 </div>
 
+
+
+
+                <div class="tnp-cards-container">
+
+                    <div class="tnp-card" id="sending">
+                        <div class="tnp-card-title">Sending</div>
+                        <?php if (empty($emails)) { ?>
+                            <p>None.</p>
+                        <?php } else { ?>
+                            <p>Newsletters are sent in the shown order.</p>
+                            <table class="widefat" style="width: 100%">
+                                <thead></thead>
+                                <tbody>
+                                    <?php foreach ($emails as $email) { ?>
+                                        <tr>
+                                            <td>
+                                                <small><?php echo esc_html($email->type_label); ?></small><br>
+                                                <?php echo esc_html($email->subject) ?>
+                                            </td>
+                                            <td style="width: 20rem">
+                                                <?php $controls->echo_date($email->send_on); ?>
+                                            </td>
+                                            <td style="text-align: center; width: 15rem">
+                                                <?php NewsletterEmails::instance()->show_email_progress_bar($email, ['scheduled' => true]) ?>
+                                            </td>
+                                            <td style="text-align: right; width: 3rem">
+                                                <?php
+                                                $controls->button_icon_edit('?page=newsletter_emails_edit&id=' . ((int) $email->id), ['tertiary' => true]);
+                                                ?>
+
+                                            </td>
+                                        </tr>
+                                    <?php } ?>
+                                </tbody>
+                            </table>
+                        <?php } ?>
+
+
+                    </div>
+                </div>
+
+                <div class="tnp-cards-container">
+
+                    <div class="tnp-card" id="sending">
+                        <div class="tnp-card-title">Paused</div>
+                        <?php if (empty($paused_emails)) { ?>
+                            <p>None.</p>
+                        <?php } else { ?>
+
+                            <table class="widefat" style="width: 100%">
+                                <thead></thead>
+                                <tbody>
+                                    <?php foreach ($paused_emails as $email) { ?>
+                                        <tr>
+                                            <td>
+                                                <small><?php echo esc_html($email->type_label); ?></small><br>
+                                                <?php echo esc_html($email->subject) ?>
+                                            </td>
+                                            <td style="width: 20rem">
+                                                <?php $controls->echo_date($email->send_on); ?>
+                                            </td>
+                                            <td style="text-align: center; width: 15rem;">
+                                                <?php NewsletterEmails::instance()->show_email_progress_bar($email, ['scheduled' => true]) ?>
+                                            </td>
+                                            <td style="text-align: right; width: 3rem">
+                                                <?php
+                                                $controls->button_icon_edit('?page=newsletter_emails_edit&id=' . ((int) $email->id), ['tertiary' => true]);
+                                                ?>
+
+                                            </td>
+                                        </tr>
+                                    <?php } ?>
+                                </tbody>
+                            </table>
+                        <?php } ?>
+
+
+                    </div>
+                </div>
 
                 <div class="tnp-cards-container">
 

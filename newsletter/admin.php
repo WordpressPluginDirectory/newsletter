@@ -4,6 +4,7 @@ define('NEWSLETTER_ADMIN_HEADER', NEWSLETTER_DIR . '/header.php');
 define('NEWSLETTER_ADMIN_FOOTER', NEWSLETTER_DIR . '/tnp-footer.php');
 
 require_once __DIR__ . '/includes/module-admin.php';
+require_once __DIR__ . '/includes/addon-admin.php';
 require_once __DIR__ . '/main/main-admin.php';
 require_once __DIR__ . '/subscription/subscription-admin.php';
 require_once __DIR__ . '/unsubscription/unsubscription-admin.php';
@@ -81,6 +82,49 @@ class NewsletterAdmin extends NewsletterModuleAdmin {
                 header('X-XSS-Protection: 0');
             }
         }
+
+        add_action('admin_bar_menu', [$this, 'hook_admin_bar_menu'], 500);
+    }
+
+    /**
+     *
+     * @global wpdb $wpdb
+     * @param WP_Admin_Bar $admin_bar
+     * @return type
+     *
+     * https://developer.wordpress.org/reference/hooks/admin_bar_menu/
+     */
+    function hook_admin_bar_menu(WP_Admin_Bar $admin_bar) {
+        global $wpdb;
+
+        if (!current_user_can('manage_options')) {
+            return;
+        }
+
+        $data = get_transient('newsletter_topbar');
+        if (!$data || !is_array($data)) {
+            $data = $wpdb->get_row($wpdb->prepare("select count(*) as count, sum(total) as total, sum(sent) as sent from " . NEWSLETTER_EMAILS_TABLE . " where status='sending' and send_on<%d", time()), ARRAY_A);
+            if (!$data) {
+                $data = ['count' => 0];
+            }
+            //$data['updated_at'] = time();
+            set_transient('newsletter_topbar', $data, 600);
+        }
+
+        if (!$data['count']) {
+            return;
+        }
+
+        $admin_bar->add_menu(array(
+            'id' => 'newsletter',
+            'parent' => null,
+            'group' => null,
+            'title' => '<span class="ab-icon"></span>' . ((int) $data['count']) . ' sending (' . ((int) $data['sent']) . '/' . ((int) $data['total']) . ')',
+            'href' => admin_url('admin.php?page=newsletter_system_delivery#sending'),
+            'meta' => [
+                'title' => __('Newsletters sending (updated every 10 minutes)', 'newsletter'),
+            ]
+        ));
     }
 
     function hook_in_admin_header() {
@@ -159,7 +203,6 @@ class NewsletterAdmin extends NewsletterModuleAdmin {
 
             wp_enqueue_script('tnp-toastify', $url . '/vendor/toastify/toastify.js', [], NEWSLETTER_VERSION);
             wp_enqueue_style('tnp-toastify', $url . '/vendor/toastify/toastify.css', [], NEWSLETTER_VERSION);
-
         }
     }
 
@@ -193,7 +236,6 @@ class NewsletterAdmin extends NewsletterModuleAdmin {
 
         NewsletterMainAdmin::instance()->admin_after_menu(); // Special entries
     }
-
 }
 
 NewsletterAdmin::instance();

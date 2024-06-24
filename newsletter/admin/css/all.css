@@ -2128,6 +2128,10 @@ span.tnp-user-status {
     border: 0;
 }
 
+#tnp-body .select2-container {
+    max-width: 500px;
+}
+
 #tnp-body .select2-container--default .select2-selection--multiple {
     border: var(--tnp-input-border);
 }

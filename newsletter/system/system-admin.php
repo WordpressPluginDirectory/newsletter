@@ -241,6 +241,7 @@ class NewsletterSystemAdmin extends NewsletterModuleAdmin {
         }
 
         if ($html) {
+            array_walk($list, 'esc_html');
             return implode('<br>', $list);
         }
         return $list;
@@ -346,6 +347,7 @@ class TNP_Send_Stats {
     var $means = [];
     /* Number of emails in the single batches */
     var $sizes = [];
+    var $speeds = [];
 
 }
 

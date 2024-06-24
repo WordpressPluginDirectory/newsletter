@@ -296,6 +296,19 @@
     margin-right: 10px;
 }
 
+#tnp-body .tnp-dashboard .tnp-card .tnp-card-description {
+    font-size: .75rem;
+    line-height: 1rem;
+    font-weight: normal;
+    margin: 0px 0px 20px;
+}
+
+#tnp-body .tnp-dashboard .tnp-card .tnp-card-value {
+    font-size: 1.5rem;
+    line-height: normal;
+    font-weight: normal;
+}
+
 .tnp-dashboard .tnp-card .tnp-card-documentation-index {
     background-color: #eee;
     padding: 15px 20px 17px 5px;

@@ -488,6 +488,55 @@ class NewsletterComposer {
     }
 
     /**
+     * Creates an email using the template stored in the provided folder. Asking for a folder
+     * contraints to use a standard structure for the template avoiding wilde behaviors. :-)
+     *
+     * The returned email is not saved into the database!
+     *
+     * @param string $dir Folder containing the template (at minimim the template.json file)
+     * @return \WP_Error|\TNP_Email
+     */
+    function build_email_from_template($dir) {
+
+        $dir = wp_normalize_path($dir);
+        $dir = realpath($dir);
+        $dir = untrailingslashit($dir);
+
+        $file = $dir . '/template.json';
+
+        if (!file_exists($file)) {
+            return new WP_Error('missing', 'The template.json file is missing');
+        }
+
+        // TODO: Checks? Which ones?
+
+        $template = json_decode(file_get_contents($file));
+        $content = '';
+        $composer = (array) $template->settings;
+        foreach ($template->blocks as $item) {
+            $options = (array) $item;
+            // Convert structured options to array (the json is decoded as "object")
+            foreach ($options as &$o) {
+                if (is_object($o)) {
+                    $o = (array) $o;
+                }
+            }
+            ob_start();
+            $this->render_block($item->block_id, true, $options, [], $composer);
+            $content .= trim(ob_get_clean());
+        }
+
+        $email = new TNP_Email();
+        $email->editor = TNP_Email::EDITOR_COMPOSER;
+        $email->options['composer'] = $composer;
+        $email->subject = $template->subject ?? '[missing subject]';
+        $email->message = TNP_Composer::get_html_open($email) . TNP_Composer::get_main_wrapper_open($email) .
+                $content . TNP_Composer::get_main_wrapper_close($email) . TNP_Composer::get_html_close($email);
+
+        return $email;
+    }
+
+    /**
      * Renders a block identified by its id, using the block options and adding a wrapper
      * if required (for the first block rendering).
      *

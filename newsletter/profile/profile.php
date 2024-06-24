@@ -19,6 +19,7 @@ class NewsletterProfile extends NewsletterModule {
     function __construct() {
         parent::__construct('profile');
         add_shortcode('newsletter_profile', [$this, 'shortcode_newsletter_profile']);
+        add_shortcode('newsletter_profile_field', [$this, 'shortcode_newsletter_profile_field']);
         add_filter('newsletter_replace', [$this, 'hook_newsletter_replace'], 10, 4);
         add_filter('newsletter_page_text', [$this, 'hook_newsletter_page_text'], 10, 3);
         add_action('newsletter_action', [$this, 'hook_newsletter_action'], 12, 3);
@@ -165,15 +166,190 @@ class NewsletterProfile extends NewsletterModule {
         return $admin_notice . $text;
     }
 
+    function shortcode_newsletter_profile_field($attrs = [], $content = '') {
+        static $user = null;
+
+        // Optimization
+        if (!$user) {
+            $user =$this->get_current_user();
+        }
+
+        $name = $attrs['name'] ?? '';
+        $options = $this->get_options();
+        $buffer = '';
+
+        if ('email' === $name) {
+            $label = $attrs['label'] ?? NewsletterSubscription::instance()->get_form_text('email');
+            $buffer .= '<div class="tnp-field tnp-field-email">';
+            $buffer .= '<label>' . esc_html($label) . '</label>';
+            $buffer .= '<input class="tnp-email" type="text" name="ne" required value="' . esc_attr($user->email) . '">';
+            $buffer .= "</div>\n";
+        }
+
+        if ('first_name' === $name) {
+            $label = $attrs['label'] ?? NewsletterSubscription::instance()->get_form_text('name');
+            $value = $this->sanitize_name($user->name);
+            $buffer .= '<div class="tnp-field tnp-field-firstname">';
+            $buffer .= '<label>' . esc_html($label) . '</label>';
+            $buffer .= '<input class="tnp-firstname" type="text" name="nn" value="' . esc_attr($value) . '"' . (!empty($options['name_required']) ? ' required' : '') . '>';
+            $buffer .= "</div>\n";
+        }
+
+        if ('last_name' === $name) {
+            $label = $attrs['label'] ?? NewsletterSubscription::instance()->get_form_text('surname');
+            $value = $this->sanitize_name($user->surname);
+            $buffer .= '<div class="tnp-field tnp-field-lastname">';
+            $buffer .= '<label>' . esc_html($label) . '</label>';
+            $buffer .= '<input class="tnp-lastname" type="text" name="ns" value="' . esc_attr($value) . '"' . (!empty($options['surname_required']) ? ' required' : '') . '>';
+            $buffer .= "</div>\n";
+        }
+
+        if ('gender' === $name) {
+            if (empty($user->sex)) {
+                $user->sex = 'n';
+            }
+            $label = $attrs['label'] ?? NewsletterSubscription::instance()->get_form_text('sex');
+            $buffer .= '<div class="tnp-field tnp-field-gender">';
+            $buffer .= '<label>' . esc_html($label) . '</label>';
+            $buffer .= '<select name="nx" class="tnp-gender"';
+
+            $buffer .= '>';
+
+            $buffer .= '<option value="n"' . ($user->sex === 'n' ? ' selected' : '') . '>' . esc_html(NewsletterSubscription::instance()->get_form_text('sex_none')) . '</option>';
+            $buffer .= '<option value="f"' . ($user->sex === 'f' ? ' selected' : '') . '>' . esc_html(NewsletterSubscription::instance()->get_form_text('sex_female')) . '</option>';
+            $buffer .= '<option value="m"' . ($user->sex === 'm' ? ' selected' : '') . '>' . esc_html(NewsletterSubscription::instance()->get_form_text('sex_male')) . '</option>';
+            $buffer .= '</select>';
+            $buffer .= "</div>\n";
+        }
+
+        if ('language' === $name) {
+            if ($this->is_multilanguage()) {
+                $label = $attrs['label'] ?? __('Language', 'newsletter');
+                $languages = $this->get_languages();
+
+                $buffer .= '<div class="tnp-field tnp-field-language">';
+                $buffer .= '<label>' . esc_html($label) . '</label>';
+                $buffer .= '<select name="nlng" class="tnp-language">';
+
+                $buffer .= '<option value="" disabled ' . ( empty($user->language) ? ' selected' : '' ) . '>' . __('Select language', 'newsletter') . '</option>';
+                foreach ($languages as $key => $l) {
+                    $buffer .= '<option value="' . esc_attr($key) . '"' . ( $user->language == $key ? ' selected' : '' ) . '>' . esc_html($l) . '</option>';
+                }
+
+                $buffer .= '</select>';
+                $buffer .= "</div>\n";
+            }
+        }
+
+        // All profiles enabled on profile page configuration
+        if ('customfields' === $name || 'profiles' === $name) {
+            $profiles = $this->get_customfields_public();
+            foreach ($profiles as $profile) {
+                if (!in_array($profile->id, $options['profiles'])) {
+                    continue;
+                }
+
+                $field = 'profile_' . $profile->id;
+                $value = $this->sanitize_user_field($user->$field);
+
+                $buffer .= '<div class="tnp-field tnp-field-profile">';
+                $buffer .= '<label>' . esc_html($profile->name) . '</label>';
+
+                if ($profile->is_text()) {
+                    $buffer .= '<input class="tnp-profile tnp-profile-' . esc_attr($profile->id) . '" type="text" name="np' . esc_attr($profile->id) . '" value="' . esc_attr($value) . '"' .
+                            ($profile->is_required() ? ' required' : '') . '>';
+                }
+
+                if ($profile->is_select()) {
+                    $buffer .= '<select class="tnp-profile tnp-profile-' . esc_attr($profile->id) . '" name="np' . esc_attr($profile->id) . '"' . ($profile->is_required() ? ' required' : '') . '>';
+                    foreach ($profile->options as $option) {
+                        $buffer .= '<option';
+                        if ($option == $user->$field) {
+                            $buffer .= ' selected';
+                        }
+                        $buffer .= '>' . esc_html($option) . '</option>';
+                    }
+                    $buffer .= '</select>';
+                }
+
+                $buffer .= "</div>\n";
+            }
+        }
+
+        if ('customfield' === $name) {
+            $number = (int) $attrs['number'] ?? 0;
+
+            $cf = $this->get_customfield($number);
+            if (!$cf) {
+                return $this->build_field_admin_notice('Custom field ' . $number . ' is not configured ot the number is wrong or not specified');
+            }
+
+            if ($cf->is_private()) {
+                return $this->build_field_admin_notice('Custom field ' . $number . ' is private and cannot be shown.');
+            }
+
+            $field = 'profile_' . $cf->id;
+            $value = $this->sanitize_user_field($user->$field);
+            $label = $attrs['label'] ?? $cf->name;
+
+            $buffer .= '<div class="tnp-field tnp-field-profile">';
+            $buffer .= '<label>' . esc_html($label) . '</label>';
+
+            if ($cf->is_text()) {
+                $buffer .= '<input class="tnp-profile tnp-profile-' . esc_attr($cf->id) . '" type="text" name="np' . esc_attr($cf->id) . '" value="' . esc_attr($value) . '"' .
+                        ($cf->is_required() ? ' required' : '') . '>';
+            }
+
+            if ($cf->is_select()) {
+                $buffer .= '<select class="tnp-profile tnp-profile-' . esc_attr($cf->id) . '" name="np' . esc_attr($cf->id) . '"' . ($cf->is_required() ? ' required' : '') . '>';
+                foreach ($cf->options as $option) {
+                    $buffer .= '<option';
+                    if ($option == $user->$field) {
+                        $buffer .= ' selected';
+                    }
+                    $buffer .= '>' . esc_html($option) . '</option>';
+                }
+                $buffer .= '</select>';
+            }
+
+            $buffer .= "</div>\n";
+        }
+
+        if ('lists' === $name) {
+            $lists = $this->get_lists_public();
+            $tmp = '';
+            foreach ($lists as $list) {
+                if (!in_array($list->id, $options['lists']) || $list->is_private()) {
+                    continue;
+                }
+                $tmp .= '<div class="tnp-field tnp-field-list">';
+                $tmp .= '<label><input class="tnp-list tnp-list-' . esc_attr($list->id) . '" type="checkbox" name="nl[]" value="' . esc_attr($list->id) . '"';
+                $field = 'list_' . $list->id;
+                // isset() for dummy subscribers
+                if (isset($user->$field) && $user->$field == 1) {
+                    $tmp .= ' checked';
+                }
+                $tmp .= '><span class="tnp-list-label">' . esc_html($list->name) . '</span></label>';
+                $tmp .= "</div>\n";
+            }
+
+            if (!empty($tmp)) {
+                $buffer .= '<div class="tnp-lists">' . "\n" . $tmp . "\n" . '</div>';
+            }
+        }
+
+        return $buffer;
+    }
+
     function shortcode_newsletter_profile($attrs, $content = '') {
         $user = $this->get_current_user();
 
         if (!$user) {
-            if (empty($content)) {
-                return __('Subscriber not found.', 'newsletter');
-            } else {
-                return $content;
-            }
+            //if (empty($content)) {
+            return __('Subscriber not found.', 'newsletter');
+            //} else {
+            //    return $content;
+            //}
         }
 
         if (!$user->_trusted) {
@@ -181,6 +357,22 @@ class NewsletterProfile extends NewsletterModule {
                 return '<p style="background-color: #eee; color: #000; padding: 1rem; margin: 1rem 0"><strong>Visible only to administrators</strong>. The subscriber edit form has been hidden. The current subscriber has been recognized but with a non editable token.</p>';
             }
             return '';
+        }
+
+        if ($content) {
+            $this->switch_language($user->language);
+            $buffer = '';
+            $buffer .= '<div class="tnp tnp-form tnp-profile">';
+            $buffer .= '<form action="#" method="post">';
+            $buffer .= '<input type="hidden" name="nk" value="' . esc_attr($user->id . '-' . $user->token) . '">';
+            $buffer .= do_shortcode($content);
+            $buffer .= '<div class="tnp-field tnp-field-button">';
+            $buffer .= '<input class="tnp-submit" type="submit" value="' . esc_attr($this->get_text('save_label')) . '">';
+            $buffer .= "</div>\n";
+            $buffer .= "</form>\n</div>\n";
+            $this->restore_language($user->language);
+
+            return $buffer;
         }
 
         return $this->get_profile_form($user);

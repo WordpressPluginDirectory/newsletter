@@ -306,12 +306,10 @@ class TNP_User {
     var $last_activity = 0; // Unix timestamp
     var $wp_user_id = 0;
     var $updated = 0; // Unix timestamp
-
     var $_dummy = false; // Transient to manage the preview of different actions
     var $_trusted = true; // Transient indicating the created subscriber can modify the data
     var $_new = true; // Transient indicating the created subscriber is new
     var $_activation = true; // Transient indicating the created subscriber needs to be activated
-
 
     public static function get_status_label($status, $html = false) {
         $label = 'Unknown';
@@ -372,4 +370,9 @@ class TNP_Email {
     const STATUS_SENDING = 'sending';
     const STATUS_PAUSED = 'paused';
     const STATUS_ERROR = 'error';
+    const EDITOR_COMPOSER = 2;
+    const EDITOR_HTML = 1;
+    const EDITOR_TINYMCE = 0;
+
+    var $options = [];
 }

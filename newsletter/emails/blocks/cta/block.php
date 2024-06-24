@@ -23,6 +23,14 @@ $default_options = array(
     'schema' => ''
 );
 
+if (!empty($options['schema'])) {
+    if ($options['schema'] === 'wire') {
+        $options['button_background'] = $composer['block_background'];
+        $options['button_border_color'] = $composer['button_background_color'];
+        $options['button_font_color'] = '#000000';
+    }
+}
+
 // Migration from old option names
 if (!empty($options['font_color']))
     $options['button_font_color'] = $options['font_color'];
@@ -52,19 +60,19 @@ unset($options['width']);
 
 $options = array_merge($default_options, $options);
 
-if (!empty($options['schema'])) {
-    if ($options['schema'] === 'dark') {
-        $options['block_background'] = '#000000';
-        $options['button_font_color'] = '#ffffff';
-        $options['button_background'] = '#96969C';
-    }
-
-    if ($options['schema'] === 'bright') {
-        $options['block_background'] = '#ffffff';
-        $options['button_font_color'] = '#ffffff';
-        $options['button_background'] = '#256F9C';
-    }
-}
+//if (!empty($options['schema'])) {
+//    if ($options['schema'] === 'dark') {
+//        $options['block_background'] = '#000000';
+//        $options['button_font_color'] = '#ffffff';
+//        $options['button_background'] = '#96969C';
+//    }
+//
+//    if ($options['schema'] === 'bright') {
+//        $options['block_background'] = '#ffffff';
+//        $options['button_font_color'] = '#ffffff';
+//        $options['button_background'] = '#256F9C';
+//    }
+//}
 
 // Cloned since we need to set the general options
 $button_options = $options;
