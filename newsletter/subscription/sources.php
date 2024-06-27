@@ -94,6 +94,8 @@ if (class_exists('NewsletterExtensions')) {
                         </td>
                     </tr>
 
+                    <?php Integrations::source_rows(Integrations::get_elementor_sources(), $controls) ?>
+
                     <?php Integrations::source_rows(Integrations::get_cf7_sources(), $controls) ?>
 
                     <?php Integrations::source_rows(Integrations::get_gravityforms_sources(), $controls) ?>

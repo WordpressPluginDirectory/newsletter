@@ -1,4 +1,6 @@
 <?php
+// phpcs:disable WordPress.Security.NonceVerification.Recommended
+
 /* @var $this NewsletterStatisticsAdmin */
 /* @var $controls NewsletterControls */
 
@@ -6,7 +8,7 @@ defined('ABSPATH') || exit;
 
 wp_enqueue_script('tnp-chart');
 
-$email = $this->get_email($_GET['id']);
+$email = $this->get_email((int) $_GET['id'] ?? 0);
 
 if (empty($email)) {
     echo 'Newsletter not found';
@@ -17,7 +19,7 @@ $report = $this->get_statistics($email);
 
 if ($email->status == 'new') {
     $controls->warnings[] = __('Draft newsletter, no data available', 'newsletter');
-} else if ($email->status == 'sending') {
+} elseif ('sending' === $email->status) {
     $controls->warnings[] = __('Newsletter still sending', 'newsletter');
 }
 
@@ -50,7 +52,7 @@ if (empty($email->track)) {
             <div class="tnp-card">
                 <div class="tnp-card-title"><?php esc_html_e('Reach', 'newsletter'); ?></div>
                 <div class="tnp-card-value">
-                    <span><?php echo $report->total ?></span>
+                    <span><?php echo (int)$report->total; ?></span>
                     <div class="tnp-card-description"><?php esc_html_e('Total people that got your email', 'newsletter'); ?></div>
                 </div>
             </div>
@@ -80,10 +82,10 @@ if (empty($email->track)) {
             <div class="tnp-card">
                 <div class="tnp-card-title"><?php esc_html_e('Reactivity', 'newsletter'); ?></div>
                 <div class="tnp-card-value">
-                    <span class="tnp-counter-animationx percentage"><?php echo $report->reactivity ?></span>%
+                    <span class="tnp-counter-animationx percentage"><?php echo (int) $report->reactivity; ?></span>%
                     <div class="tnp-card-description">
-                        <span class="value"><?php echo (int) $report->click_count ?></span> <?php esc_html_e('clicks out of', 'newsletter'); ?>
-                        <span class="value"><?php echo (int) $report->open_count ?></span> <?php esc_html_e('opens', 'newsletter'); ?>
+                        <span class="value"><?php echo (int) $report->click_count; ?></span> <?php esc_html_e('clicks out of', 'newsletter'); ?>
+                        <span class="value"><?php echo (int) $report->open_count; ?></span> <?php esc_html_e('opens', 'newsletter'); ?>
                     </div>
                 </div>
             </div>
@@ -139,7 +141,7 @@ if (empty($email->track)) {
             ],
             datasets: [
                 {
-                    data: [<?php echo $report->total - $report->open_count; ?>, <?php echo (int)$report->open_count ?>],
+                    data: [<?php echo (int) ($report->total - $report->open_count); ?>, <?php echo (int) $report->open_count ?>],
                     backgroundColor: [
                         "#49a0e9",
                         "#27AE60",
@@ -165,7 +167,7 @@ if (empty($email->track)) {
             ],
             datasets: [
                 {
-                    data: [<?php echo $report->open_count - $report->click_count; ?>, <?php echo $report->click_count ?>],
+                    data: [<?php echo (int) ($report->open_count - $report->click_count); ?>, <?php echo (int) $report->click_count ?>],
                     backgroundColor: [
                         "#49a0e9",
                         "#27AE60",

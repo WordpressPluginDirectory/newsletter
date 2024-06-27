@@ -21,7 +21,7 @@ if ($controls->is_action('save')) {
         if ($user === false) {
             $controls->errors = __('This subscriber already exists.', 'newsletter');
         } else {
-            $controls->js_redirect('?page=newsletter_users_edit&id=' . $user->id);
+            $controls->js_redirect('?page=newsletter_users_edit&id=' . ((int) $user->id));
         }
     }
 }
@@ -46,7 +46,7 @@ if ($controls->is_action('save')) {
 
             <table class="form-table">
                 <tr>
-                    <th><?php esc_html_e('Email', 'newsletter')?></th>
+                    <th><?php esc_html_e('Email', 'newsletter') ?></th>
                     <td>
                         <?php $controls->text_email('email', 60); ?>
                         <?php $controls->button('save', '&raquo;'); ?>

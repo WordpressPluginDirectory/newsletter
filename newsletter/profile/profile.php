@@ -636,7 +636,6 @@ class NewsletterProfile extends NewsletterModule {
 
             foreach ($ids as $id) {
                 if (isset($posted['np' . $id])) {
-                    echo $posted['np' . $id], ' - ';
                     $profile = $this->get_profile($id);
                     if ($profile && $profile->is_public()) {
                         $data['profile_' . $id] = $this->sanitize_user_field($posted['np' . $id]);

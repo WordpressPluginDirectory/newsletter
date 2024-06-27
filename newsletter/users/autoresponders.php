@@ -4,7 +4,7 @@
 
 defined('ABSPATH') || exit;
 
-$user = $this->get_user((int) $_GET['id']);
+$user = $this->get_user((int) $_GET['id'] ?? -1);
 
 if (!$user) {
     echo 'Subscriber not found.';

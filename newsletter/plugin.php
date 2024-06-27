@@ -4,7 +4,7 @@
   Plugin Name: Newsletter
   Plugin URI: https://www.thenewsletterplugin.com
   Description: Newsletter is a cool plugin to create your own subscriber list, to send newsletters, to build your business. <strong>Before update give a look to <a href="https://www.thenewsletterplugin.com/category/release">this page</a> to know what's changed.</strong>
-  Version: 8.4.1
+  Version: 8.4.2
   Author: Stefano Lissa & The Newsletter Team
   Author URI: https://www.thenewsletterplugin.com
   Disclaimer: Use at your own risk. No warranty expressed or implied is provided.
@@ -30,7 +30,7 @@
 
  */
 
-define('NEWSLETTER_VERSION', '8.4.1');
+define('NEWSLETTER_VERSION', '8.4.2');
 
 global $wpdb, $newsletter;
 
@@ -137,11 +137,13 @@ class Newsletter extends NewsletterModule {
     function __construct() {
 
         // Grab it before a plugin decides to remove it.
-        if (isset($_GET['na'])) {
-            $this->action = sanitize_key($_GET['na']);
-        }
-        if (isset($_POST['na'])) {
-            $this->action = sanitize_key($_POST['na']);
+        if (!is_admin()) {
+            if (isset($_GET['na'])) {
+                $this->action = sanitize_key($_GET['na']);
+            }
+            if (isset($_POST['na'])) {
+                $this->action = sanitize_key($_POST['na']);
+            }
         }
 
         $this->time_start = time();
@@ -155,8 +157,8 @@ class Newsletter extends NewsletterModule {
 
         add_action('newsletter', [$this, 'hook_newsletter'], 1);
 
-        add_action('wp_ajax_tnp', [$this, 'action']);
-        add_action('wp_ajax_nopriv_tnp', [$this, 'action']);
+        add_action('wp_ajax_tnp', [$this, 'ajax_action']);
+        add_action('wp_ajax_nopriv_tnp', [$this, 'ajax_action']);
 
         if (is_admin()) {
             add_action('wp_ajax_newsletter-log', function () {
@@ -181,10 +183,14 @@ class Newsletter extends NewsletterModule {
     /**
      * Action request via AJAX.
      */
-    function action() {
+    function ajax_action() {
         if (isset($_REQUEST['na'])) {
             $this->action = sanitize_key($_REQUEST['na']);
+            $this->do_action();
+        } else {
+            die('No axction specified');
         }
+        die();
     }
 
     /**
@@ -266,6 +272,11 @@ class Newsletter extends NewsletterModule {
                 update_option('newsletter_version', NEWSLETTER_VERSION);
             }
         }
+
+        $this->do_action();
+    }
+
+    function do_action() {
 
         if (empty($this->action)) {
             return;

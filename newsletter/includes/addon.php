@@ -55,9 +55,11 @@ class NewsletterAddon {
         if (is_admin()) {
             if ($this->is_allowed()) {
                 add_action('admin_menu', [$this, 'admin_menu'], $this->menu_priority);
+
                 if (method_exists($this, 'settings_menu')) {
                     add_filter('newsletter_menu_settings', [$this, 'settings_menu']);
                 }
+                
                 if (method_exists($this, 'subscribers_menu')) {
                     add_filter('newsletter_menu_subscribers', [$this, 'subscribers_menu']);
                 }
@@ -75,7 +77,7 @@ class NewsletterAddon {
         $logger->info($this->name . ' deactivated');
 
         // The periodic check
-        wp_clear_scheduled_hook('newsletter_addon_' . $this->name);
+        wp_unschedule_hook('newsletter_addon_' . $this->name);
     }
 
     function admin_menu() {

@@ -71,7 +71,6 @@ if (!$controls->is_action()) {
 
         </form>
 
-
     </div>
 
     <?php include NEWSLETTER_ADMIN_FOOTER; ?>

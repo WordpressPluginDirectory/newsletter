@@ -109,36 +109,15 @@ class NewsletterUnsubscription extends NewsletterModule {
         }
 
         if (isset($_SERVER['HTTP_USER_AGENT'])) {
-            $agent = strtolower($_SERVER['HTTP_USER_AGENT']);
-//            if (strpos($agent, 'yahoomailproxy') !== false) {
-//                return;
-//            }
-            if (strpos($agent, 'googlebot') !== false) {
-                die();
-            }
-            if (strpos($agent, 'yandexbot') !== false) {
-                die();
-            }
-            if (strpos($agent, 'bingbot') !== false) {
-                die();
-            }
-            if (strpos($agent, 'bingpreview') !== false) {
-                die();
-            }
-            if (strpos($agent, 'microsoftpreview') !== false) {
-                die();
-            }
-            if (strpos($agent, 'bytespider') !== false) {
-                die();
-            }
-            if (strpos($agent, 'headlesschrome') !== false) {
-                die();
+            $agent = strtolower(wp_unslash($_SERVER['HTTP_USER_AGENT']));
+            $bots = ['googlebot', 'yandexbot', 'bingbot', 'bingpreview', 'microsoftpreview', 'bytespider', 'headlesschrome'];
+            foreach ($bots as $bot) {
+                if (strpos($agent, $bot) !== false) {
+                    die();
+                }
             }
         }
 
-        //if ($this->get_main_option('mode') == '1' && $action === 'u') {
-        //    $action = 'uc';
-        //}
         // Action conversion from old links from the email headers
         if (isset($_POST['List-Unsubscribe']) && 'One-Click' === $_POST['List-Unsubscribe']) {
             $action = 'ocu';
@@ -165,7 +144,7 @@ class NewsletterUnsubscription extends NewsletterModule {
                 break;
 
             case 'ocu': // One Click Unsubscribe rfc8058
-                if (isset($_POST['List-Unsubscribe']) && 'One-Click' === $_POST['List-Unsubscribe']) {
+                if ('One-Click' === wp_unslash($_POST['List-Unsubscribe'] ?? '')) {
                     $this->unsubscribe($user, $email, 'unsubscribe-rfc8058');
                     die('ok');
                 }
@@ -200,7 +179,7 @@ class NewsletterUnsubscription extends NewsletterModule {
         do_action('newsletter_user_unsubscribed', $user);
 
         if ($email) {
-            $wpdb->update(NEWSLETTER_USERS_TABLE, array('unsub_email_id' => (int) $email->id, 'unsub_time' => time()), array('id' => $user->id));
+            $wpdb->update(NEWSLETTER_USERS_TABLE, ['unsub_email_id' => (int) $email->id, 'unsub_time' => time()], ['id' => (int) $user->id]);
         }
 
         $this->send_unsubscribed_email($user);

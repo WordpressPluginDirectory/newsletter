@@ -13,7 +13,7 @@ class NewsletterWidget extends WP_Widget {
     static function get_widget_form($instance) {
 
         if (!isset($instance['nl']) || !is_array($instance['nl'])) {
-            $instance['nl'] = array();
+            $instance['nl'] = [];
         }
 
         $instance = array_merge(array('lists_layout' => '',
@@ -48,7 +48,7 @@ class NewsletterWidget extends WP_Widget {
 
         // Filters are used for WPML
         if (!empty($instance['title'])) {
-            echo $args['before_title'] . apply_filters('widget_title', $instance['title'], $instance, $this->id_base) . $args['after_title'];
+            echo $args['before_title'] . esc_html(apply_filters('widget_title', $instance['title'], $instance, $this->id_base)) . $args['after_title'];
         }
 
         $buffer = apply_filters('widget_text', $instance['text'], $instance);
@@ -91,50 +91,50 @@ class NewsletterWidget extends WP_Widget {
         $instance = array_merge(array('title' => '', 'text' => '', 'lists_layout' => '', 'lists_empty_label' => '', 'lists_field_label' => ''), $instance);
         $options_profile = get_option('newsletter_profile');
         if (!isset($instance['nl']) || !is_array($instance['nl']))
-            $instance['nl'] = array();
+            $instance['nl'] = [];
         ?>
         <p>
-            <label for="<?php echo $this->get_field_id('title'); ?>">
-                <?php _e('Title') ?>:
-                <input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo esc_attr($instance['title']); ?>" />
+            <label for="<?php echo esc_attr($this->get_field_id('title')); ?>">
+                <?php esc_html_e('Title') ?>:
+                <input class="widefat" id="<?php echo esc_attr($this->get_field_id('title')); ?>" name="<?php echo esc_attr($this->get_field_name('title')); ?>" type="text" value="<?php echo esc_attr($instance['title']); ?>" />
             </label>
             <br>
-            <label for="<?php echo $this->get_field_id('text'); ?>">
+            <label for="<?php echo esc_attr($this->get_field_id('text')); ?>">
                 Introduction:
-                <textarea class="widefat" rows="10" cols="20" id="<?php echo $this->get_field_id('text'); ?>" name="<?php echo $this->get_field_name('text'); ?>"><?php echo esc_html($instance['text']); ?></textarea>
+                <textarea class="widefat" rows="10" cols="20" id="<?php echo esc_attr($this->get_field_id('text')); ?>" name="<?php echo esc_attr($this->get_field_name('text')); ?>"><?php echo esc_html($instance['text']); ?></textarea>
             </label>
             <br>
-            <label for="<?php echo $this->get_field_id('hide_labels'); ?>">
-                <input type="checkbox" id="<?php echo $this->get_field_id('hide_labels'); ?>" value="1" name="<?php echo $this->get_field_name('hide_labels') ?>" <?php echo isset($instance['hide_labels']) ? 'checked' : '' ?>> Hide the field labels
+            <label for="<?php echo esc_attr($this->get_field_id('hide_labels')); ?>">
+                <input type="checkbox" id="<?php echo esc_attr($this->get_field_id('hide_labels')); ?>" value="1" name="<?php echo esc_attr($this->get_field_name('hide_labels')); ?>" <?php echo isset($instance['hide_labels']) ? 'checked' : '' ?>> Hide the field labels
             </label>
             <br>
             <label>
                 Show lists as:
-                <select name="<?php echo $this->get_field_name('lists_layout'); ?>" id="<?php echo $this->get_field_id('lists_layout'); ?>" style="width: 100%">
+                <select name="<?php echo esc_attr($this->get_field_name('lists_layout')); ?>" id="<?php echo esc_attr($this->get_field_id('lists_layout')); ?>" style="width: 100%">
                     <option value="">Checkboxes</option>
                     <option value="dropdown" <?php echo $instance['lists_layout'] == 'dropdown' ? 'selected' : '' ?>>Dropdown</option>
                 </select>
             </label>
             <br>
-            <label for="<?php echo $this->get_field_id('lists_empty_label'); ?>">
+            <label for="<?php echo esc_attr($this->get_field_id('lists_empty_label')); ?>">
                 First dropdown entry label:
-                <input class="widefat" id="<?php echo $this->get_field_id('lists_empty_label'); ?>" name="<?php echo $this->get_field_name('lists_empty_label'); ?>" type="text" value="<?php echo esc_attr($instance['lists_empty_label']); ?>" />
+                <input class="widefat" id="<?php echo esc_attr($this->get_field_id('lists_empty_label')); ?>" name="<?php echo esc_attr($this->get_field_name('lists_empty_label')); ?>" type="text" value="<?php echo esc_attr($instance['lists_empty_label']); ?>" />
             </label>
             <br>
-            <label for="<?php echo $this->get_field_id('lists_field_label'); ?>">
+            <label for="<?php echo esc_attr($this->get_field_id('lists_field_label')); ?>">
                 Lists field label:
-                <input class="widefat" id="<?php echo $this->get_field_id('lists_field_label'); ?>" name="<?php echo $this->get_field_name('lists_field_label'); ?>" type="text" value="<?php echo esc_attr($instance['lists_field_label']); ?>" />
+                <input class="widefat" id="<?php echo esc_attr($this->get_field_id('lists_field_label')); ?>" name="<?php echo esc_attr($this->get_field_name('lists_field_label')); ?>" type="text" value="<?php echo esc_attr($instance['lists_field_label']); ?>" />
             </label>
 
             <br><br>
-            <?php _e('Automatically subscribe to', 'newsletter') ?>
+            <?php esc_html_e('Automatically subscribe to', 'newsletter') ?>
             <br>
             <?php
             $lists = Newsletter::instance()->get_lists_public();
             foreach ($lists as $list) {
                 ?>
-                <label for="nl<?php echo $list->id ?>">
-                    <input type="checkbox" value="<?php echo $list->id ?>" name="<?php echo $this->get_field_name('nl[]') ?>" <?php echo array_search($list->id, $instance['nl']) !== false ? 'checked' : '' ?>> <?php echo esc_html($list->name) ?>
+                <label for="nl<?php echo (int) $list->id ?>">
+                    <input type="checkbox" value="<?php echo (int) $list->id ?>" name="<?php echo esc_attr($this->get_field_name('nl[]')); ?>" <?php echo array_search($list->id, $instance['nl']) !== false ? 'checked' : '' ?>> <?php echo esc_html($list->name) ?>
                 </label>
                 <br>
             <?php } ?>

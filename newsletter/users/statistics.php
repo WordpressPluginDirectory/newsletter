@@ -145,11 +145,11 @@ $referres = $wpdb->get_results("select referrer, count(*) as total, SUM(if(statu
                             <th>&nbsp;</th>
                             <th><?php esc_html_e('List', 'newsletter') ?></th>
                             <th style="text-align: right"><?php esc_html_e('Total', 'newsletter') ?></th>
-                            <th style="text-align: right"><?php echo $this->get_user_status_label('C', true) ?></th>
-                            <th style="text-align: right"><?php echo $this->get_user_status_label('S', true) ?></th>
-                            <th style="text-align: right"><?php echo $this->get_user_status_label('U', true) ?></th>
-                            <th style="text-align: right"><?php echo $this->get_user_status_label('B', true) ?></th>
-                            <th style="text-align: right"><?php echo $this->get_user_status_label('P', true) ?></th>
+                            <th style="text-align: right"><?php $this->echo_user_status_label('C') ?></th>
+                            <th style="text-align: right"><?php $this->echo_user_status_label('S') ?></th>
+                            <th style="text-align: right"><?php $this->echo_user_status_label('U') ?></th>
+                            <th style="text-align: right"><?php $this->echo_user_status_label('B') ?></th>
+                            <th style="text-align: right"><?php $this->echo_user_status_label('P') ?></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -249,11 +249,11 @@ $referres = $wpdb->get_results("select referrer, count(*) as total, SUM(if(statu
                         <tr>
                             <th><?php esc_html_e('Referrer', 'newsletter') ?></th>
                             <th style="text-align: right"><?php esc_html_e('Total', 'newsletter') ?></th>
-                            <th style="text-align: right"><?php echo $this->get_user_status_label('C', true) ?></th>
-                            <th style="text-align: right"><?php echo $this->get_user_status_label('S', true) ?></th>
-                            <th style="text-align: right"><?php echo $this->get_user_status_label('U', true) ?></th>
-                            <th style="text-align: right"><?php echo $this->get_user_status_label('B', true) ?></th>
-                            <th style="text-align: right"><?php echo $this->get_user_status_label('P', true) ?></th>
+                            <th style="text-align: right"><?php $this->echo_user_status_label('C') ?></th>
+                            <th style="text-align: right"><?php $this->echo_user_status_label('S') ?></th>
+                            <th style="text-align: right"><?php $this->echo_user_status_label('U') ?></th>
+                            <th style="text-align: right"><?php $this->echo_user_status_label('B') ?></th>
+                            <th style="text-align: right"><?php $this->echo_user_status_label('P') ?></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -284,17 +284,17 @@ $referres = $wpdb->get_results("select referrer, count(*) as total, SUM(if(statu
                         <tr>
                             <th>URL</th>
                             <th style="text-align: right"><?php esc_html_e('Total', 'newsletter') ?></th>
-                            <th style="text-align: right"><?php echo $this->get_user_status_label('C', true) ?></th>
-                            <th style="text-align: right"><?php echo $this->get_user_status_label('S', true) ?></th>
-                            <th style="text-align: right"><?php echo $this->get_user_status_label('U', true) ?></th>
-                            <th style="text-align: right"><?php echo $this->get_user_status_label('B', true) ?></th>
-                            <th style="text-align: right"><?php echo $this->get_user_status_label('P', true) ?></th>
+                            <th style="text-align: right"><?php $this->echo_user_status_label('C') ?></th>
+                            <th style="text-align: right"><?php $this->echo_user_status_label('S') ?></th>
+                            <th style="text-align: right"><?php $this->echo_user_status_label('U') ?></th>
+                            <th style="text-align: right"><?php $this->echo_user_status_label('B') ?></th>
+                            <th style="text-align: right"><?php $this->echo_user_status_label('P') ?></th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($list as $row) { ?>
                             <tr>
-                                <td><?php echo empty($row->http_referer) ? '[not set]' : $controls->print_truncated($row->http_referer, 120) ?></td>
+                                <td><?php echo esc_html(empty($row->http_referer) ? '[not set]' : $controls->print_truncated($row->http_referer, 120)); ?></td>
                                 <td style="text-align: right"><?php echo (int)$row->total; ?></td>
                                 <td style="text-align: right"><?php echo (int)$row->confirmed; ?></td>
                                 <td style="text-align: right"><?php echo (int)$row->unconfirmed; ?></td>
@@ -322,11 +322,11 @@ $referres = $wpdb->get_results("select referrer, count(*) as total, SUM(if(statu
                     <thead>
                         <tr>
                             <th><?php esc_html_e('Gender', 'newsletter') ?></th>
-                            <th style="text-align: right"><?php echo $this->get_user_status_label('C', true) ?></th>
-                            <th style="text-align: right"><?php echo $this->get_user_status_label('S', true) ?></th>
-                            <th style="text-align: right"><?php echo $this->get_user_status_label('U', true) ?></th>
-                            <th style="text-align: right"><?php echo $this->get_user_status_label('B', true) ?></th>
-                            <th style="text-align: right"><?php echo $this->get_user_status_label('P', true) ?></th>
+                            <th style="text-align: right"><?php $this->echo_user_status_label('C') ?></th>
+                            <th style="text-align: right"><?php $this->echo_user_status_label('S') ?></th>
+                            <th style="text-align: right"><?php $this->echo_user_status_label('U') ?></th>
+                            <th style="text-align: right"><?php $this->echo_user_status_label('B') ?></th>
+                            <th style="text-align: right"><?php $this->echo_user_status_label('P') ?></th>
                         </tr>
                     </thead>
                     <tbody>

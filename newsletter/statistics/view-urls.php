@@ -3,44 +3,44 @@
 /* @var $controls NewsletterControls */
 
 defined('ABSPATH') || exit;
-$email = $this->get_email($_GET['id']);
+$email = $this->get_email((int) $_GET['id'] ?? 0);
 if (empty($email)) {
     echo 'Newsletter not found';
     return;
 }
-$urls = [];
+$items = [];
 
-$s = new stdClass();
-$s->url = 'https://www.example.org/page-1';
-$s->number = 130;
+$item = new stdClass();
+$item->url = 'https://www.example.org/page-1';
+$item->number = 130;
 
-$urls[] = $s;
+$items[] = $item;
 
-$s = new stdClass();
-$s->url = 'https://www.example.org/page-2';
-$s->number = 40;
+$item = new stdClass();
+$item->url = 'https://www.example.org/page-2';
+$item->number = 40;
 
-$urls[] = $s;
+$items[] = $item;
 
-$s = new stdClass();
-$s->url = 'https://www.example.org/page-3';
-$s->number = 20;
+$item = new stdClass();
+$item->url = 'https://www.example.org/page-3';
+$item->number = 20;
 
-$urls[] = $s;
+$items[] = $item;
 
-$s = new stdClass();
-$s->url = 'https://www.example.org/page-4';
-$s->number = 1;
+$item = new stdClass();
+$item->url = 'https://www.example.org/page-4';
+$item->number = 1;
 
-$urls[] = $s;
+$items[] = $item;
 
-$s = new stdClass();
-$s->url = 'https://www.example.org/page-5';
-$s->number = 0;
+$item = new stdClass();
+$item->url = 'https://www.example.org/page-5';
+$item->number = 0;
 
-$urls[] = $s;
+$items[] = $item;
 
-$total = array_reduce($urls, function ($carry, $item) {
+$total = array_reduce($items, function ($carry, $item) {
     $carry += $item->number;
     return $carry;
 });
@@ -76,21 +76,21 @@ $total = array_reduce($urls, function ($carry, $item) {
             </thead>
             <tbody>
 
-                <?php for ($i = 0; $i < count($urls); $i++) : ?>
+                <?php for ($i = 0; $i < count($items); $i++) : ?>
                     <tr>
                         <td>
-                            <a href="<?php echo esc_attr($urls[$i]->url) ?>" target="_blank">
-                                <?php echo esc_html($urls[$i]->url) ?>
+                            <a href="<?php echo esc_attr($items[$i]->url); ?>" target="_blank">
+                                <?php echo esc_html($items[$i]->url); ?>
                             </a>
                         </td>
-                        <td><?php echo $urls[$i]->number ?></td>
+                        <td><?php echo esc_html($items[$i]->number); ?></td>
                         <td>
-                            <?php echo NewsletterModule::percent($urls[$i]->number, $total); ?>
+                            <?php echo esc_html(NewsletterModule::percent($items[$i]->number, $total)); ?>
                         </td>
                         <td>
                             <form action="" method="post">
                                 <?php $controls->init() ?>
-                                <?php $controls->data['url'] = $urls[$i]->url; ?>
+                                <?php $controls->data['url'] = $items[$i]->url; ?>
                                 <?php $controls->hidden('url') ?>
                                 <?php $controls->lists_select() ?>
                                 <?php $controls->btn('set', 'Add to this list', ['secondary' => true]) ?>

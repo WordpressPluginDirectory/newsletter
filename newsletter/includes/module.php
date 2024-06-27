@@ -278,9 +278,9 @@ class NewsletterModule extends NewsletterModuleBase {
     function get_email_from_request() {
 
         if (isset($_REQUEST['nek'])) {
-            list($id, $token) = @explode('-', $_REQUEST['nek'], 2);
+            list($id, $token) = explode('-', wp_unslash($_REQUEST['nek']), 2);
         } else if (isset($_COOKIE['tnpe'])) {
-            list($id, $token) = @explode('-', $_COOKIE['tnpe'], 2);
+            list($id, $token) = explode('-', wp_unslash($_COOKIE['tnpe']), 2);
         } else {
             return null;
         }
@@ -306,20 +306,20 @@ class NewsletterModule extends NewsletterModuleBase {
         $user = null;
 
         if (isset($_REQUEST['nk'])) {
-            list($id, $token) = @explode('-', $_REQUEST['nk'], 2);
-        } else if (isset($_COOKIE['newsletter'])) {
-            list ($id, $token) = @explode('-', $_COOKIE['newsletter'], 2);
+            list($id, $token) = @explode('-', wp_unslash($_REQUEST['nk']), 2);
+        } elseif (isset($_COOKIE['newsletter'])) {
+            list($id, $token) = @explode('-', wp_unslash($_COOKIE['newsletter']), 2);
         }
 
         if (isset($id)) {
             $user = $this->get_user($id);
             if ($user) {
-                if ($context == 'preconfirm') {
-                    if ($token != md5($user->token)) {
+                if ($context === 'preconfirm') {
+                    if ($token !== md5($user->token)) {
                         $user = null;
                     }
                 } else {
-                    if ($token != $user->token) {
+                    if ($token !== $user->token) {
                         $user = null;
                     }
                 }
@@ -376,13 +376,13 @@ class NewsletterModule extends NewsletterModuleBase {
     function get_user_from_request($die_on_fail = false, $context = '') {
         $id = 0;
         if (isset($_REQUEST['nk'])) {
-            list($id, $token) = @explode('-', $_REQUEST['nk'], 2);
+            list($id, $token) = @explode('-', wp_unslash($_REQUEST['nk']), 2);
         }
         $user = $this->get_user($id);
 
         if ($user == null) {
             if ($die_on_fail) {
-                die(__('No subscriber found.', 'newsletter'));
+                die(esc_html__('No subscriber found.', 'newsletter'));
             } else {
                 return $this->get_user_from_logged_in_user();
             }
@@ -390,7 +390,7 @@ class NewsletterModule extends NewsletterModuleBase {
 
         if ($token != $user->token && $token != md5($user->token)) {
             if ($die_on_fail) {
-                die(__('No subscriber found.', 'newsletter'));
+                die(esc_html__('No subscriber found.', 'newsletter'));
             } else {
                 return $this->get_user_from_logged_in_user();
             }
@@ -411,8 +411,8 @@ class NewsletterModule extends NewsletterModuleBase {
             return false;
 
         if (isset($_REQUEST['nk'])) {
-            list($id, $token) = explode('-', $_REQUEST['nk'], 2);
-        } else if (isset($_COOKIE['newsletter'])) {
+            list($id, $token) = explode('-', wp_unslash($_REQUEST['nk']), 2);
+        } elseif (isset($_COOKIE['newsletter'])) {
             list ($id, $token) = explode('-', $_COOKIE['newsletter'], 2);
         } else {
             return false;
@@ -431,12 +431,12 @@ class NewsletterModule extends NewsletterModuleBase {
         $user = null;
 
         if (isset($_REQUEST['nk'])) {
-            list($id, $token) = explode('-', $_REQUEST['nk'], 2);
+            list($id, $token) = explode('-', wp_unslash($_REQUEST['nk']), 2);
             if (current_user_can('administrator') && $id === '0') {
                 $user = $this->get_dummy_user();
                 return $user;
             }
-        } else if (isset($_COOKIE['newsletter'])) {
+        } elseif (isset($_COOKIE['newsletter'])) {
             list ($id, $token) = explode('-', $_COOKIE['newsletter'], 2);
         }
 
@@ -1073,7 +1073,7 @@ class NewsletterModule extends NewsletterModuleBase {
             return true;
         }
 
-        if (strtolower($_SERVER['REQUEST_METHOD']) != 'post') {
+        if ('POST' !== $_SERVER['REQUEST_METHOD'] ?? '') {
             return false;
         }
 
@@ -1087,6 +1087,11 @@ class NewsletterModule extends NewsletterModuleBase {
         }
 
         if ($captcha) {
+
+            if (!isset($_POST['n1']) || !isset($_POST['n2']) || !isset($_POST['n3'])) {
+                return false;
+            }
+
             $n1 = (int) $_POST['n1'];
             if (empty($n1)) {
                 return false;
@@ -1132,15 +1137,17 @@ class NewsletterModule extends NewsletterModuleBase {
 
     /** Returns a percentage as string */
     static function percent($value, $total) {
-        if ($total == 0)
+        if ($total == 0) {
             return '-';
+        }
         return sprintf("%.2f", $value / $total * 100) . '%';
     }
 
     /** Returns a percentage as integer value */
     static function percentValue($value, $total) {
-        if ($total == 0)
+        if ($total == 0) {
             return 0;
+        }
         return round($value / $total * 100);
     }
 
@@ -1192,11 +1199,11 @@ class NewsletterModule extends NewsletterModuleBase {
     static function get_remote_ip() {
         $ip = '';
         if (!empty($_SERVER['HTTP_X_REAL_IP'])) {
-            $ip = $_SERVER['HTTP_X_REAL_IP'];
+            $ip = wp_unslash($_SERVER['HTTP_X_REAL_IP']);
         } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+            $ip = wp_unslash($_SERVER['HTTP_X_FORWARDED_FOR']);
         } elseif (isset($_SERVER['REMOTE_ADDR'])) {
-            $ip = $_SERVER['REMOTE_ADDR'];
+            $ip = wp_unslash($_SERVER['REMOTE_ADDR']);
         }
         return self::sanitize_ip($ip);
     }
@@ -1236,9 +1243,9 @@ class NewsletterModule extends NewsletterModuleBase {
     function get_default_language() {
         if (class_exists('SitePress')) {
             return $current_language = apply_filters('wpml_current_language', '');
-        } else if (function_exists('pll_default_language')) {
+        } elseif (function_exists('pll_default_language')) {
             return pll_default_language();
-        } else if (class_exists('TRP_Translate_Press')) {
+        } elseif (class_exists('TRP_Translate_Press')) {
 // TODO: Find the default language
         }
         return '';
@@ -1303,5 +1310,5 @@ function newsletter_the_excerpt($post, $words = 30) {
         $excerpt = strip_shortcodes($excerpt);
         $excerpt = wp_strip_all_tags($excerpt, true);
     }
-    echo '<p>' . wp_trim_words($excerpt, $words) . '</p>';
+    echo '<p>', esc_html(wp_trim_words($excerpt, $words)), '</p>';
 }

@@ -1,10 +1,6 @@
 <?php
 defined('ABSPATH') || exit;
 
-if (version_compare(phpversion(), '5.3', '<')) {
-    return;
-}
-
 class NewsletterWidgetMinimal extends WP_Widget {
 
     function __construct() {
@@ -26,7 +22,7 @@ class NewsletterWidgetMinimal extends WP_Widget {
         // Filters are used for WPML
         if (!empty($instance['title'])) {
             $title = apply_filters('widget_title', $instance['title'], $instance, $this->id_base);
-            echo $before_title . $title . $after_title;
+            echo $before_title . esc_html($title) . $after_title;
         }
 
         $options_profile = Newsletter::instance()->get_options('form');
@@ -72,27 +68,27 @@ class NewsletterWidgetMinimal extends WP_Widget {
         }
         ?>
         <p>
-            <label for="<?php echo $this->get_field_id('title'); ?>">
+            <label for="<?php echo esc_attr($this->get_field_id('title')); ?>">
                 Title:
-                <input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo esc_attr($instance['title']); ?>">
+                <input class="widefat" id="<?php echo esc_attr($this->get_field_id('title')); ?>" name="<?php echo esc_attr($this->get_field_name('title')); ?>" type="text" value="<?php echo esc_attr($instance['title']); ?>">
             </label>
 
-            <label for="<?php echo $this->get_field_id('button'); ?>">
+            <label for="<?php echo esc_attr($this->get_field_id('button')); ?>">
                 Button label:
-                <input class="widefat" id="<?php echo $this->get_field_id('button'); ?>" name="<?php echo $this->get_field_name('button'); ?>" type="text" value="<?php echo esc_attr($instance['button']); ?>">
+                <input class="widefat" id="<?php echo esc_attr($this->get_field_id('button')); ?>" name="<?php echo esc_attr($this->get_field_name('button')); ?>" type="text" value="<?php echo esc_attr($instance['button']); ?>">
                 Use a short one!
             </label>
         </p>
 
         <p>
-            <?php _e('Automatically subscribe to', 'newsletter') ?>
+            <?php esc_html_e('Automatically subscribe to', 'newsletter') ?>
             <br>
              <?php
             $lists = Newsletter::instance()->get_lists_public();
             foreach ($lists as $list) {
                 ?>
-                <label for="nl<?php echo $list->id ?>">
-                    <input type="checkbox" value="<?php echo $list->id ?>" name="<?php echo $this->get_field_name('nl[]') ?>" <?php echo array_search($list->id, $instance['nl']) !== false ? 'checked' : '' ?>> <?php echo esc_html($list->name) ?>
+                <label for="nl<?php echo (int) $list->id ?>">
+                    <input type="checkbox" value="<?php echo (int) $list->id ?>" name="<?php echo esc_attr($this->get_field_name('nl[]')) ?>" <?php echo array_search($list->id, $instance['nl']) !== false ? 'checked' : '' ?>> <?php echo esc_html($list->name) ?>
                 </label>
                 <br>
             <?php } ?>

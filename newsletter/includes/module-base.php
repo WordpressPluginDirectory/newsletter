@@ -861,7 +861,12 @@ class NewsletterModuleBase {
         if (NEWSLETTER_ACTION_TYPE === 'ajax') {
             return admin_url('admin-ajax.php') . '?action=tnp';
         } else {
-            return $this->get_home_url();
+            $type = Newsletter::instance()->get_main_option('links');
+            if (empty($type)) {
+                return $this->get_home_url();
+            } else {
+                return admin_url('admin-ajax.php') . '?action=tnp';
+            }
         }
     }
 

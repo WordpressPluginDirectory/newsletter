@@ -126,10 +126,10 @@ class TNP_Pagination_Controller {
             <?php $this->controls->btn('first', '«', ['tertiary' => true]); ?>
             <?php $this->controls->btn('prev', '‹', ['tertiary' => true]); ?>
             <?php $this->controls->text('search_page', 3); ?>
-            /<?php echo $this->last_page ?> <?php $this->controls->btn('go', esc_html__('Go', 'newsletter'), ['secondary' => true]); ?>
+            /<?php echo (int) $this->last_page ?> <?php $this->controls->btn('go', esc_html__('Go', 'newsletter'), ['secondary' => true]); ?>
             <?php $this->controls->btn('next', '›', ['tertiary' => true]); ?>
             <?php $this->controls->btn('last', '»', ['tertiary' => true]); ?>
-            <?php echo $this->get_total_items() ?> <?php esc_html_e('item(s) found', 'newsletter') ?>
+            <?php echo (int) $this->get_total_items() ?> <?php esc_html_e('item(s) found', 'newsletter') ?>
         </div>
 
         <?php

@@ -1,5 +1,5 @@
 <?php
-$p = $_GET['page'];
+$p = sanitize_key($_GET['page'] ?? '');
 ?>
 <ul class="tnp-nav">
     <li class="<?php echo $p === 'newsletter_users_index'?'active':''?>"><a href="?page=newsletter_users_index"><?php esc_html_e('Manage', 'newsletter')?></a></li>

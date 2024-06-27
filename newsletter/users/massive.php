@@ -114,7 +114,6 @@ if ($controls->is_action('change_status')) {
 
     $controls->messages = $count . ' subscribers updated';
 }
-
 ?>
 
 <div class="wrap tnp-users tnp-users-massive" id="tnp-wrap">
@@ -164,7 +163,7 @@ if ($controls->is_action('change_status')) {
                         <tr>
                             <td><?php esc_html_e('Total', 'newsletter') ?></td>
                             <td>
-                                <?php echo $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE); ?>
+                                <?php echo (int) $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE); ?>
                             </td>
                             <td nowrap>
                                 <?php $controls->button_confirm('remove_all', __('Delete all', 'newsletter'), __('Are you sure you want to remove ALL subscribers?', 'newsletter')); ?>
@@ -173,7 +172,7 @@ if ($controls->is_action('change_status')) {
                         <tr>
                             <td><?php esc_html_e('Confirmed', 'newsletter') ?></td>
                             <td>
-                                <?php echo $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE . " where status='C'"); ?>
+                                <?php echo (int) $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE . " where status='C'"); ?>
                             </td>
                             <td nowrap>
                                 <?php $controls->button_confirm('unconfirm_all', __('Unconfirm all', 'newsletter')); ?>
@@ -182,7 +181,7 @@ if ($controls->is_action('change_status')) {
                         <tr>
                             <td><?php esc_html_e('Not comfirmed', 'newsletter') ?></td>
                             <td>
-                                <?php echo $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE . " where status='S'"); ?>
+                                <?php echo (int) $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE . " where status='S'"); ?>
                             </td>
                             <td nowrap>
                                 <?php $controls->button_confirm('remove_unconfirmed', __('Delete all', 'newsletter')); ?>
@@ -192,7 +191,7 @@ if ($controls->is_action('change_status')) {
                         <tr>
                             <td><?php esc_html_e('Unsubscribed', 'newsletter') ?></td>
                             <td>
-                                <?php echo $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE . " where status='U'"); ?>
+                                <?php echo (int) $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE . " where status='U'"); ?>
                             </td>
                             <td>
                                 <?php $controls->button_confirm('remove_unsubscribed', __('Delete all', 'newsletter')); ?>
@@ -202,7 +201,7 @@ if ($controls->is_action('change_status')) {
                         <tr>
                             <td><?php esc_html_e('Bounced', 'newsletter') ?></td>
                             <td>
-                                <?php echo $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE . " where status='B'"); ?>
+                                <?php echo (int) $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE . " where status='B'"); ?>
                             </td>
                             <td>
                                 <?php $controls->button_confirm('remove_bounced', __('Delete all', 'newsletter')); ?>
@@ -212,7 +211,7 @@ if ($controls->is_action('change_status')) {
                         <tr>
                             <td><?php esc_html_e('Complained', 'newsletter') ?></td>
                             <td>
-                                <?php echo $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE . " where status='P'"); ?>
+                                <?php echo (int) $wpdb->get_var("select count(*) from " . NEWSLETTER_USERS_TABLE . " where status='P'"); ?>
                             </td>
                             <td>
                                 <?php $controls->button_confirm('remove_complained', __('Delete all', 'newsletter')); ?>
@@ -268,7 +267,7 @@ if ($controls->is_action('change_status')) {
                                 <td>Language</td>
                                 <td>
                                     <?php esc_html_e('Set to', 'newsletter') ?>
-                                    <?php $controls->language('language', false) ?> <?php _e('subscribers without a language', 'newsletter') ?>
+                                    <?php $controls->language('language', false) ?> <?php esc_html_e('subscribers without a language', 'newsletter') ?>
                                 </td>
                                 <td>
                                     <?php $controls->btn('language', '&raquo;', ['confirm' => true]); ?>

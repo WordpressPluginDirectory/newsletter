@@ -8,17 +8,7 @@ header('Cache-Control: no-cache,no-store,private');
 <html>
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <script>
-            addEventListener("DOMContentLoaded", (event) => {
-                let e = new Date();
-                e.setTime(e.getTime() + 300 * 1000);
-                document.cookie = "tnpab=1; expires=" + e.toGMTString() + "; path=/";
-                let f = document.getElementById("form");
-                f.action = location.pathname;
-                f.method = 'POST';
-                f.submit();
-            });
-        </script>
+
     </head>
     <body>
         <form method="get" action="" id="form">
@@ -43,5 +33,17 @@ header('Cache-Control: no-cache,no-store,private');
             echo '<input type="hidden" name="ts" value="' . time() . '">';
             ?>
         </form>
+
+        <script>
+            window.setTimeout(() => {
+                let e = new Date();
+                e.setTime(e.getTime() + 300 * 1000);
+                document.cookie = "tnpab=1; expires=" + e.toGMTString() + "; path=/";
+                let f = document.getElementById("form");
+                f.action = location.pathname;
+                f.method = 'POST';
+                f.submit();
+            }, 500);
+        </script>
     </body>
 </html>

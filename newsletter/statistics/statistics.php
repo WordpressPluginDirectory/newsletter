@@ -17,6 +17,7 @@ class NewsletterStatistics extends NewsletterModule {
     var $relink_user_id;
     var $relink_email_token;
     var $relink_key = '';
+    var $relink_url = '';
 
     /**
      * @return NewsletterStatistics
@@ -182,6 +183,7 @@ class NewsletterStatistics extends NewsletterModule {
         $this->relink_email_id = $email_id;
         $this->relink_user_id = $user_id;
         $this->relink_email_token = $email_token;
+
         if (empty($this->relink_key)) {
             if (defined('NEWSLETTER_RELINK_KEY')) {
                 $this->relink_key = NEWSLETTER_RELINK_KEY;
@@ -189,19 +191,26 @@ class NewsletterStatistics extends NewsletterModule {
                 $this->relink_key = $this->get_main_option('key');
             }
         }
-        $text = preg_replace_callback('/(<[aA][^>]+href[\s]*=[\s]*["\'])([^>"\']+)(["\'][^>]*>)(.*?)(<\/[Aa]>)/is', array($this, 'relink_callback'), $text);
 
-        $signature = md5($email_id . $user_id . $email_token);
+        $url_type = Newsletter::instance()->get_main_option('links');
 
-        switch (NEWSLETTER_TRACKING_TYPE) {
-            case 'ajax':
-                $url = admin_url('admin-ajax.php?action=tnptr&noti=') . urlencode(base64_encode($email_id . ';' . $user_id . ';' . $signature));
-                break;
-            default:
-                $url = home_url('/') . '?noti=' . urlencode(base64_encode($email_id . ';' . $user_id . ';' . $signature));
+        if (NEWSLETTER_TRACKING_TYPE === 'ajax' || $url_type === 'ajax') {
+            $this->relink_url = admin_url('admin-ajax.php?action=tnptr&nltr=');
+        } else {
+            $this->relink_url = home_url('/') . '?nltr=';
         }
 
-        $text = str_replace('</body>', '<img width="1" height="1" alt="" src="' . $url . '"/></body>', $text);
+        $text = preg_replace_callback('/(<[aA][^>]+href[\s]*=[\s]*["\'])([^>"\']+)(["\'][^>]*>)(.*?)(<\/[Aa]>)/is', [$this, 'relink_callback'], $text);
+
+        // Open tracking image
+        $signature = md5($email_id . $user_id . $email_token);
+        if (NEWSLETTER_TRACKING_TYPE === 'ajax' || $url_type === 'ajax') {
+            $url = admin_url('admin-ajax.php?action=tnptr&noti=') . rawurlencode(base64_encode($email_id . ';' . $user_id . ';' . $signature));
+        } else {
+            $url = home_url('/') . '?noti=' . rawurlencode(base64_encode($email_id . ';' . $user_id . ';' . $signature));
+        }
+
+        $text = str_replace('</body>', '<img width="1" height="1" alt="" src="' . esc_attr($url) . '"/></body>', $text);
         return $text;
     }
 
@@ -215,11 +224,11 @@ class NewsletterStatistics extends NewsletterModule {
         }
 
         // Do not relink anchors
-        if (substr($href, 0, 1) == '#') {
+        if (substr($href, 0, 1) === '#') {
             return $matches[0];
         }
         // Do not relink mailto:
-        if (substr($href, 0, 7) == 'mailto:') {
+        if (substr($href, 0, 7) === 'mailto:') {
             return $matches[0];
         }
 
@@ -228,14 +237,9 @@ class NewsletterStatistics extends NewsletterModule {
         $r = $this->relink_email_id . ';' . $this->relink_user_id . ';' . $href . ';' . $anchor;
         $r = $r . ';' . md5($r . $this->relink_key);
         $r = base64_encode($r);
-        $r = urlencode($r);
-        switch (NEWSLETTER_TRACKING_TYPE) {
-            case 'ajax':
-                $url = admin_url('admin-ajax.php?action=tnptr&nltr=') . $r;
-                break;
-            default:
-                $url = home_url('/') . '?nltr=' . $r;
-        }
+        $r = rawurlencode($r);
+
+        $url = $this->relink_url . $r;
 
         return $matches[1] . $url . $matches[3] . $matches[4] . $matches[5];
     }

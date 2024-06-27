@@ -106,10 +106,29 @@ class Integrations {
         foreach ($forms as $form) {
             $source = new Source($form->post_title, 'Contact Form 7', 'cf7');
             if (class_exists('NewsletterCF7')) {
-                $source->config_url = '?page=newsletter_cf7_edit&id=' . urlencode($form->ID);
+                $source->config_url = '?page=newsletter_cf7_edit&id=' . rawurlencode($form->ID);
             }
             $sources[] = $source;
         }
+        return $sources;
+    }
+
+    static function is_elementor_active() {
+        return defined('ELEMENTOR_PRO_VERSION');
+    }
+
+    static function get_elementor_sources() {
+        if (!self::is_elementor_active()) {
+            return [];
+        }
+
+        $sources = [];
+
+        $source = new Source('Elementor', 'Elementor', 'elementor');
+        $source->config_url = '?page=newsletter_nlelementr_index';
+
+        $sources[] = $source;
+
         return $sources;
     }
 
@@ -128,7 +147,7 @@ class Integrations {
         foreach ($forms as $form) {
             $source = new Source($form['title'], 'Gravity Forms', 'gravityforms');
             if (class_exists('NewsletterGravityForms')) {
-                $source->config_url = '?page=newsletter_gravityforms_edit&id=' . urlencode($form['id']);
+                $source->config_url = '?page=newsletter_gravityforms_edit&id=' . rawurlencode($form['id']);
             }
             $sources[] = $source;
         }
@@ -149,7 +168,7 @@ class Integrations {
         foreach ($forms as $form) {
             $source = new Source($form->post_title, 'WP Forms', 'wpforms');
             if (class_exists('NewsletterWpForms')) {
-                $source->config_url = '?page=newsletter_wpnlforms_edit&id=' . urlencode($form->ID);
+                $source->config_url = '?page=newsletter_wpnlforms_edit&id=' . rawurlencode($form->ID);
             }
             $sources[] = $source;
         }
@@ -170,7 +189,7 @@ class Integrations {
         foreach ($forms as $form) {
             $source = new Source($form->name, 'Forminator', 'forminator');
             if (class_exists('NewsletterForminator')) {
-                $source->config_url = '?page=newsletter_forminator_edit&id=' . urlencode($form->id);
+                $source->config_url = '?page=newsletter_forminator_edit&id=' . rawurlencode($form->id);
             }
             $sources[] = $source;
         }
@@ -191,7 +210,7 @@ class Integrations {
         foreach ($forms as $form) {
             $source = new Source($form->name, 'Formidable Forms', 'formidable');
             if (class_exists('NewsletterFormidable')) {
-                $source->config_url = '?page=newsletter_forminator_edit&id=' . urlencode($form->id);
+                $source->config_url = '?page=newsletter_forminator_edit&id=' . rawurlencode($form->id);
             }
             $sources[] = $source;
         }
@@ -212,7 +231,7 @@ class Integrations {
         foreach ($forms as $form) {
             $source = new Source($form->get_setting('title'), 'Ninja Forms', 'ninjaforms');
             if (class_exists('NewsletterNinjaForms')) {
-                $source->config_url = '?page=newsletter_forminator_edit&id=' . urlencode($form->get_id());
+                $source->config_url = '?page=newsletter_forminator_edit&id=' . rawurlencode($form->get_id());
             }
             $sources[] = $source;
         }
@@ -243,7 +262,7 @@ class Integrations {
         foreach ($forms as $form) {
             $source = new Source($form->title, 'Fluent Forms', 'fluentforms');
             if (class_exists('NewsletterFluentForms')) {
-                $source->config_url = '?page=newsletter_fluentforms_edit&id=' . urlencode($form->id);
+                $source->config_url = '?page=newsletter_fluentforms_edit&id=' . rawurlencode($form->id);
             }
             $sources[] = $source;
         }

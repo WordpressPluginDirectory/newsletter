@@ -4,8 +4,7 @@
 
 defined('ABSPATH') || exit;
 
-$id = (int) $_GET['id'];
-$user = $this->get_user($id);
+$user = $this->get_user((int) $_GET['id'] ?? -1);
 
 if (!$user) {
     echo 'Subscriber not found.';
@@ -41,7 +40,7 @@ if (!$user) {
 
                 <div id="tabs-history" class="tnp-tab">
                     <?php
-                    $logs = $wpdb->get_results($wpdb->prepare("select * from {$wpdb->prefix}newsletter_user_logs where user_id=%d order by id desc", $id));
+                    $logs = $wpdb->get_results($wpdb->prepare("select * from {$wpdb->prefix}newsletter_user_logs where user_id=%d order by id desc", $user->id));
                     ?>
                     <?php if (empty($logs)) { ?>
                         <p>No logs available</p>
@@ -66,7 +65,7 @@ if (!$user) {
                                     ?>
                                     <tr>
                                         <td><?php echo esc_html($log->id) ?></td>
-                                        <td><?php echo $controls->print_date($log->created) ?></td>
+                                        <td><?php $controls->echo_date($log->created) ?></td>
                                         <td><?php echo esc_html($log->source) ?></td>
                                         <td><?php echo esc_html($log->ip) ?></td>
                                         <td>

@@ -38,7 +38,8 @@ if ($controls->is_action('delete')) {
 }
 
 if ($controls->is_action('delete_selected')) {
-    $r = Newsletter::instance()->delete_user($_POST['ids']);
+    $ids = wp_parse_id_list(wp_unslash($_POST['ids'] ?? []));
+    $r = Newsletter::instance()->delete_user($ids);
     $controls->messages .= $r . ' user(s) deleted';
 }
 
@@ -55,7 +56,7 @@ if ($text) {
 }
 
 if (!empty($controls->data['search_status'])) {
-    if ($controls->data['search_status'] == 'T') {
+    if ('T' === $controls->data['search_status']) {
         $where .= " and test=1";
     } else {
         $query_args[] = $controls->data['search_status'];
@@ -156,11 +157,11 @@ $utc = new DateTimeZone('UTC');
 
                 <?php $controls->btn('first', '«', ['tertiary' => true]); ?>
                 <?php $controls->btn('prev', '‹', ['tertiary' => true]); ?>
-                <?php $controls->text('search_page', 3); ?> of <?php echo $last_page + 1 ?> <?php $controls->btn('go', __('Go', 'newsletter'), ['secondary' => true]); ?>
+                <?php $controls->text('search_page', 3); ?> of <?php echo (int)($last_page + 1) ?> <?php $controls->btn('go', __('Go', 'newsletter'), ['secondary' => true]); ?>
                 <?php $controls->btn('next', '›', ['tertiary' => true]); ?>
                 <?php $controls->btn('last', '»', ['tertiary' => true]); ?>
 
-                <?php echo $count ?> <?php esc_html_e('subscriber(s) found', 'newsletter') ?>
+                <?php echo (int) $count ?> <?php esc_html_e('subscriber(s) found', 'newsletter') ?>
 
                 <?php $controls->btn_link('?page=newsletter_users_new', __('Add new', 'newsletter')); ?>
                 <?php $controls->btn('delete_selected', __('Delete selected', 'newsletter'), ['tertiary' => true]); ?>
@@ -192,10 +193,10 @@ $utc = new DateTimeZone('UTC');
                         <td><?php echo esc_html($s->email); ?></td>
                         <td><?php echo esc_html($s->name); ?> <?php echo esc_html($s->surname); ?></td>
                         <td>
-                            <?php echo $this->get_user_status_label($s, true); ?>
+                            <?php $this->echo_user_status_label($s); ?>
                         </td>
                         <td>
-                            <?php echo $controls->print_date($s->created_at); ?>
+                            <?php $controls->echo_date($s->created_at); ?>
                         </td>
 
                         <td>

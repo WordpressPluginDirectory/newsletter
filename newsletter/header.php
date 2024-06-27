@@ -16,7 +16,7 @@ function newsletter_print_entries($group) {
     }
 
     foreach ($entries as &$entry) {
-        echo '<li><a href="', esc_attr($entry['url']), '">', $entry['label'], '</a></li>';
+        echo '<li><a href="', esc_attr($entry['url']), '">', wp_strip_all_tags($entry['label']), '</a></li>';
     }
 }
 
@@ -333,7 +333,7 @@ if (NEWSLETTER_DEBUG || NEWSLETTER_PAGE_WARNING) {
             <input type="hidden" value="3" name="nl[]">
             <input type="hidden" value="1" name="nl[]">
             <input type="hidden" value="double" name="optin">
-            <input type="email" name="ne" value="<?php echo esc_attr('') ?>">
+            <input type="email" name="ne" value="">
             <input type="submit" class="button-primary" value="<?php esc_attr_e('Subscribe', 'newsletter') ?>">
         </form>
     </div>

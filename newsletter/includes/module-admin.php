@@ -371,6 +371,10 @@ class NewsletterModuleAdmin extends NewsletterModuleBase {
         return '<span class="tnp-status tnp-user-status tnp-user-status--' . esc_attr($class) . '">' . esc_html($label) . '</span>';
     }
 
+    function echo_user_status_label($user) {
+        echo $this->get_user_status_label($user, true);
+    }
+
     /**
      * Managed by WP Users Addon
      * @deprecated since version 7.6.7

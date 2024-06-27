@@ -372,6 +372,19 @@ if (!empty($return_path)) {
 
                             <tr>
                                 <th>
+                                    <?php $controls->label(__('Tracking and action links', 'newsletter'), '') ?>
+                                </th>
+                                <td>
+                                    <?php $controls->select('links', ['' => 'Standard', 'ajax' => 'Alternative']); ?>
+                                    <span class="description">
+                                        Select "alternative" if confirmation/unsubscription/tracking links seems to not work. Resend a test nessletter
+                                        to check the effect, old newsletters are not affacted.
+                                    </span>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <th>
                                     <?php $controls->label(__('Email encoding', 'newsletter'), '/newsletter-configuration#encoding') ?>
                                 </th>
                                 <td>

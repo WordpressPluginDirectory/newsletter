@@ -1,5 +1,5 @@
 <?php
-$p = $_GET['page'];
+$p = sanitize_key($_GET['page'] ?? '');
 ?>
 <ul class="tnp-nav">
     <li class="<?php echo $p === 'newsletter_subscription_form'?'active':''?>"><a href="?page=newsletter_subscription_form">Settings</a></li>

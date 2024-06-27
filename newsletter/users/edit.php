@@ -1,11 +1,13 @@
 <?php
+
+// phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedScript
+
 /* @var $this NewsletterUsersAdmin */
 /* @var $controls NewsletterControls */
 
 defined('ABSPATH') || exit;
 
-$user_id = (int) $_GET['id'];
-$user = $this->get_user($user_id);
+$user = $this->get_user((int) $_GET['id'] ?? -1);
 
 if (!$user) {
     echo 'Subscriber not found.';
@@ -181,7 +183,10 @@ function percentValue($value, $total) {
                 <div id="tabs-preferences" class="tnp-tab">
                     <table class="form-table">
                         <tr>
-                            <th><?php esc_html_e('Lists', 'newsletter') ?><br><?php echo $controls->help('https://www.thenewsletterplugin.com/plugins/newsletter/newsletter-preferences') ?></th>
+                            <th>
+                                <?php esc_html_e('Lists', 'newsletter') ?>
+                                <br>
+                                    <?php $controls->help('https://www.thenewsletterplugin.com/plugins/newsletter/newsletter-preferences') ?></th>
                             <td>
                                 <?php $controls->preferences('list'); ?>
                             </td>
@@ -203,7 +208,7 @@ function percentValue($value, $total) {
                             <?php
                             foreach ($this->get_all_customfields() as $customfield) {
                                 echo '<tr><td>';
-                                echo $customfield->id;
+                                echo (int) $customfield->id;
                                 echo '</td><td>';
                                 echo esc_html($customfield->name);
                                 echo '</td><td>';
@@ -231,25 +236,25 @@ function percentValue($value, $total) {
                         <tr>
                             <th><?php esc_html_e('Created', 'newsletter') ?></th>
                             <td>
-                                <?php echo $controls->print_date(strtotime($controls->data['created'])); ?>
+                                <?php $controls->echo_date(strtotime($controls->data['created'])); ?>
                             </td>
                         </tr>
                         <tr>
                             <th><?php esc_html_e('Referrer', 'newsletter') ?></th>
                             <td>
-                                <?php echo $controls->value('referrer'); ?>
+                                <?php $controls->value('referrer'); ?>
                             </td>
                         </tr>
                         <tr>
                             <th><?php esc_html_e('HTTP Referrer', 'newsletter') ?></th>
                             <td>
-                                <?php echo $controls->value('http_referer'); ?>
+                                <?php $controls->value('http_referer'); ?>
                             </td>
                         </tr>
                         <tr>
                             <th><?php esc_html_e('Last activity', 'newsletter') ?></th>
                             <td>
-                                <?php echo $controls->print_date($controls->data['last_activity']); ?>
+                                <?php $controls->echo_date($controls->data['last_activity']); ?>
                             </td>
                         </tr>
                         <tr>
@@ -274,7 +279,7 @@ function percentValue($value, $total) {
                             <th><?php esc_html_e('Profile URL', 'newsletter'); ?></th>
                             <td>
                                 <?php $profile_url = NewsletterProfile::instance()->get_profile_url($user) ?>
-                                <a href='<?php echo $profile_url ?>' target="_blank"><?php echo $profile_url ?></a>
+                                <a href='<?php echo esc_attr($profile_url) ?>' target="_blank"><?php echo esc_attr($profile_url) ?></a>
                             </td>
                         </tr>
 
