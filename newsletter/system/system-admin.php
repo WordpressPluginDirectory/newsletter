@@ -247,6 +247,10 @@ class NewsletterSystemAdmin extends NewsletterModuleAdmin {
         return $list;
     }
 
+    function echo_hook_functions($tag) {
+        echo $this->get_hook_functions($tag, true);
+    }
+
     function condition_flag($condition, $url = '') {
         switch ($condition) {
             case 0: echo ' <span class="tnp-ko">KO</span>';

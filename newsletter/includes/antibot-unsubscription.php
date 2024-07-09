@@ -36,9 +36,9 @@ header('Cache-Control: no-cache,no-store,private');
 
         <script>
             window.setTimeout(() => {
-                let e = new Date();
-                e.setTime(e.getTime() + 300 * 1000);
-                document.cookie = "tnpab=1; expires=" + e.toGMTString() + "; path=/";
+                //let e = new Date();
+                //e.setTime(e.getTime() + 300 * 1000);
+                //document.cookie = "tnpab=1; expires=" + e.toGMTString() + "; path=/";
                 let f = document.getElementById("form");
                 f.action = location.pathname;
                 f.method = 'POST';

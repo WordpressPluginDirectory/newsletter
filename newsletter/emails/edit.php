@@ -282,6 +282,7 @@ if (empty($controls->errors) && ($controls->is_action('send') || $controls->is_a
         $email['status'] = TNP_Email::STATUS_SENDING;
         if ($controls->is_action('send')) {
             $controls->messages = __('Now sending.', 'newsletter');
+            $controls->messages .= '<br>' . __('The first batch of emails will be delivered in 5 minutes.', 'newsletter');
         } else {
             $controls->messages = __('Scheduled.', 'newsletter');
         }
@@ -299,7 +300,7 @@ if (empty($controls->errors) && ($controls->is_action('send') || $controls->is_a
     }
 }
 
-if (isset($email['options']['status']) && $email['options']['status'] == 'S') {
+if (isset($email['options']['status']) && $email['options']['status'] === 'S') {
     $controls->warnings[] = __('This newsletter will be sent to not confirmed subscribers.', 'newsletter');
 }
 

@@ -71,10 +71,12 @@ $panels = (int) (NEWSLETTER_LIST_MAX / 10) + (NEWSLETTER_LIST_MAX % 10 > 0 ? 1 :
         <?php $controls->show(); ?>
 
         <p>
-            Configure the lists visibility on the <a href="?page=newsletter_subscription_form" target="_blank">Subscription form</a> and <a href="?page=newsletter_profile_index" target="_blank">Profile page</a>.
+            Configure the lists visibility on the <a href="?page=newsletter_subscription_form" target="_blank">Subscription form</a>
+            and <a href="?page=newsletter_profile_index" target="_blank">Profile page</a>.
         </p>
         <p>
-            List wide operations on subscribers (delete, move, add, ...) can be performed on the <a href="?page=newsletter_users_massive" target="_blank">Subscribers Maintenance page</a>.
+            List wide operations on subscribers (delete, move, add, ...) can be performed
+            on the <a href="?page=newsletter_users_massive" target="_blank">Subscribers Maintenance page</a>.
         </p>
 
         <form method="post" action="">
@@ -173,7 +175,7 @@ $panels = (int) (NEWSLETTER_LIST_MAX / 10) + (NEWSLETTER_LIST_MAX % 10 > 0 ? 1 :
                 <?php } ?>
                 <?php if (NEWSLETTER_DEBUG) { ?>
                     <div id="tabs-debug">
-                        <pre><?php echo esc_html(json_encode($this->get_db_options('lists', $language), JSON_PRETTY_PRINT)) ?></pre>
+                        <pre><?php echo esc_html(wp_json_encode($this->get_db_options('lists', $language), JSON_PRETTY_PRINT)) ?></pre>
                     </div>
                 <?php } ?>
 

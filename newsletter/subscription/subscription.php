@@ -386,6 +386,10 @@ class NewsletterSubscription extends NewsletterModule {
 
         $subscription = apply_filters('newsletter_subscription', $subscription, $user);
 
+        if (!$subscription) {
+            return new WP_Error('filter', 'Subscription blocked by filter');
+        }
+
         $this->sanitize_subscription_data($subscription->data);
 
         if (empty($subscription->data->email)) {

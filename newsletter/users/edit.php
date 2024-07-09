@@ -261,6 +261,8 @@ function percentValue($value, $total) {
                             <th><?php esc_html_e('WP user ID', 'newsletter') ?></th>
                             <td>
                                 <?php $controls->text('wp_user_id'); ?>
+                                <span class="description">ID of the WP user connected with this subscriber. Install
+                                    <a href="<?php echo esc_attr(\Newsletter\Integrations::get_addon_url('wpusers')); ?>">WP Users Addon</a> for automated integration.</span>
                             </td>
                         </tr>
                         <tr>

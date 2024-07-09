@@ -295,14 +295,17 @@ if (NEWSLETTER_DEBUG || NEWSLETTER_PAGE_WARNING) {
                 echo '<div class="tnp-notice tnp-notice-warning">The Newsletter public page is not published. <a href="', esc_attr(admin_url('post.php')) . '?post=', esc_attr($tnp_page_id), '&action=edit"><strong>Edit the page</strong></a> or <a href="admin.php?page=newsletter_main_main"><strong>review the main settings</strong></a>.</div>';
             } else {
                 $content = get_post_field('post_content', $tnp_page_id);
+                $title = get_post_field('post_title', $tnp_page_id);
                 // With and without attributes
                 if (strpos($content, '[newsletter]') === false && strpos($content, '[newsletter ') === false) {
                     update_option('newsletter_public_page_check', 0, false);
                     ?>
                     <div class="tnp-notice tnp-notice-warning">
-                        The Newsletter public page does not contain the <code>[newsletter]</code> shortcode.
-                        <a href="<?php echo esc_attr(admin_url('post.php')) ?>?post=<?php echo esc_attr($tnp_page_id) ?>&action=edit"><strong>Edit the page</strong></a>.
+                        The WordPress page "<?php echo esc_html($title) ?>" set as Newsletter's public page on the <a href="admin.php?page=newsletter_main_main">main settings</a>
+                        does not contain the <code>[newsletter]</code> shortcode.
                         <br>
+                        <a href="<?php echo esc_attr(admin_url('post.php')) ?>?post=<?php echo esc_attr($tnp_page_id) ?>&action=edit"><strong>Edit the page</strong></a>
+                        and add the <code>[newsletter]</code> as the only page content.
                     </div>
                     <?php
                 }

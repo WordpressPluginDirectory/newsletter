@@ -101,6 +101,22 @@ foreach ($paused_emails as $email) {
     }
 }
 
+// Nedded to have access to non regular paused newsletters in a easy way
+$error_emails = $this->get_results("select * from " . NEWSLETTER_EMAILS_TABLE . " where status='error' order by send_on asc");
+foreach ($error_emails as $email) {
+
+    // Type label
+    if ($email->type === 'message') {
+        $email->type_label = 'Standard';
+    } elseif (strpos($email->type, 'automated_') === 0) {
+        $email->type_label = 'Automated ' . substr($email->type, 10);
+    } elseif (strpos($email->type, 'instant_') === 0) {
+        $email->type_label = 'Instant ' . substr($email->type, 8);
+    } else {
+        $email->type_label = $email->type;
+    }
+}
+
 $options = $this->get_options('status');
 
 $functions = $this->get_hook_functions('phpmailer_init');
@@ -298,6 +314,14 @@ $speed = Newsletter::instance()->get_send_speed();
                         <div class="tnp-card-description">Hours</div>
                     </div>
 
+                    <div class="tnp-card">
+                        <div class="tnp-card-header">
+                            <div class="tnp-card-title"><?php esc_html_e('In error', 'newsletter') ?></div>
+                        </div>
+                        <div class="tnp-card-value"><?php echo (int) count($error_emails); ?></div>
+                        <div class="tnp-card-description">Newsletters</div>
+                    </div>
+
 
 
                 </div>
@@ -481,7 +505,7 @@ $speed = Newsletter::instance()->get_send_speed();
 
                 <div class="tnp-cards-container">
 
-                    <div class="tnp-card" id="sending">
+                    <div class="tnp-card" id="paused">
                         <div class="tnp-card-title">Paused</div>
                         <?php if (empty($paused_emails)) { ?>
                             <p>None.</p>
@@ -491,6 +515,45 @@ $speed = Newsletter::instance()->get_send_speed();
                                 <thead></thead>
                                 <tbody>
                                     <?php foreach ($paused_emails as $email) { ?>
+                                        <tr>
+                                            <td>
+                                                <small><?php echo esc_html($email->type_label); ?></small><br>
+                                                <?php echo esc_html($email->subject) ?>
+                                            </td>
+                                            <td style="width: 20rem">
+                                                <?php $controls->echo_date($email->send_on); ?>
+                                            </td>
+                                            <td style="text-align: center; width: 15rem;">
+                                                <?php NewsletterEmails::instance()->show_email_progress_bar($email, ['scheduled' => true]) ?>
+                                            </td>
+                                            <td style="text-align: right; width: 3rem">
+                                                <?php
+                                                $controls->button_icon_edit('?page=newsletter_emails_edit&id=' . ((int) $email->id), ['tertiary' => true]);
+                                                ?>
+
+                                            </td>
+                                        </tr>
+                                    <?php } ?>
+                                </tbody>
+                            </table>
+                        <?php } ?>
+
+
+                    </div>
+                </div>
+
+                <div class="tnp-cards-container">
+
+                    <div class="tnp-card" id="paused">
+                        <div class="tnp-card-title">Stopped by error</div>
+                        <?php if (empty($error_emails)) { ?>
+                            <p>None.</p>
+                        <?php } else { ?>
+
+                            <table class="widefat" style="width: 100%">
+                                <thead></thead>
+                                <tbody>
+                                    <?php foreach ($error_emails as $email) { ?>
                                         <tr>
                                             <td>
                                                 <small><?php echo esc_html($email->type_label); ?></small><br>

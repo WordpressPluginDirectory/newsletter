@@ -1081,11 +1081,6 @@ class NewsletterModule extends NewsletterModuleBase {
             return false;
         }
 
-        // Cookie
-        if (!isset($_COOKIE['tnpab'])) {
-            return false;
-        }
-
         if ($captcha) {
 
             if (!isset($_POST['n1']) || !isset($_POST['n2']) || !isset($_POST['n3'])) {

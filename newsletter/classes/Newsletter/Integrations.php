@@ -6,6 +6,14 @@ defined('ABSPATH') || exit;
 
 class Integrations {
 
+    static function get_addon_url($addon) {
+        $extensions_url = '?page=newsletter_main_extensions';
+        if (class_exists('\NewsletterExtensions')) {
+            $extensions_url = '?page=newsletter_extensions_index';
+        }
+        return $extensions_url . '#newsletter-' . sanitize_key($addon);
+    }
+
     static function is_addon_manager_active() {
         return class_exists('NewsletterExtensions');
     }

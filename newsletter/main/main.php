@@ -318,6 +318,9 @@ if (!empty($return_path)) {
                                 </th>
                                 <td>
                                     <?php $controls->enabled('track'); ?>
+                                    <span class="description">
+                                        Applied only to new newsletters.
+                                    </span>
                                 </td>
                             </tr>
 
@@ -349,7 +352,6 @@ if (!empty($return_path)) {
                                     </p>
                                 </td>
                             </tr>
-
 
                             <tr>
                                 <th><?php esc_html_e('IP addresses', 'newsletter') ?></th>
