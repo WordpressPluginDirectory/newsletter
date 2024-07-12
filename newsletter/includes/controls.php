@@ -1590,6 +1590,20 @@ class NewsletterControls {
         echo '</div>';
     }
 
+    function autoresponders($name = 'autoresponders') {
+        if (!class_exists('NewsletterAutoresponder')) {
+            echo 'The Autoresponder addon is required.';
+            return;
+        }
+
+        $autoresponders = NewsletterAutoresponder::instance()->get_autoresponders();
+
+        foreach ($autoresponders as $autoresponder) {
+            $controls->checkbox_group($name, $autoresponder->id, $autoresponder->name);
+            echo '<br>';
+        }
+    }
+
     function lists_checkboxes($name = 'lists') {
         $this->preferences_group($name);
     }

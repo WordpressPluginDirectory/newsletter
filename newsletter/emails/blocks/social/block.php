@@ -23,7 +23,7 @@ $type = (int) $options['type'];
 $width = (int) $options['width'];
 $social_icon_url = plugins_url('newsletter') . '/images/social-' . $type;
 
-$socials = ['facebook', 'twitter', 'pinterest', 'linkedin', 'tumblr', 'youtube', 'soundcloud', 'instagram', 'vimeo', 'telegram', 'vk', 'discord', 'tiktok', 'twitch', 'whatsapp'];
+$socials = ['facebook', 'twitter', 'pinterest', 'linkedin', 'tumblr', 'youtube', 'soundcloud', 'instagram', 'vimeo', 'telegram', 'vk', 'discord', 'tiktok', 'twitch', 'whatsapp', 'threads'];
 
 $valid_socials = [];
 foreach ($socials as &$social) {

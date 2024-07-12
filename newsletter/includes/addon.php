@@ -59,7 +59,7 @@ class NewsletterAddon {
                 if (method_exists($this, 'settings_menu')) {
                     add_filter('newsletter_menu_settings', [$this, 'settings_menu']);
                 }
-                
+
                 if (method_exists($this, 'subscribers_menu')) {
                     add_filter('newsletter_menu_subscribers', [$this, 'subscribers_menu']);
                 }
@@ -361,7 +361,7 @@ class NewsletterMailerAddon extends NewsletterAddon {
         }
 
         if ($this->enabled && class_exists('NewsletterBounce')) {
-            $controls->warnings[] = 'The Bounce addon is active and should be disabled (bounces are managed by this addon)';
+            $controls->warnings[] = 'The Bounce addon is active and should be disabled on the <a href="plugins.php">plugins page</a> (bounces are managed by this addon)';
         }
     }
 
@@ -569,6 +569,10 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
 
         if (!empty($form_options['lists'])) {
             $subscription->data->add_lists($form_options['lists']);
+        }
+
+        if (!empty($form_options['autoresponders'])) {
+            $subscription->autoresponders = $form_options['autoresponders'];
         }
 
         return $subscription;

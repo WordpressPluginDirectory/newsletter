@@ -665,6 +665,7 @@ class NewsletterSubscription extends NewsletterModule {
                 // Check the keys
                 foreach ($keys as $key) {
                     if (NewsletterAutoresponder::$instance->is_valid_key($key)) {
+                        list($id, $token) = explode('-', $key, 2);
                         $subscription->autoresponders[] = $id;
                     }
                 }

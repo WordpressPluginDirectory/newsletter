@@ -190,6 +190,12 @@ if (!$controls->is_action()) {
                                     <?php $controls->text('whatsapp_url', 40); ?>
                                 </td>
                             </tr>
+                            <tr>
+                                <th>Treads</th>
+                                <td>
+                                    <?php $controls->text('threads_url', 40); ?>
+                                </td>
+                            </tr>
                         </table>
                     <?php } ?>
                 </div>
