@@ -218,7 +218,7 @@ class Integrations {
         foreach ($forms as $form) {
             $source = new Source($form->name, 'Formidable Forms', 'formidable');
             if (class_exists('NewsletterFormidable')) {
-                $source->config_url = '?page=newsletter_forminator_edit&id=' . rawurlencode($form->id);
+                $source->config_url = '?page=newsletter_formidable_edit&id=' . rawurlencode($form->id);
             }
             $sources[] = $source;
         }

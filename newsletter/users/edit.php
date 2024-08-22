@@ -1,5 +1,4 @@
 <?php
-
 // phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedScript
 
 /* @var $this NewsletterUsersAdmin */
@@ -124,6 +123,9 @@ function percentValue($value, $total) {
                     <li><a href="#tabs-preferences"><?php esc_html_e('Lists', 'newsletter') ?></a></li>
                     <li><a href="#tabs-profile"><?php esc_html_e('Custom fields', 'newsletter') ?></a></li>
                     <li><a href="#tabs-other"><?php esc_html_e('Other', 'newsletter') ?></a></li>
+                    <?php if (NEWSLETTER_DEBUG) { ?>
+                        <li><a href="#tabs-meta">Meta</a></li>
+                    <?php } ?>
                 </ul>
 
                 <div id="tabs-general" class="tnp-tab">
@@ -186,7 +188,7 @@ function percentValue($value, $total) {
                             <th>
                                 <?php esc_html_e('Lists', 'newsletter') ?>
                                 <br>
-                                    <?php $controls->help('https://www.thenewsletterplugin.com/plugins/newsletter/newsletter-preferences') ?></th>
+                                <?php $controls->help('https://www.thenewsletterplugin.com/plugins/newsletter/newsletter-preferences') ?></th>
                             <td>
                                 <?php $controls->preferences('list'); ?>
                             </td>
@@ -287,6 +289,30 @@ function percentValue($value, $total) {
 
                     </table>
                 </div>
+
+                <?php if (NEWSLETTER_DEBUG) { ?>
+                    <div id="tabs-meta" class="tnp-tab">
+
+                        <table class="widefat" style="width: auto">
+                            <thead>
+                                <tr>
+                                    <th><?php esc_html_e('Name', 'newsletter'); ?></th>
+                                    <th><?php esc_html_e('Value', 'newsletter'); ?></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                <tr>
+                                    <td>Welcome email ID</td>
+                                    <td>
+                                        <?php echo esc_html($this->get_user_meta($user->id, 'welcome_email_id')); ?>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                <?php } ?>
 
 
             </div>

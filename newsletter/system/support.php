@@ -15,7 +15,7 @@ defined('ABSPATH') || exit;
 
     <div id="tnp-heading">
 
-        <h2><?php esc_html_e('Support', 'newsletter') ?> <?php echo \Newsletter\License::get_badge(); ?></h2>
+        <h2><?php esc_html_e('Support', 'newsletter') ?></h2>
 
     </div>
 

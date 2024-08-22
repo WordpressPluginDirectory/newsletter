@@ -32,6 +32,7 @@ class NewsletterSubscription extends NewsletterModule {
     function hook_init() {
 
         add_action('newsletter_action', [$this, 'hook_newsletter_action'], 10, 3);
+        add_action('newsletter_action_dummy', [$this, 'hook_newsletter_action_dummy'], 11, 3);
         add_filter('newsletter_page_text', [$this, 'hook_newsletter_page_text'], 10, 3);
 
         // The form is sometimes retrieved via AJAX
@@ -116,6 +117,12 @@ class NewsletterSubscription extends NewsletterModule {
                 . '</div>';
     }
 
+    function hook_newsletter_action_dummy($action, $user, $email) {
+        if ('c' === $action) {
+            $this->redirect($this->build_message_url(null, 'confirmed', $user));
+        }
+    }
+
     /**
      *
      * @global wpdb $wpdb
@@ -194,9 +201,9 @@ class NewsletterSubscription extends NewsletterModule {
                     $this->set_user_cookie($user);
 
                     if ($user->_activation) {
-                        $this->redirect_to_confirmation($user);
+                        $this->redirect_to_confirmation($user, $email);
                     } else {
-                        $this->redirect_to_confirmed($user);
+                        $this->redirect_to_confirmed($user, $email);
                     }
                 } else {
                     $language = $this->sanitize_language($_REQUEST['nlang'] ?? '');
@@ -248,7 +255,7 @@ class NewsletterSubscription extends NewsletterModule {
                 if ($this->antibot_form_check()) {
                     $user = $this->confirm($user);
                     $this->set_user_cookie($user);
-                    $this->redirect_to_confirmed($user);
+                    $this->redirect_to_confirmed($user, $email);
                 } else {
                     $this->antibot_subscription('Confirm');
                 }
@@ -319,9 +326,12 @@ class NewsletterSubscription extends NewsletterModule {
         switch ($multiple) {
             case 0: $subscription->if_exists = TNP_Subscription::EXISTING_ERROR;
                 break;
-            case 1: $subscription->if_exists = TNP_Subscription::EXISTING_DOUBLE_OPTIN;
+            case 1: $subscription->if_exists = $this->is_double_optin() ? TNP_Subscription::EXISTING_DOUBLE_OPTIN : TNP_Subscription::EXISTING_SINGLE_OPTIN;
                 break;
             case 2: $subscription->if_exists = TNP_Subscription::EXISTING_SINGLE_OPTIN;
+                break;
+            case 3: $subscription->if_exists = TNP_Subscription::EXISTING_DOUBLE_OPTIN;
+                break;
         }
 
         $lists = $this->get_lists();
@@ -772,55 +782,58 @@ class NewsletterSubscription extends NewsletterModule {
         $r = $this->mail($user, $subject, $message);
 
         return $r;
-
-        // TODO: Add filter
-//        if ($res = apply_filters('newsletter_activation_email', false, $user)) {
-//            if ($res === true)
-//                return;
-//            if (is_int($res)) {
-//                $email = $this->get_email($res);
-//                if ($email) {
-//                    Newsletter::instance()->send($email, [$user]);
-//                }
-//            }
-//        }
-//
-//        return $this->send_message('confirmation', $user, true);
     }
 
-    function send_welcome_email($user, $force = false) {
+    function get_default_welcome_email_id($language = null) {
 
-        $this->logger->debug('Sending welcome email');
+        $email_id = 0;
 
-        $this->switch_language($user->language);
+        $this->switch_language($language);
+        $welcome_email = (int) $this->get_option('welcome_email');
+        switch ($welcome_email) {
+            case 1:
+                $email_id = (int) $this->get_option('welcome_email_id');
+                break;
 
-        $email_id = (int) $this->get_user_meta($user->id, 'welcome_email_id');
-        $this->logger->debug('Email ID: ' . $email_id);
-        if ($email_id) {
-            if ($email_id === -1) {
-                return;
-            }
-            $email = $this->get_email($email_id);
-            if ($email) {
-                $r = Newsletter::instance()->send($email, [$user]);
-                return;
-            } else {
-                $this->logger->error('Welcome email not found: ' . $email_id);
-            }
+            case 2:
+                $email_id = -1;
+                break;
+        }
+        $this->restore_language();
+
+        return $email_id;
+    }
+
+    function send_welcome_email($user) {
+
+        $email_id = $this->get_user_meta_int($user->id, 'welcome_email_id');
+
+        if (is_null($email_id)) {
+            $email_id = $this->get_default_welcome_email_id($user->language);
         }
 
-        if (!$force && $this->options['welcome_email'] == '2') {
-            return true;
+        if ($email_id === -1) {
+            return false;
         }
 
-        $message = [];
-        $message['html'] = do_shortcode($this->get_text('confirmed_message'));
-        $message['text'] = $this->get_text_message('confirmed');
-        $subject = $this->get_text('confirmed_subject');
+        if ($email_id === 0) {
+            $this->switch_language($user->language);
+            $message = [];
+            $message['html'] = do_shortcode($this->get_text('confirmed_message'));
+            $message['text'] = $this->get_text_message('confirmed');
+            $subject = $this->get_text('confirmed_subject');
+            $this->restore_language();
 
-        $r = $this->mail($user, $subject, $message);
+            $r = $this->mail($user, $subject, $message);
+            return $r;
+        }
 
-        return $r;
+        $email = $this->get_email($email_id);
+        if ($email) {
+            $r = Newsletter::instance()->send($email, [$user]);
+            return $r;
+        }
+        return false;
     }
 
     /**
@@ -874,7 +887,7 @@ class NewsletterSubscription extends NewsletterModule {
         return $this->mail($user, $subject, $message);
     }
 
-    function redirect_to_confirmed($user) {
+    function redirect_to_confirmed($user, $email = null) {
         if (!$user) {
             die('Subscriber not found.');
         }
@@ -900,11 +913,11 @@ class NewsletterSubscription extends NewsletterModule {
             }
         }
         $url = apply_filters('newsletter_welcome_url', $url, $user);
-        $url = Newsletter::instance()->build_message_url($url, 'confirmed', $user);
+        $url = Newsletter::instance()->build_message_url($url, 'confirmed', $user, $email);
         $this->redirect($url);
     }
 
-    function redirect_to_confirmation($user) {
+    function redirect_to_confirmation($user, $email = null) {
         if (!$user) {
             die('Subscriber not found.');
         }
@@ -917,7 +930,7 @@ class NewsletterSubscription extends NewsletterModule {
             // Per message custom URL from configuration (language variants could not be supported)
             $url = sanitize_url($this->get_option('confirmation_url'));
         }
-        $url = $this->build_message_url($url, 'confirmation', $user);
+        $url = $this->build_message_url($url, 'confirmation', $user, $email);
         $this->redirect($url);
     }
 
@@ -1589,6 +1602,11 @@ class NewsletterSubscription extends NewsletterModule {
                     if (is_array($ids)) {
                         $field_attrs['name'] = 'customfield';
                         foreach ($ids as $id) {
+                            $profile = $this->get_customfield($id);
+
+                            if (!$profile || $profile->is_private()) {
+                                continue;
+                            }
                             $field_attrs['number'] = $id;
                             $buffer .= $this->shortcode_newsletter_field($field_attrs);
                         }

@@ -4,7 +4,7 @@
   Plugin Name: Newsletter
   Plugin URI: https://www.thenewsletterplugin.com
   Description: Newsletter is a cool plugin to create your own subscriber list, to send newsletters, to build your business. <strong>Before update give a look to <a href="https://www.thenewsletterplugin.com/category/release">this page</a> to know what's changed.</strong>
-  Version: 8.4.5
+  Version: 8.4.8
   Author: Stefano Lissa & The Newsletter Team
   Author URI: https://www.thenewsletterplugin.com
   Disclaimer: Use at your own risk. No warranty expressed or implied is provided.
@@ -30,7 +30,7 @@
 
  */
 
-define('NEWSLETTER_VERSION', '8.4.5');
+define('NEWSLETTER_VERSION', '8.4.8');
 
 global $wpdb, $newsletter;
 
@@ -1328,7 +1328,11 @@ class Newsletter extends NewsletterModule {
         $download_message = 'You can download all addons from www.thenewsletterplugin.com if your license is valid.';
 
         if (wp_remote_retrieve_response_code($response) != '200') {
-            $data = new WP_Error(wp_remote_retrieve_response_code($response), 'License validation service error. <br>' . $download_message);
+            $data = new WP_Error(wp_remote_retrieve_response_code($response),
+                    '[' . esc_html(wp_remote_retrieve_response_code($response)) . '] '
+                    . esc_html(wp_remote_retrieve_response_message($response))
+                    . '<br>' . $download_message);
+
             set_transient('newsletter_license_data', $data, DAY_IN_SECONDS);
             return $data;
         }
@@ -1343,7 +1347,7 @@ class Newsletter extends NewsletterModule {
         }
 
         if (isset($data->message)) {
-            $data = new WP_Error(1, $data->message . ' (check the license on Newsletter main settings)');
+            $data = new WP_Error(1, 'License check: ' . $data->message);
             set_transient('newsletter_license_data', $data, DAY_IN_SECONDS);
             return $data;
         }

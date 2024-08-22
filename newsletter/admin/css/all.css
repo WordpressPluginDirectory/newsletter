@@ -396,6 +396,11 @@ table.clicks {
     border-color: var(--tnp-orange-light)
 }
 
+#tnp-wrap .tnp-notice.tnp-notice-error {
+    background-color: var(--tnp-red-lighter);
+    border-color: var(--tnp-red-light)
+}
+
 #tnp-wrap .tnp-notice a.tnp-dismiss {
     display: block;
     line-height: normal;
@@ -1227,6 +1232,12 @@ span.tnp-user-status {
     font-size: 1rem;
 }
 
+#tnp-menu ul li a:focus {
+    outline: 0;
+    border: 0;
+    box-shadow: none;
+}
+
 #tnp-menu ul li a i {
     margin-right: 5px;
 }
@@ -1292,6 +1303,7 @@ span.tnp-user-status {
 {
     outline: 0;
     box-shadow: none;
+    border: 0;
 }
 
 #tnp-menu ul ul li a:hover small {
@@ -1311,42 +1323,28 @@ span.tnp-user-status {
 /* License button */
 
 #tnp-menu .tnp-licence-button {
-    border-left: 3px solid var(--tnp-green);
     background-color: var(--tnp-green);
-    border: none;
-    -webkit-transition: all 1s ease-in-out;
-    -moz-transition: all 1s ease-in-out;
-    -o-transition: all 1s ease-in-out;
+    border: 0;
     transition: all 1s ease-in-out;
     border-radius: 3px;
 }
 
 #tnp-menu .tnp-licence-button a {
     color: #fff;
+    font-size: .9rem;
 }
 
 #tnp-menu .tnp-licence-button:hover {
     background-color: var(--tnp-green-dark) !important;
-    border: none;
 }
 
-#tnp-menu .tnp-licence-button-red {
+#tnp-menu .tnp-licence-button.tnp-licence-button-red {
     background-color: var(--tnp-red);
-    border: none;
-    -webkit-transition: all 1s ease-in-out;
-    -moz-transition: all 1s ease-in-out;
-    -o-transition: all 1s ease-in-out;
-    transition: all 1s ease-in-out;
-    border-radius: 3px;
 }
 
-#tnp-menu .tnp-licence-button-red a {
-    color: #fff;
-}
 
-#tnp-menu .tnp-licence-button-red:hover {
+#tnp-menu .tnp-licence-button.tnp-licence-button-red:hover {
     background-color: var(--tnp-red-dark) !important;
-    border: none;
 }/*
     The head section of each administration page with title and introduction
 */
@@ -1391,39 +1389,45 @@ span.tnp-user-status {
     box-shadow: 0 0 3px #ccc;
 }
 
-#tnp-heading h2 span.tnp-badge-green {
+#tnp-heading h2 span.tnp-badge-green,
+#tnp-heading h2 span.tnp-badge-green a
+{
     background-color: green;
     /*border: 1px solid #999;*/
     font-weight: normal;
-    color: #fff;
+    color: #fff !important;
 }
 
-#tnp-heading h2 span.tnp-badge-red {
+#tnp-heading h2 span.tnp-badge-red,
+#tnp-heading h2 span.tnp-badge-red a {
     background-color: red;
     /*border: 1px solid #999;*/
     font-weight: normal;
-    color: #fff;
+    color: #fff !important;
 }
 
+#tnp-heading h2 span.tnp-badge-orange,
 #tnp-heading h2 span.tnp-badge-orange {
     background-color: var(--tnp-orange);
     /*border: 1px solid #999;*/
     font-weight: normal;
-    color: #fff;
+    color: #fff !important;
 }
 
-#tnp-heading h2 span.tnp-badge-blue {
+#tnp-heading h2 span.tnp-badge-blue,
+#tnp-heading h2 span.tnp-badge-blue a {
     background-color: var(--tnp-blue);
     /*border: 1px solid #999;*/
     font-weight: normal;
-    color: #fff;
+    color: #fff !important;
 }
 
-#tnp-heading h2 span.tnp-badge-gray {
+#tnp-heading h2 span.tnp-badge-gray,
+#tnp-heading h2 span.tnp-badge-gray a {
     background-color: var(--tnp-gray-dark);
     /*border: 1px solid #999;*/
     font-weight: normal;
-    color: #fff;
+    color: #fff !important;
 }
 
 #tnp-heading .tnp-title-help {

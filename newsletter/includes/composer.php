@@ -630,7 +630,7 @@ class TNP_Composer {
      * @return string
      */
     static function grid($items = [], $attrs = []) {
-        $attrs = wp_parse_args($attrs, ['width' => 600, 'columns' => 2, 'widths'=>[], 'padding' => 10, 'responsive' => true]);
+        $attrs = wp_parse_args($attrs, ['width' => 600, 'columns' => 2, 'widths' => [], 'padding' => 10, 'responsive' => true]);
         $width = (int) $attrs['width'];
         $columns = (int) $attrs['columns'];
         $padding = (int) $attrs['padding'];
@@ -640,8 +640,8 @@ class TNP_Composer {
         }
         $column_widths = [];
         $td_widths = [];
-        $sum = (float)array_sum($attrs['widths']);
-        for ($i=0; $i<$columns; $i++) {
+        $sum = (float) array_sum($attrs['widths']);
+        for ($i = 0; $i < $columns; $i++) {
             $column_widths[$i] = ($width - $padding * $columns) * $attrs['widths'][$i] / $sum;
             $td_widths[$i] = (int) (100 * $attrs['widths'][$i] / $sum);
         }
@@ -821,19 +821,24 @@ class TNP_Composer {
                 }
             } elseif (is_a($node, 'DOMText')) {
 
-                // ???
-                //$decoded = utf8_decode($node->wholeText);
-                $decoded = $node->wholeText;
-                //$decoded = trim(html_entity_decode($node->wholeText));
-                // We could avoid ctype_*
-                if (ctype_space($decoded)) {
-                    // Append blank only if last character output is not blank.
-                    if ((strlen($output) > 0) && !ctype_space(substr($output, -1))) {
+                // Rare error reported about uninitialized variable
+                if (isset($node->wholeText)) {
+                    // ???
+                    //$decoded = utf8_decode($node->wholeText);
+                    $decoded = $node->wholeText;
+                    //$decoded = trim(html_entity_decode($node->wholeText));
+                    // We could avoid ctype_*
+                    if (ctype_space($decoded)) {
+                        // Append blank only if last character output is not blank.
+                        if ((strlen($output) > 0) && !ctype_space(substr($output, -1))) {
+                            $output .= ' ';
+                        }
+                    } else {
+                        $output .= trim($node->wholeText);
                         $output .= ' ';
                     }
                 } else {
-                    $output .= trim($node->wholeText);
-                    $output .= ' ';
+                    // ???
                 }
             }
         }

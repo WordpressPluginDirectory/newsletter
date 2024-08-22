@@ -12,8 +12,6 @@ if (!$controls->is_action()) {
 
     if ($controls->is_action('save')) {
 
-        License::update();
-
         if (!$language) {
 
             if (!$this->is_email($controls->data['sender_email'])) {
@@ -62,9 +60,11 @@ if (!$controls->is_action()) {
         }
 
         delete_transient("tnp_extensions_json");
-        delete_transient('newsletter_license_data');
+        //delete_transient('newsletter_license_data');
         update_option('newsletter_news_updated', 0, false);
         update_option('newsletter_public_page_check', 0, false);
+
+        License::update();
     }
 
     if ($controls->is_action('create')) {
@@ -102,6 +102,13 @@ if (!empty($return_path)) {
         $controls->warnings[] = __('Your Return Path domain is different from your Sender domain. Providers may require them to match.', 'newsletter');
     }
 }
+
+$license_data = License::get_data();
+
+if (is_wp_error($license_data)) {
+    $controls->errors .= esc_html($license_data->get_error_message());
+}
+
 ?>
 
 <?php include NEWSLETTER_INCLUDES_DIR . '/codemirror.php'; ?>
@@ -128,7 +135,7 @@ if (!empty($return_path)) {
     <div id="tnp-heading">
         <?php $controls->title_help('https://www.thenewsletterplugin.com/plugins/newsletter/newsletter-configuration') ?>
 
-        <h2><?php esc_html_e('Settings', 'newsletter'); ?> <?php echo License::get_badge() ?></h2>
+        <h2><?php esc_html_e('Settings', 'newsletter'); ?></h2>
         <?php include __DIR__ . '/nav.php' ?>
 
     </div>

@@ -158,6 +158,8 @@ $system_warnings = NewsletterSystemAdmin::instance()->get_warnings_count();
                         </a>
                     </li>
 
+                    <li><a href="?page=newsletter_system_scheduler"><?php esc_html_e('Scheduler', 'newsletter') ?></a></li>
+
                     <li><a href="?page=newsletter_system_delivery"><?php esc_html_e('Delivery', 'newsletter') ?></a></li>
 
                     <?php if (class_exists('NewsletterExtensions')) { ?>
@@ -181,37 +183,59 @@ $system_warnings = NewsletterSystemAdmin::instance()->get_warnings_count();
         <?php
         $license_data = Newsletter::instance()->get_license_data();
         $premium_url = 'https://www.thenewsletterplugin.com/premium?utm_source=header&utm_medium=link&utm_campaign=plugin&utm_content=' . urlencode($_GET['page']);
+        if (NEWSLETTER_DEBUG) {
+            //$license_data->expire = 0; //time() + MONTH_IN_SECONDS + DAY_IN_SECONDS;
+            //$license_data->type = 'personal';
+            //$license_data = false;
+        }
         ?>
 
         <?php if (empty($license_data)) { ?>
 
-            <li class="tnp-licence-button"><a href="<?php echo $premium_url ?>" target="_blank">
-                    <i class="fas fa-trophy"></i> <?php _e('Get Professional Addons', 'newsletter') ?></a>
+            <li class="tnp-licence-button"><a href="<?php echo esc_attr($premium_url); ?>" target="_blank">
+                    <i class="fas fa-trophy"></i> <?php esc_html_e('Get Professional Addons', 'newsletter'); ?></a>
             </li>
 
         <?php } elseif (is_wp_error($license_data)) { ?>
 
-            <li class="tnp-licence-button-red">
-                <a href="?page=newsletter_main_main"><i class="fas fa-hand-paper" style="color: white"></i> <?php _e('Unable to check', 'newsletter') ?></a>
+            <li class="tnp-licence-button tnp-licence-button-red">
+                <a href="?page=newsletter_main_main"><i class="fas fa-hand-paper" style="color: white"></i> <?php esc_html_e('License check failed', 'newsletter') ?></a>
             </li>
 
         <?php } elseif ($license_data->expire == 0) { ?>
 
             <li class="tnp-licence-button">
-                <a href="<?php echo $premium_url ?>" target="_blank"><i class="fas fa-trophy"></i> <?php _e('Get Professional Addons', 'newsletter') ?></a>
+                <a href="<?php echo esc_attr($premium_url) ?>" target="_blank"><i class="fas fa-trophy"></i> <?php _e('Get Professional Addons', 'newsletter') ?></a>
             </li>
 
         <?php } elseif ($license_data->expire < time()) { ?>
 
-            <li class="tnp-licence-button-red">
-                <a href="?page=newsletter_main_main"><i class="fas fa-hand-paper" style="color: white"></i> <?php _e('License expired', 'newsletter') ?></a>
-            </li>
+            <?php if ($license_data->type === 'personal') { ?>
+                <li class="tnp-licence-button tnp-licence-button-red">
+                    <a href="https://www.thenewsletterplugin.com/account" target="_blank"><i class="fas fa-hand-paper" style="color: white"></i> <?php esc_html_e('License expired', 'newsletter') ?></a>
+                </li>
+            <?php } else { ?>
+                <li class="tnp-licence-button tnp-licence-button-red">
+                    <a href="javascript:alert('You have a reselled license, please ask your web agency to renew it or get a personal one.')"><i class="fas fa-check-square"></i> <?php esc_html_e('License expired', 'newsletter') ?></a>
+                </li>
+            <?php } ?>
+                
+        <?php } elseif ($license_data->expire < time() + MONTH_IN_SECONDS) { ?>
+
+            <?php if ($license_data->type === 'personal') { ?>
+                <li class="tnp-licence-button tnp-licence-button-red">
+                    <a href="https://www.thenewsletterplugin.com/account" target="_blank"><i class="fas fa-check-square"></i> <?php esc_html_e('License expiring', 'newsletter') ?> (<?php echo esc_html(date('Y-m-d', $license_data->expire)); ?>)</a>
+                </li>
+            <?php } else { ?>
+                <li class="tnp-licence-button tnp-licence-button-red">
+                    <a href="javascript:alert('You have a reselled license, please ask your web agency to renew it or get a personal one.')"><i class="fas fa-check-square"></i> <?php esc_html_e('License expiring', 'newsletter') ?> (<?php echo esc_html(date('Y-m-d', $license_data->expire)); ?>)</a>
+                </li>
+            <?php } ?>
 
         <?php } elseif ($license_data->expire >= time()) { ?>
 
-            <?php $p = class_exists('NewsletterExtensions') ? 'newsletter_extensions_index' : 'newsletter_main_extensions'; ?>
             <li class="tnp-licence-button">
-                <a href="?page=<?php echo $p ?>"><i class="fas fa-check-square"></i> <?php _e('License active', 'newsletter') ?></a>
+                <a href="https://www.thenewsletterplugin.com/account" target="_blank"><i class="fas fa-check-square"></i> <?php esc_html_e('License active', 'newsletter') ?> (<?php echo esc_html(date('Y-m-d', $license_data->expire)); ?>)</a>
             </li>
 
         <?php } ?>
@@ -290,7 +314,11 @@ if (NEWSLETTER_DEBUG || NEWSLETTER_PAGE_WARNING) {
         } else {
 
             $tnp_page_id = NewsletterMainAdmin::instance()->get_main_option('page');
-            if (get_post_status($tnp_page_id) !== 'publish') {
+            $tnp_page_status = get_post_status($tnp_page_id);
+            if ($tnp_page_status === false) {
+                update_option('newsletter_public_page_check', 0, false);
+                echo '<div class="tnp-notice tnp-notice-warning">The Newsletter public page is missing. <a href="?page=newsletter_main_main#tabs-basic">Configure it</a>.</div>';
+            } elseif ($tnp_page_status !== 'publish') {
                 update_option('newsletter_public_page_check', 0, false);
                 echo '<div class="tnp-notice tnp-notice-warning">The Newsletter public page is not published. <a href="', esc_attr(admin_url('post.php')) . '?post=', esc_attr($tnp_page_id), '&action=edit"><strong>Edit the page</strong></a> or <a href="admin.php?page=newsletter_main_main"><strong>review the main settings</strong></a>.</div>';
             } else {
@@ -352,22 +380,12 @@ if (!defined('NEWSLETTER_CRON_WARNINGS') || NEWSLETTER_CRON_WARNINGS) {
 ?>
 
 <?php
-if ($_GET['page'] !== 'newsletter_emails_edit') {
-
-    $last_failed_newsletters = Newsletter::instance()->get_emails_by_status(TNP_Email::STATUS_ERROR);
-    if (false && $last_failed_newsletters) {
-        $c = new NewsletterControls();
-        foreach ($last_failed_newsletters as $n) {
-            echo '<div class="tnp-notice tnp-notice-warning">';
-            printf(__('Newsletter "%s" stopped by fatal error.', 'newsletter'), esc_html($n->subject));
-            echo '&nbsp;';
-
-            $c->btn_link('?page=newsletter_emails_edit&id=' . $n->id, __('Check', 'newsletter'));
-            echo '</div>';
-        }
-    }
+$hook_paused = get_option('wp_crontrol_paused');
+if (isset($hook_paused['newsletter']) && $hook_paused['newsletter']) {
+    echo '<div class="tnp-notice tnp-notice-error">The delivery engine has been paused using WP Crontrol. Please <a href="tools.php?page=crontrol_admin_manage_page">reactivate the <code>newsletter</code> hook</a>.</div>';
 }
-?>
+
+
 
 
 

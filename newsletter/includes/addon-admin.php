@@ -15,13 +15,6 @@ class NewsletterAddonAdmin {
     public function __construct($name, $version = '0.0.0', $dir = '') {
         $this->name = $name;
         $this->version = $version;
-        if (is_admin()) {
-            $old_version = get_option('newsletter_' . $name . '_version');
-            if ($version !== $old_version) {
-                $this->upgrade($old_version === false);
-                update_option('newsletter_' . $name . '_version', $version, false);
-            }
-        }
         add_action('newsletter_init', array($this, 'init'));
         //Load translations from specific addon /languages/ directory
 

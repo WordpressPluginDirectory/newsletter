@@ -126,7 +126,7 @@ $stats = $this->get_cron_stats();
                                             echo 'The job is missing! Try to deactivate and reactivate the Newsletter plugin.';
                                             break;
                                         case NewsletterSystemAdmin::JOB_LATE:
-                                            echo 'The job is late. You probably need and external scheduler trigger.';
+                                            echo 'The job is late. You probably need and <a href="https://www.thenewsletterplugin.com/documentation/troubleshooting/newsletter-delivery-engine/">external scheduler trigger</a>.';
                                             break;
                                         case NewsletterSystemAdmin::JOB_SKIPPED:
                                             echo 'The job has been skipped! The scheduler is overloaded or a job has fatal error and blocks the scheduler: check the server error logs with the help of your provider.';
@@ -136,14 +136,17 @@ $stats = $this->get_cron_stats();
                                             break;
                                     }
                                     ?>
+                                    <br><br>
+                                    Always install the plugin <a href="https://wordpress.org/plugins/wp-crontrol/" target="_blank">WP Crontrol</a>
+                                    to have a view of the WP scheduler under Tools/Events.
                                 </td>
                             </tr>
                             <tr>
                                 <td>Job next run</td>
                                 <td class="status">
-                                    </td>
+                                </td>
                                 <td>
-                                    <?php echo $controls->print_date($this->get_job_schedule(), false, true) ?>
+                                    <?php $controls->echo_date($this->get_job_schedule(), false, true) ?>
 
                                     <?php
                                     if ($status == NewsletterSystemAdmin::JOB_LATE) {
@@ -158,7 +161,7 @@ $stats = $this->get_cron_stats();
                                 <td>Last cron call</td>
                                 <td class="status">&nbsp;</td>
                                 <td>
-                                    <?php echo $controls->print_date($this->get_last_cron_call()) ?>
+                                    <?php $controls->echo_date($this->get_last_cron_call()) ?>
                                 </td>
                             </tr>
                         </table>

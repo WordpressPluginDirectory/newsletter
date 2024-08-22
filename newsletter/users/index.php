@@ -22,14 +22,20 @@ if ($controls->is_action()) {
 
 if ($controls->is_action('resend')) {
     $user = $this->get_user($controls->button_data);
-    NewsletterSubscription::instance()->send_message('confirmation', $user, true);
+    $this->delete_user_meta($user->id, 'activation_email_id');
+    NewsletterSubscription::instance()->send_activation_email($user, true);
     $controls->messages = __('Activation email sent.', 'newsletter');
 }
 
 if ($controls->is_action('resend_welcome')) {
     $user = $this->get_user($controls->button_data);
-    NewsletterSubscription::instance()->send_message('confirmed', $user, true);
-    $controls->messages = __('Welcome email sent.', 'newsletter');
+    $this->delete_user_meta($user->id, 'welcome_email_id');
+    $r = NewsletterSubscription::instance()->send_welcome_email($user);
+    if ($r) {
+        $controls->messages = __('Welcome email sent.', 'newsletter');
+    } else {
+        $controls->errors = __('The welcome email is disabled.', 'newsletter');
+    }
 }
 
 if ($controls->is_action('delete')) {

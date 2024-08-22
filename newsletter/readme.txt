@@ -1,7 +1,7 @@
 === Newsletter - Send awesome emails from WordPress ===
 Tags: newsletter, subscription, email marketing, welcome email, signup forms
-Tested up to: 6.5.5
-Stable tag: 8.4.5
+Tested up to: 6.6.1
+Stable tag: 8.4.8
 Contributors: satollo,webagile
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -128,6 +128,30 @@ Thank you, The Newsletter Team
 3. The Reports extension
 
 == Changelog ==
+
+= 8.4.8 =
+
+* Added link to license badge
+* Added warning if the delivery engine has been paused using WP Crontrol
+* Revisited the Help/Delivery
+* Added check on XML DOM code (library bug?)
+* Fixed admin message about invalid custom field
+* Fixed import/export menu entry
+* Fixed the welcome email when sent from the admin side
+* More control on repeated subscriptions
+* Added admin wide message when newsletter have been bklocked by fatal errors
+* Changed license top menu button
+* Removed license badge
+
+= 8.4.7 =
+
+* Fixed redirection to welcome page
+
+= 8.4.6 =
+
+* WP 6.6 check
+* Improved error detection on test email
+* Added newsletter id on action urls
 
 = 8.4.5 =
 

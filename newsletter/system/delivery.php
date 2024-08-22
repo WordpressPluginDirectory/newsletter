@@ -165,6 +165,45 @@ $speed = Newsletter::instance()->get_send_speed();
             <?php $controls->init(); ?>
 
             <div class="tnp-dashboard">
+
+                <div class="tnp-cards-container">
+                    <div class="tnp-card">
+                        <div class="tnp-card-header">
+                            <div class="tnp-card-title"><?php esc_html_e('Sending', 'newsletter') ?></div>
+                            <div class="tnp-card-upper-buttons"><a href="#sending"><i class="fas fa-chart-bar"></i></a></div>
+                        </div>
+                        <div class="tnp-card-value"><?php echo (int) count($emails); ?></div>
+                        <div class="tnp-card-description">Newsletters</div>
+                    </div>
+
+                    <div class="tnp-card">
+                        <div class="tnp-card-header">
+                            <div class="tnp-card-title"><?php esc_html_e('Progress', 'newsletter') ?></div>
+                        </div>
+                        <div class="tnp-card-value"><?php echo $total - $queued, '/', (int) $queued; ?></div>
+                        <div class="tnp-card-description">Emails</div>
+                    </div>
+
+                    <div class="tnp-card">
+                        <div class="tnp-card-header">
+                            <div class="tnp-card-title"><?php esc_html_e('Time to finish', 'newsletter') ?></div>
+                        </div>
+                        <div class="tnp-card-value"><?php printf('%.1f', $queued / $speed) ?></div>
+                        <div class="tnp-card-description">Hours</div>
+                    </div>
+
+                    <div class="tnp-card">
+                        <div class="tnp-card-header">
+                            <div class="tnp-card-title"><?php esc_html_e('In error', 'newsletter') ?></div>
+                        </div>
+                        <div class="tnp-card-value"><?php echo (int) count($error_emails); ?></div>
+                        <div class="tnp-card-description">Newsletters</div>
+                    </div>
+
+
+
+                </div>
+
                 <div class="tnp-cards-container">
                     <div class="tnp-card">
                         <?php
@@ -288,43 +327,7 @@ $speed = Newsletter::instance()->get_send_speed();
                 </div>
 
 
-                <div class="tnp-cards-container">
-                    <div class="tnp-card">
-                        <div class="tnp-card-header">
-                            <div class="tnp-card-title"><?php esc_html_e('Sending', 'newsletter') ?></div>
-                            <div class="tnp-card-upper-buttons"><a href="#sending"><i class="fas fa-chart-bar"></i></a></div>
-                        </div>
-                        <div class="tnp-card-value"><?php echo (int) count($emails); ?></div>
-                        <div class="tnp-card-description">Newsletters</div>
-                    </div>
 
-                    <div class="tnp-card">
-                        <div class="tnp-card-header">
-                            <div class="tnp-card-title"><?php esc_html_e('Progress', 'newsletter') ?></div>
-                        </div>
-                        <div class="tnp-card-value"><?php echo $total - $queued, '/', (int) $queued; ?></div>
-                        <div class="tnp-card-description">Emails</div>
-                    </div>
-
-                    <div class="tnp-card">
-                        <div class="tnp-card-header">
-                            <div class="tnp-card-title"><?php esc_html_e('Time to finish', 'newsletter') ?></div>
-                        </div>
-                        <div class="tnp-card-value"><?php printf('%.1f', $queued / $speed) ?></div>
-                        <div class="tnp-card-description">Hours</div>
-                    </div>
-
-                    <div class="tnp-card">
-                        <div class="tnp-card-header">
-                            <div class="tnp-card-title"><?php esc_html_e('In error', 'newsletter') ?></div>
-                        </div>
-                        <div class="tnp-card-value"><?php echo (int) count($error_emails); ?></div>
-                        <div class="tnp-card-description">Newsletters</div>
-                    </div>
-
-
-
-                </div>
 
 
 
@@ -355,7 +358,7 @@ $speed = Newsletter::instance()->get_send_speed();
 
 
                             <p>
-                                Average time to send an email: <?php echo (float)$stats->mean ?> seconds<br>
+                                Average time to send an email: <?php echo (float) $stats->mean ?> seconds<br>
                                 <?php if ($stats->mean > 0) { ?>
                                     Max speed: <?php echo esc_html(sprintf("%.2f", 1.0 / $stats->mean * 3600)) ?> emails per hour<br>
                                 <?php } ?>
@@ -544,7 +547,7 @@ $speed = Newsletter::instance()->get_send_speed();
 
                 <div class="tnp-cards-container">
 
-                    <div class="tnp-card" id="paused">
+                    <div class="tnp-card" id="newsletters-error">
                         <div class="tnp-card-title">Stopped by error</div>
                         <?php if (empty($error_emails)) { ?>
                             <p>None.</p>
@@ -584,7 +587,7 @@ $speed = Newsletter::instance()->get_send_speed();
                 <div class="tnp-cards-container">
 
                     <div class="tnp-card">
-                        <div class="tnp-card-title">Filters applied to WP mailing system</div>
+                        <div class="tnp-card-title">Filters applied to WP mailing system (<code>phpmailer_init</code>)</div>
                         <?php if (empty($functions)) { ?>
                             <p>None.</p>
                         <?php } else { ?>
@@ -594,6 +597,22 @@ $speed = Newsletter::instance()->get_send_speed();
 
 
                     </div>
+
+                    <div class="tnp-card">
+                        <?php
+                        $functions = $this->get_hook_functions('pre_wp_mail');
+                        ?>
+                        <div class="tnp-card-title">Filters applied to WP mailing system (<code>pre_wp_mail</code>)</div>
+                        <?php if (empty($functions)) { ?>
+                            <p>None.</p>
+                        <?php } else { ?>
+                            <p><?php echo $functions ?></p>
+                        <?php } ?>
+
+
+                    </div>
+
+
                 </div>
 
             </div>

@@ -246,6 +246,7 @@ class NewsletterDefaultMailer extends NewsletterMailer {
      * @return
      */
     function fix_mailer($mailer) {
+
         // If there is not a current message, wp_mail() was not called by us
         if (is_null($this->current_message)) {
             return;
@@ -272,6 +273,8 @@ class NewsletterDefaultMailer extends NewsletterMailer {
         }
 
         $mailer->XMailer = false;
+
+        return $mailer; // It's not a filter...
     }
 
     /**
@@ -280,6 +283,8 @@ class NewsletterDefaultMailer extends NewsletterMailer {
      * @return \WP_Error|boolean
      */
     function send($message) {
+
+        $logger = $this->get_logger();
 
         if (!$this->filter_active) {
             add_action('phpmailer_init', array($this, 'fix_mailer'), 100);
@@ -325,7 +330,12 @@ class NewsletterDefaultMailer extends NewsletterMailer {
         $this->last_error = null;
 
         $this->current_message = $message;
+
+        // To avoid to show errors/warnings by code executed before
+        error_clear_last();
+
         $r = wp_mail($message->to, $message->subject, $body, $wp_mail_headers);
+
         $this->current_message = null;
 
         if (!$r) {
@@ -350,6 +360,7 @@ class NewsletterDefaultMailer extends NewsletterMailer {
             $last_error = error_get_last();
             if (is_array($last_error)) {
                 $message->error = $last_error['message'];
+
                 if (stripos($message->error, 'Could not instantiate mail function') || stripos($message->error, 'Failed to connect to mailserver')) {
                     return new WP_Error(self::ERROR_FATAL, $last_error['message']);
                 } else {

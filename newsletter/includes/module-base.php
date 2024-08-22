@@ -305,6 +305,14 @@ class NewsletterModuleBase {
         return $dummy_user;
     }
 
+    function get_user_meta_int($user_id, $key) {
+        $value = $this->get_user_meta($user_id, $key);
+        if (is_null($value)) {
+            return null;
+        }
+        return (int) $value;
+    }
+
     function get_user_meta($user_id, $key) {
         global $wpdb;
 
@@ -677,6 +685,12 @@ class NewsletterModuleBase {
         return $list;
     }
 
+    function get_emails_blocked_count() {
+        global $wpdb;
+        $count = $wpdb->get_var($wpdb->prepare("select count(*) from " . NEWSLETTER_EMAILS_TABLE . " where status=%s order by id desc", TNP_Email::STATUS_ERROR));
+        return $count;
+    }
+
     /**
      * Save an email and provide serialization, if needed, of $email['options'].
      * @return TNP_Email
@@ -740,7 +754,8 @@ class NewsletterModuleBase {
      * @return string
      */
     function get_email_key($email) {
-        if (!$email) return '0-0';
+        if (!$email)
+            return '0-0';
 
         if (!isset($email->token)) {
             return $email->id . '-';
@@ -752,11 +767,11 @@ class NewsletterModuleBase {
 
         if ($language) {
             //if (class_exists('SitePress')) {
-                if (empty($language)) {
-                    $language = 'all';
-                }
-                do_action('wpml_switch_language', $language);
-                $filters['suppress_filters'] = false;
+            if (empty($language)) {
+                $language = 'all';
+            }
+            do_action('wpml_switch_language', $language);
+            $filters['suppress_filters'] = false;
             //} else if (class_exists('Polylang')) {
             //    $filters['lang'] = $language;
             //}
@@ -774,7 +789,7 @@ class NewsletterModuleBase {
 
         if ($language) {
             //if (class_exists('SitePress')) {
-                do_action('wpml_switch_language', Newsletter::$language);
+            do_action('wpml_switch_language', Newsletter::$language);
             //}
         }
         return $posts;
@@ -905,6 +920,8 @@ class NewsletterModuleBase {
     }
 
     static function sanitize_user_field($value, $max = 250) {
+        if (!$value)
+            return '';
         $value = html_entity_decode($value, ENT_QUOTES);
         $value = wp_strip_all_tags($value, true);
         $value = str_replace(['{', '}', '[', ']', '>', '<'], '', $value); // Tags cannot be used on user's fields
@@ -1269,9 +1286,9 @@ class NewsletterModuleBase {
         echo '</div>';
         if ($attrs['numbers']) {
             if ($email->status == 'sent') {
-                echo '<div class="tnp-progress-numbers">', ((int)$email->total), ' ', esc_html__('of', 'newsletter'), ' ', ((int)$email->total), '</div>';
+                echo '<div class="tnp-progress-numbers">', ((int) $email->total), ' ', esc_html__('of', 'newsletter'), ' ', ((int) $email->total), '</div>';
             } else {
-                echo '<div class="tnp-progress-numbers">', ((int)$email->sent), ' ', esc_html__('of', 'newsletter'), ' ', ((int)$email->total), '</div>';
+                echo '<div class="tnp-progress-numbers">', ((int) $email->sent), ' ', esc_html__('of', 'newsletter'), ' ', ((int) $email->total), '</div>';
             }
         }
     }

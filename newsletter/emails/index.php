@@ -52,16 +52,6 @@ if ($controls->is_action('delete_selected')) {
 $pagination_controller = new TNP_Pagination_Controller(NEWSLETTER_EMAILS_TABLE, 'id', ['type' => 'message']);
 $emails = $pagination_controller->get_items();
 
-$emails_with_error = $this->get_emails_by_status(TNP_Email::STATUS_ERROR);
-
-if ($emails_with_error) {
-    foreach ($emails_with_error as $e) {
-        if ($e->type !== 'message') continue;
-        $controls->errors .= 'A newsletter has been stopped due to an error: ' . esc_html($e->options['error_message']??'[not set]') . '<br>';
-        $controls->errors .= '<a href="?page=newsletter_emails_edit&id=' . urlencode($e->id) . '">' . __('Check it', 'newsletter') . '</a><br>';
-        break;
-    }
-}
 ?>
 
 <div class="wrap tnp-emails tnp-emails-index" id="tnp-wrap">

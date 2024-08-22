@@ -74,7 +74,6 @@ if ($controls->is_action()) {
             $controls->messages .= '<br>If the message is not received, try to change the message text it could trigger some antispam filters.';
         }
     }
-
 } else {
     $controls->data = $this->get_options('', $language);
 }
@@ -158,8 +157,12 @@ foreach (['confirmed_text', 'confirmed_message', 'confirmation_text', 'confirmat
                                 </th>
                                 <td>
                                     <?php
-                                    $controls->select('multiple', ['0' => __('Not allowed', 'newsletter'), '1' => __('Allowed', 'newsletter'),
-                                        '2' => __('Allowed force single opt-in', 'newsletter')]);
+                                    $controls->select('multiple', [
+                                        '0' => __('Not allowed', 'newsletter'),
+                                        '1' => __('Allowed', 'newsletter'),
+                                        '2' => __('Allowed (single opt-in)', 'newsletter'),
+                                        '3' => __('Allowed (double opt-in)', 'newsletter')
+                                        ]);
                                     ?>
                                     <br><br>
 
@@ -234,6 +237,10 @@ foreach (['confirmed_text', 'confirmed_message', 'confirmation_text', 'confirmat
                 <div id="tabs-4">
 
                     <?php $this->language_notice(); ?>
+
+                    <?php if (current_user_can('administrator')) { ?>
+                        <a href="<?php echo esc_attr($this->build_action_url('c')); ?>&nk=0-0" target="_blank">Preview online</a>
+                    <?php } ?>
                     <table class="form-table">
                         <tr>
                             <th><?php esc_html_e('Welcome page content', 'newsletter') ?></th>
