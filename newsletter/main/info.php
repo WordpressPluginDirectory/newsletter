@@ -191,7 +191,7 @@ if (!$controls->is_action()) {
                                 </td>
                             </tr>
                             <tr>
-                                <th>Treads</th>
+                                <th>Threads</th>
                                 <td>
                                     <?php $controls->text('threads_url', 40); ?>
                                 </td>

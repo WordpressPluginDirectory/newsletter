@@ -638,15 +638,18 @@ class NewsletterControls {
      * @param string $name
      * @param array $values_labels
      */
-    function checkboxes_group($name, $values_labels) {
+    function checkboxes_group($name, $values_labels, $attrs = []) {
         $value_array = $this->get_value_array($name);
 
         echo '<div class="tnpc-checkboxes">';
         foreach ($values_labels as $value => $label) {
-            echo '<label><input type="checkbox" id="' . esc_attr($name) . '" name="options[' . esc_attr($name) . '][]" value="' . esc_attr($value) . '"';
+            echo '<label><input type="checkbox" id="', esc_attr($name), '" name="options[', esc_attr($name), '][]" value="', esc_attr($value), '"';
             // phpcs:ignore WordPress.PHP.StrictInArray.MissingTrueStrict
             if (array_search($value, $value_array) !== false) {
                 echo ' checked';
+            }
+            if (!empty($attrs['disabled'])) {
+                echo ' disabled';
             }
             echo '>';
             if ($label != '') {
@@ -1417,6 +1420,11 @@ class NewsletterControls {
         if (!empty($attrs['onchange'])) {
             echo ' onchange="', esc_attr($attrs['onchange']), '"';
         }
+
+        if (!empty($attrs['disabled'])) {
+            echo ' disabled';
+        }
+
         echo '>';
         if ($label != '') {
             echo '&nbsp;' . esc_html($label) . '</label>';
@@ -2222,7 +2230,7 @@ tnp_controls_init();
      *
      * @param string $name
      */
-    function languages($name = 'languages') {
+    function languages($name = 'languages', $attrs = []) {
         if (!$this->is_multilanguage()) {
             echo esc_html__('Install WPML or Polylang for multilanguage support', 'newsletter');
             return;
@@ -2235,7 +2243,7 @@ tnp_controls_init();
             return;
         }
 
-        $this->checkboxes_group($name, $language_options);
+        $this->checkboxes_group($name, $language_options, $attrs);
     }
 
     /**

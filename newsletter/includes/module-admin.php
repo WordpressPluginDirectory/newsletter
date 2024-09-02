@@ -189,7 +189,7 @@ class NewsletterModuleAdmin extends NewsletterModuleBase {
         }
         echo '<div class="tnpc-language-notice">';
         $label = $this->get_language_label($this->language());
-        echo sprintf(esc_html__('You are configuring the language %s. Switch to "all languages" to see all options.', 'newsletter'),
+        echo sprintf(esc_html__('You are configuring the language %s. Switch to "all languages" to see or edit all options.', 'newsletter'),
                         '<strong>' . $label . '</strong>');
         echo '</div>';
     }

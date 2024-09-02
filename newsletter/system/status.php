@@ -22,7 +22,7 @@ if ($controls->is_action('conversion')) {
         }
         $r = maybe_convert_table_to_utf8mb4(NEWSLETTER_USERS_TABLE);
         if (!$r) {
-            $controls->errors .= 'It was not possible to run the conversion for the table ' . NEWSLETTER_EMAILS_TABLE . ' - ';
+            $controls->errors .= 'It was not possible to run the conversion for the table ' . NEWSLETTER_USERS_TABLE . ' - ';
             $controls->errors .= $wpdb->last_error . '<br>';
         }
         $controls->messages .= 'Done.';

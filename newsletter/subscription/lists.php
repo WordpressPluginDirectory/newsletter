@@ -100,17 +100,30 @@ $panels = (int) (NEWSLETTER_LIST_MAX / 10) + (NEWSLETTER_LIST_MAX % 10 > 0 ? 1 :
                         <table class="widefat" style="width: auto; max-width: 800px" scope="presentation">
                             <thead>
                                 <tr>
-                                    <th>#</th>
-                                    <th><?php esc_html_e('Name', 'newsletter') ?></th>
+                                    <th style="vertical-align: top">#</th>
+                                    <th style="vertical-align: top"><?php esc_html_e('Name', 'newsletter') ?></th>
                                     <?php if (!$language) { ?>
-                                        <th><?php _e('Type', 'newsletter') ?></th>
-                                        <th style="white-space: nowrap"><?php esc_html_e('Enforced', 'newsletter') ?> <i class="fas fa-info-circle tnp-notes" title="<?php esc_attr_e('If you check this box, all your new subscribers will be automatically added to this list', 'newsletter') ?>"></i></th>
+                                        <th style="vertical-align: top"><?php esc_html_e('Type', 'newsletter') ?></th>
+                                        <th style="vertical-align: top; white-space: nowrap"><?php esc_html_e('Enforced', 'newsletter') ?> <i class="fas fa-info-circle tnp-notes" title="<?php esc_attr_e('If you check this box, all your new subscribers will be automatically added to this list', 'newsletter') ?>"></i></th>
                                         <?php if ($is_multilanguage) { ?>
-                                            <th><?php esc_html_e('Enforced by language', 'newsletter') ?></th>
+                                            <th style="vertical-align: top">
+                                                <?php esc_html_e('Enforced by language', 'newsletter') ?>
+                                                <i class="fas fa-info-circle tnp-notes" title="<?php esc_attr_e('If you check a language, all your new subscribers with that language will be automatically added to the list', 'newsletter') ?>"></i>
+                                            </th>
                                         <?php } ?>
+                                    <?php } elseif ($is_multilanguage) { ?>
+                                        <th style="vertical-align: top; white-space: nowrap">
+                                            <?php esc_html_e('Enforced', 'newsletter') ?><br>
+                                            <span style="color: var(--tnp-gray-light); font-size: .9em">Switch to "all languages"</span>
+                                        </th>
                                     <?php } ?>
-                                    <th><?php esc_html_e('Subscribers', 'newsletter') ?></th>
-                                    <th>&nbsp;</th>
+                                    <th style="vertical-align: top"><?php esc_html_e('Subscribers', 'newsletter') ?></th>
+                                    <th style="vertical-align: top; white-space: nowrap">
+                                        <?php esc_html_e('Actions', 'newsletter') ?>
+                                        <?php if ($language) { ?>
+                                            <br><span style="color: var(--tnp-gray-light); font-size: .9em">Switch to "all languages"</span>
+                                        <?php } ?>
+                                    </th>
                                 </tr>
                             </thead>
 
@@ -129,11 +142,13 @@ $panels = (int) (NEWSLETTER_LIST_MAX / 10) + (NEWSLETTER_LIST_MAX % 10 > 0 ? 1 :
                                     <?php if (!$language) { ?>
                                         <td><?php $controls->select('list_' . $i . '_status', $status); ?></td>
                                         <td style="text-align: center">
-                                            <?php $controls->checkbox('list_' . $i . '_forced'); ?>
+                                            <?php $controls->checkbox('list_' . $i . '_forced', ''); ?>
                                         </td>
                                         <?php if ($is_multilanguage) { ?>
                                             <td><?php $controls->languages('list_' . $i . '_languages'); ?></td>
                                         <?php } ?>
+                                    <?php } elseif ($is_multilanguage) { ?>
+                                        <td>&nbsp;</td>
                                     <?php } ?>
 
                                     <td>

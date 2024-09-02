@@ -321,8 +321,8 @@ function tnp_resize($media_id, $size) {
     $out_mimetype = null;
 
     if ($file_ext === 'webp' || $file_ext === 'avif') {
-        $file_ext = 'jpg';
-        $out_mimetype = 'image/jpeg';
+        $file_ext = 'png';
+        $out_mimetype = 'image/png';
     }
 
     $relative_thumb = $pathinfo['dirname'] . '/' . $pathinfo['filename'] . '-' . $width . 'x' . $height . ($crop ? '-c' : '') . '.' . $file_ext;

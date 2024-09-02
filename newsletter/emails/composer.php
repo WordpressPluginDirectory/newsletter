@@ -72,7 +72,7 @@ if ($controls->is_action()) {
 
         TNP_Composer::update_email($email, $controls);
 
-        $email = $this->save_email($email);
+        $email = $this->save_email($email, OBJECT, true);
         if ($controls->is_action('preview')) {
             $redirect = '?page=newsletter_emails_edit';
         } else {
@@ -107,10 +107,16 @@ if ($controls->is_action()) {
             }
 
             $email->updated = time();
-            $email = $this->save_email($email);
-            TNP_Composer::prepare_controls($controls, $email);
-            if ($controls->is_action('save')) {
-                $controls->add_toast_saved();
+
+            $email = $this->save_email($email, OBJECT, true);
+
+            if (is_wp_error($email)) {
+                $controls->errors = $email->get_error_message();
+            } else {
+                TNP_Composer::prepare_controls($controls, $email);
+                if ($controls->is_action('save')) {
+                    $controls->add_toast_saved();
+                }
             }
         }
     }

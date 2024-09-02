@@ -693,7 +693,7 @@ class NewsletterModuleBase {
 
     /**
      * Save an email and provide serialization, if needed, of $email['options'].
-     * @return TNP_Email
+     * @return TNP_Email|bool|WP_Error
      */
     function save_email($email, $return_format = OBJECT) {
         if (is_object($email)) {
@@ -708,7 +708,13 @@ class NewsletterModuleBase {
         if (isset($email['options']) && is_array($email['options'])) {
             $email['options'] = serialize($email['options']);
         }
-        $email = $this->store->save(NEWSLETTER_EMAILS_TABLE, $email, $return_format);
+
+        $email = $this->store->save(NEWSLETTER_EMAILS_TABLE, $email, $return_format, true);
+
+        if (is_wp_error($email)) {
+            return $email;
+        }
+
         if ($return_format == OBJECT) {
             $email->options = maybe_unserialize($email->options);
             if (!is_array($email->options)) {
