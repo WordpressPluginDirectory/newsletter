@@ -304,9 +304,9 @@ if (isset($email['options']['status']) && $email['options']['status'] === 'S') {
     $controls->warnings[] = __('This newsletter will be sent to not confirmed subscribers.', 'newsletter');
 }
 
-if (strpos($email['message'], '{profile_url}') === false && strpos($email['message'], '{unsubscription_url}') === false && strpos($email['message'], '{unsubscription_confirm_url}') === false) {
-    $controls->warnings[] = __('The message is missing the subscriber profile or cancellation link.', 'newsletter');
-}
+//if (strpos($email['message'], '{profile_url}') === false && strpos($email['message'], '{unsubscription_url}') === false && strpos($email['message'], '{unsubscription_confirm_url}') === false) {
+//    $controls->warnings[] = __('The message is missing the subscriber profile or cancellation link.', 'newsletter');
+//}
 
 if (TNP_Email::STATUS_ERROR === $email['status'] && isset($email['options']['error_message'])) {
     $controls->errors .= sprintf(__('Stopped by fatal error: %s', 'newsletter'), esc_html($email['options']['error_message']));

@@ -392,25 +392,50 @@ class NewsletterMailerAddon extends NewsletterAddon {
         $this->echo_status_badge();
     }
 
-    function set_bounced($email) {
+    function set_bounced($email, $type = 'permanent', $data = '') {
         global $wpdb;
         $logger = $this->get_logger();
         $logger->info($email . ' bounced');
-        $this->query($wpdb->prepare("update " . NEWSLETTER_USERS_TABLE . " set status=%s where email=%s limit 1", TNP_User::STATUS_BOUNCED, $email));
+        $user = Newsletter::instance()->get_user($email);
+        if (!$user) {
+            Newsletter\Logs::add($this->name, $email . ' - ' . $type . ' bounce - no subscriber found');
+            $logger->info($email . ' not found');
+            return;
+        }
+
+        Newsletter::instance()->set_user_status($user, TNP_User::STATUS_BOUNCED);
+        add_user_log($user, $this->name);
+        Newsletter\Logs::add($this->name, $email . ' - ' . $type . ' bounce', 0, $data);
     }
 
     function set_complained($email) {
         global $wpdb;
         $logger = $this->get_logger();
         $logger->info($email . ' complained');
-        $this->query($wpdb->prepare("update " . NEWSLETTER_USERS_TABLE . " set status=%s where email=%s limit 1", TNP_User::STATUS_COMPLAINED, $email));
+        $user = Newsletter::instance()->get_user($email);
+        if (!$user) {
+            Newsletter\Logs::add($this->name, $email . ' - complaint - no subscriber found');
+            $logger->info($email . ' not found');
+            return;
+        }
+
+        Newsletter::instance()->set_user_status($user, TNP_User::STATUS_COMPLAINED);
+        Newsletter::instance()->add_user_log($user, $this->name);
     }
 
     function set_unsubscribed($email) {
         global $wpdb;
         $logger = $this->get_logger();
         $logger->info($email . ' unsubscribed');
-        $this->query($wpdb->prepare("update " . NEWSLETTER_USERS_TABLE . " set status=%s where email=%s limit 1", TNP_User::STATUS_UNSUBSCRIBED, $email));
+        $user = Newsletter::instance()->get_user($email);
+        if (!$user) {
+            Newsletter\Logs::add($this->name, $email . ' - unsubscribe - no subscriber found');
+            $logger->info($email . ' not found');
+            return;
+        }
+
+        Newsletter::instance()->set_user_status($user, TNP_User::STATUS_UNSUBSCRIBED);
+        Newsletter::instance()->add_user_log($user, $this->name);
     }
 
     /**
@@ -556,6 +581,8 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
 
     function get_default_subscription($form_options) {
         $subscription = NewsletterSubscription::instance()->get_default_subscription();
+        $subscription->floodcheck = false;
+
         if (!empty($form_options['welcome_email'])) {
             if ($form_options['welcome_email'] == '1') {
                 $subscription->welcome_email_id = (int) $form_options['welcome_email_id'];
@@ -639,6 +666,28 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
                     }
             );
         }
+    }
+
+    /**
+     *
+     * @param TNP_Subscription $subscription
+     * @param misex $form_id
+     * @return TNP_User|WP_Error
+     */
+    function subscribe($subscription, $form_id) {
+        $logger = $this->get_logger();
+
+        $logger->debug($subscription);
+
+        $user = NewsletterSubscription::instance()->subscribe2($subscription);
+
+        if (is_wp_error($user)) {
+            Newsletter\Logs::add($this->name . '-' . $form_id, 'Subcription for ' . $subscription->data->email . ' failed: ' . $user->get_error_message());
+        } else {
+            Newsletter\Logs::add($this->name . '-' . $form_id, 'Subcription for ' . $subscription->data->email);
+        }
+
+        return $user;
     }
 
     /**

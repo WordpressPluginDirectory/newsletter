@@ -162,6 +162,7 @@ function percentValue($value, $total) {
                             <th><?php esc_html_e('Status', 'newsletter'); ?></th>
                             <td>
                                 <?php $controls->user_status() ?>
+                                <span class="description"><a href="?page=newsletter_users_logs&id=<?php echo esc_attr($user->id); ?>">Status change history</a></span>
                             </td>
                         </tr>
                         <tr>

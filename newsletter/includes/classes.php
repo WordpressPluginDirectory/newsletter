@@ -240,6 +240,7 @@ class TNP_Subscription {
      */
     var $data;
     var $spamcheck = true;
+    var $floodcheck = true;
     // The optin to use, empty for the plugin default. It's a string to facilitate the use by addons (which have a selector for the desired
     // optin as empty (for default), 'single' or 'double'.
     var $optin = null;

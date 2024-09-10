@@ -14,6 +14,11 @@ class Logs {
      */
     static function add($source, $description, $status = 0, $data = '') {
         global $wpdb;
+
+        if (is_null($data)) {
+            $data = '';
+        }
+
         if (!is_scalar($data)) {
             $data = wp_json_encode($data, JSON_PRETTY_PRINT);
         }

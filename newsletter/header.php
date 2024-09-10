@@ -219,7 +219,7 @@ $system_warnings = NewsletterSystemAdmin::instance()->get_warnings_count();
                     <a href="javascript:alert('You have a reselled license, please ask your web agency to renew it or get a personal one.')"><i class="fas fa-check-square"></i> <?php esc_html_e('License expired', 'newsletter') ?></a>
                 </li>
             <?php } ?>
-                
+
         <?php } elseif ($license_data->expire < time() + MONTH_IN_SECONDS) { ?>
 
             <?php if ($license_data->type === 'personal') { ?>
@@ -270,20 +270,29 @@ if (NEWSLETTER_DEBUG || NEWSLETTER_PAGE_WARNING) {
 
             foreach ($languages as $l => $label) { // Do NOT use $language!
                 $tnp_page_id = NewsletterMainAdmin::instance()->get_option('page', '', $l);
+
+                // Found an installation with page ID equals to zero and returning a valid status...
+                if (empty($tnp_page_id)) {
+                    $missing[] = '<a href="?page=newsletter_main_main&lang=' . esc_attr($l) . '#tabs-basic">' . esc_html($label) . '</a>';
+                    continue;
+                }
+
                 $tnp_page_status = get_post_status($tnp_page_id);
                 if ($tnp_page_status === false) {
                     $missing[] = '<a href="?page=newsletter_main_main&lang=' . esc_attr($l) . '#tabs-basic">' . esc_html($label) . '</a>';
-                } else {
-                    if ($tnp_page_status !== 'publish') {
-                        $missing_publish[] = '<a href="' . esc_attr(admin_url('post.php')) . '?post=' . esc_attr($tnp_page_id)
-                                . '&action=edit" target="_blank">' . esc_html(get_post_field('post_title', $tnp_page_id)) . '</a>';
-                    }
+                    continue;
+                }
 
-                    $content = get_post_field('post_content', $tnp_page_id);
-                    if (strpos($content, '[newsletter]') === false && strpos($content, '[newsletter ') === false) {
-                        $missing_shortcode[] = '<a href="' . esc_attr(admin_url('post.php')) . '?post=' . esc_attr($tnp_page_id)
-                                . '&action=edit" target="_blank">' . esc_html(get_post_field('post_title', $tnp_page_id)) . '</a>';
-                    }
+                if ($tnp_page_status !== 'publish') {
+                    $missing_publish[] = '<a href="' . esc_attr(admin_url('post.php')) . '?post=' . esc_attr($tnp_page_id)
+                            . '&action=edit" target="_blank">' . esc_html(get_post_field('post_title', $tnp_page_id)) . '</a>';
+                    continue;
+                }
+
+                $content = get_post_field('post_content', $tnp_page_id);
+                if (strpos($content, '[newsletter]') === false && strpos($content, '[newsletter ') === false && strpos($content, '[newsletter/]') === false) {
+                    $missing_shortcode[] = '<a href="' . esc_attr(admin_url('post.php')) . '?post=' . esc_attr($tnp_page_id)
+                            . '&action=edit" target="_blank">' . esc_html(get_post_field('post_title', $tnp_page_id)) . '</a>';
                 }
             }
 
@@ -307,7 +316,7 @@ if (NEWSLETTER_DEBUG || NEWSLETTER_PAGE_WARNING) {
                 update_option('newsletter_public_page_check', 0, false);
                 ?>
                 <div class="tnp-notice tnp-notice-warning">
-                    Some Newsletter's public page(s) do not contain the <code>[newsletter]</code> shortcode that is required: <?php echo implode(', ', $missing_shortcode); ?>
+                    Some Newsletter's public page(s) do not contain the <code>[newsletter]</code> shortcode: <?php echo implode(', ', $missing_shortcode); ?>
                 </div>
                 <?php
             }
@@ -343,12 +352,18 @@ if (NEWSLETTER_DEBUG || NEWSLETTER_PAGE_WARNING) {
 }
 ?>
 
-<?php if (isset($_GET['debug']) || !isset($dismissed['rate']) && $user_count > 300) { ?>
+<?php if (isset($_GET['debug']) || isset($dismissed['newsletter-subscribe']) && !isset($dismissed['rate']) && $user_count > 300) { ?>
     <div class="tnp-notice">
         <a href="<?php echo esc_attr($_SERVER['REQUEST_URI']) . '&noheader=1&dismiss=rate' ?>" class="tnp-dismiss">&times;</a>
 
-        We never asked before and we're curious: <a href="http://wordpress.org/plugins/newsletter/" target="_blank">would you rate this plugin</a>?
-        (few seconds required - account on WordPress.org required, every blog owner should have one...). <strong>Really appreciated, The Newsletter Team</strong>.
+        ☆☆☆☆☆ Would you rate the Newsletter plugin</a> to help us improve even more?
+    <br><br>
+    <a href="https://wordpress.org/support/plugin/newsletter/reviews/?rate=5#new-post" target="_blank" class="button-primary" style="color: #fff"><?php esc_html_e('Yes, you deserve it!', 'newsletter') ?></a>
+    &nbsp;&nbsp;&nbsp;
+    <a href="<?php echo esc_attr($_SERVER['REQUEST_URI']) . '&noheader=1&dismiss=rate' ?>" style="color: #666; font-weight: normal; font-size: .9em"><?php esc_html_e('Maybe later', 'newsletter') ?></a>
+
+    <br><br>
+    <strong>Really appreciated, The Newsletter Team</strong>.
 
     </div>
 <?php } ?>

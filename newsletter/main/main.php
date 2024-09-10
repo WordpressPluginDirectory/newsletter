@@ -108,7 +108,6 @@ $license_data = License::get_data();
 if (is_wp_error($license_data)) {
     $controls->errors .= esc_html($license_data->get_error_message());
 }
-
 ?>
 
 <?php include NEWSLETTER_INCLUDES_DIR . '/codemirror.php'; ?>
@@ -237,7 +236,7 @@ if (is_wp_error($license_data)) {
                             </th>
                             <td>
 
-                                <?php $controls->page('page', null, '', true); ?>
+                                <?php $controls->page('page', NEWSLETTER_DEBUG ? 'None (for debug)' : null, '', true); ?>
 
                                 <?php
                                 if (!$this->is_multilanguage() && empty($controls->data['page'])) {
@@ -251,7 +250,7 @@ if (is_wp_error($license_data)) {
 
                                 <?php if ($this->is_multilanguage()) { ?>
                                     <p class="description">
-                                        This page needs to be set for every language.
+                                        <?php esc_html_e('To be set for every language', 'newsletter'); ?>
                                     </p>
                                 <?php } ?>
 

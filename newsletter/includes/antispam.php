@@ -69,7 +69,7 @@ class NewsletterAntispam {
         }
 
         // Flood check
-        if ($this->is_flood($email, $ip)) {
+        if ($subscription->floodcheck && $this->is_flood($email, $ip)) {
             $this->logger->fatal($email . ' - ' . $ip . ' - Antiflood triggered');
             if ($return_wp_error)
                 return new WP_Error('flood', 'Flood detected for: ' . $ip . ' or ' . $email);

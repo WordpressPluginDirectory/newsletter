@@ -711,11 +711,19 @@ class NewsletterControls {
         $this->select($name, $options);
     }
 
+    /**
+     *
+     * @param string $name Control name
+     * @param string $first LAbel for the first empty entry (if null: not shown)
+     * @param string $language Language code to extract the pages only for that language
+     * @param bool $show_id Show the page ID near the page title
+     */
+
     function page($name = 'page', $first = null, $language = '', $show_id = false) {
         $args = array(
             'post_type' => 'page',
             // phpcs:ignore WordPress.WP.PostsPerPage.posts_per_page_posts_per_page
-            'posts_per_page' => 200,
+            'posts_per_page' => 1500,
             'offset' => 0,
             'orderby' => 'post_title',
             'post_status' => 'any',
