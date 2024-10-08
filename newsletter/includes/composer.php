@@ -269,28 +269,25 @@ class TNP_Composer {
      */
     static function update_email($email, $controls) {
         if (isset($controls->data['subject'])) {
-            $email->subject = $controls->data['subject'];
+            $email->subject = wp_strip_all_tags($controls->data['subject']);
         }
 
         // They should be only composer options
         foreach ($controls->data as $name => $value) {
             if (strpos($name, 'options_') === 0) {
-                $email->options[substr($name, 8)] = $value;
+                $email->options[substr($name, 8)] = wp_strip_all_tags($value);
             }
         }
 
-        //if (isset($controls->data['preheader'])) {
-        //    $email->options['preheader'] = $controls->data['preheader'];
-        //}
-
         $email->editor = NewsletterEmails::EDITOR_COMPOSER;
+        $message = $controls->data['message'];
 
         $email->message = self::get_html_open($email) . self::get_main_wrapper_open($email) .
-                $controls->data['message'] . self::get_main_wrapper_close($email) . self::get_html_close($email);
+                $message . self::get_main_wrapper_close($email) . self::get_html_close($email);
     }
 
     /**
-     * Prepares a controls object injecting the relevant fields from an email
+     * Prepares a NewsletterControls object injecting the relevant fields from an email
      * which cannot be directly used by controls. If $email is null or missing,
      * $controls is prepared with default values.
      *
@@ -440,6 +437,10 @@ class TNP_Composer {
      * @return string
      */
     static function image($media, $attr = []) {
+
+        if (!$media) {
+            return '';
+        }
 
         $default_attrs = [
             'style' => 'display: inline-block; max-width: 100%!important; height: auto; padding: 0; border: 0; font-size: 12px',
@@ -631,7 +632,7 @@ class TNP_Composer {
      */
     static function grid($items = [], $attrs = []) {
         $attrs = wp_parse_args($attrs, ['width' => 600, 'columns' => 2, 'widths' => [], 'padding' => 10, 'responsive' => true]);
-        $width = (int) $attrs['width'];
+        $width = (int) $attrs['width'] - 2; // To compensate the border
         $columns = (int) $attrs['columns'];
         $padding = (int) $attrs['padding'];
 

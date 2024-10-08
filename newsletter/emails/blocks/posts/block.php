@@ -29,13 +29,17 @@ $defaults = array(
     'title_font_size' => '',
     'title_font_color' => '',
     'title_font_weight' => '',
-    'nocrop' => 0,
+    'image_crop' => 1,
     'max' => 4,
     'private' => '',
     'reverse' => '',
     'categories' => '',
     'tags' => '',
     'layout' => 'one',
+
+    'show_image' => 1,
+    'show_date' => 1,
+
     'language' => '',
     'button_label' => __('Read more...', 'newsletter'),
     'button_background' => '',
@@ -62,12 +66,56 @@ $defaults = array(
     'show_read_more_button' => true,
 );
 
-// Backward compatibility
+$styles = [
+    'default' => [
+        'block_background' => '',
+        'block_background2' => '',
+        'font_color' => '',
+        'font_family' => '',
+        'font_size' => '',
+        'font_weight' => '',
+        'title_font_color' => '',
+        'title_font_weight' => '',
+        'title_font_family' => '',
+        'title_font_size' => '',
+        'block_border_radius' => 0,
+        'block_border_color' => ''
+    ],
+    'inverted' => [
+        'block_background' => '#000000',
+        'font_color' => '#cccccc',
+        'title_font_color' => '#ffffff',
+        'title_font_weight' => 'bold',
+        'block_border_radius' => 0,
+        'block_border_color' => ''
+    ],
+    'boxed' => [
+        'block_background' => '#eeeeee',
+        'font_color' => '#333333',
+        'title_font_color' => '#333333',
+        'title_font_weight' => 'bold',
+        'block_border_radius' => 15,
+        'block_border_color' => '#dddddd'
+    ]
+];
+
+// Migration
 if (isset($options['automated_required'])) {
     $defaults['automated'] = '1';
 }
+// Migration end
 
 $options = array_merge($defaults, $options);
+
+// Migration
+if (isset($options['nocrop'])) {
+    $options['image_crop'] = 0;
+}
+// Migration end
+
+
+$block_style = $options['block_style'] ?? '';
+$options = array_merge($options, $styles[$block_style] ?? []);
 
 $filters = array();
 
@@ -149,6 +197,7 @@ $excerpt_length_in_chars = $options['excerpt_length_type'] == 'chars';
 $show_image = !empty($options['show_image']);
 $show_date = !empty($options['show_date']);
 $show_author = !empty($options['show_author']);
+$image_crop = !empty($options['image_crop']);
 
 $title_font_family = empty($options['title_font_family']) ? $global_title_font_family : $options['title_font_family'];
 $title_font_size = empty($options['title_font_size']) ? round($global_title_font_size * 0.8) : $options['title_font_size'];
@@ -169,7 +218,7 @@ $button_options['button_font_color'] = empty($options['button_font_color']) ? $g
 $button_options['button_font_weight'] = empty($options['button_font_weight']) ? $global_button_font_weight : $options['button_font_weight'];
 $button_options['button_background'] = empty($options['button_background']) ? $global_button_background_color : $options['button_background'];
 
-$show_read_more_button = (bool) $options['show_read_more_button'];
+$show_read_more_button = (bool) $options['show_read_more_button'] && !empty($options['button_label']);
 
 Newsletter::instance()->switch_language($options['language']);
 
