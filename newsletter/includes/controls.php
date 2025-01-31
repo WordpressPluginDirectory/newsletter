@@ -718,7 +718,6 @@ class NewsletterControls {
      * @param string $language Language code to extract the pages only for that language
      * @param bool $show_id Show the page ID near the page title
      */
-
     function page($name = 'page', $first = null, $language = '', $show_id = false) {
         $args = array(
             'post_type' => 'page',
@@ -977,7 +976,7 @@ class NewsletterControls {
         $value = $this->get_value($name);
         $style = '';
         if (isset($attrs['width'])) {
-            $style = 'width: ' . ((int)$attrs['width']) . 'px;';
+            $style = 'width: ' . ((int) $attrs['width']) . 'px;';
         }
         if (!$attrs['visible']) {
             $style .= 'display: none;';
@@ -1619,9 +1618,61 @@ class NewsletterControls {
         $autoresponders = NewsletterAutoresponder::instance()->get_autoresponders();
 
         foreach ($autoresponders as $autoresponder) {
-            $controls->checkbox_group($name, $autoresponder->id, $autoresponder->name);
+            $this->checkbox_group($name, $autoresponder->id, $autoresponder->name);
             echo '<br>';
         }
+    }
+
+    /**
+     * Shows all the autoresponders giving the choice to activate, deactivate or left
+     * unchanged. The generated value is an associative array where the key is the autoresponder
+     * ID and the value is 'on', 'off', or ''.
+     *
+     * @param string $name
+     */
+    function autoresponders_on_off($name = 'autoresponders') {
+        if (!class_exists('NewsletterAutoresponder')) {
+            echo 'The Autoresponder addon is required.';
+            return;
+        }
+
+        $autoresponders = NewsletterAutoresponder::instance()->get_autoresponders();
+
+        echo '<table class="widefat" style="width: auto">';
+
+        foreach ($autoresponders as $autoresponder) {
+            echo '<tr><td>';
+            echo esc_html($autoresponder->name);
+            echo '</td><td>';
+
+            echo '<select name="options[', esc_attr($name), '][]"';
+            echo '>';
+
+            echo '<option value="">', esc_html__('Ignore', 'newsletter'), '</option>';
+
+            $values = $this->get_value_array($name);
+
+            // Positive ID
+            echo '<option value="', esc_attr($autoresponder->id), '"';
+            if (in_array('' . $autoresponder->id, $values)) {
+                echo ' selected';
+            }
+            echo '>', esc_html__('Activate', 'newsletter'), '</option>';
+
+            // Negative ID
+            echo '<option value="-', esc_attr($autoresponder->id), '"';
+            if (in_array('-' . $autoresponder->id, $values)) {
+                echo ' selected';
+            }
+            echo '>', esc_html__('Deactivate', 'newsletter'), '</option>';
+
+
+            echo '</select>';
+
+            echo '</tr></td>';
+        }
+
+        echo '</table>';
     }
 
     function lists_checkboxes($name = 'lists') {
@@ -1923,6 +1974,8 @@ class NewsletterControls {
             $cookie_name = 'newsletter_tab';
         }
 
+        $tab = $_GET['tab'] ?? $_COOKIE[$cookie_name] ?? '';
+
         echo '<script type="text/javascript">
     jQuery(document).ready(function(){
 
@@ -1933,7 +1986,7 @@ tnp_controls_init();
             jQuery(this).css("height", "400px");
         });
       tabs = jQuery("#tabs").tabs({
-        active : jQuery.cookie("', sanitize_key($cookie_name), '"),
+        active : "', sanitize_key($tab), '",
         activate : function( event, ui ){
             jQuery.cookie("', sanitize_key($cookie_name), '", ui.newTab.index(),{expires: 1});
         }
@@ -2141,7 +2194,6 @@ tnp_controls_init();
             'Arial Narrow, sans-serif' => 'Arial Narrow',
             'Book Antiqua, serif' => 'Book Antiqua',
             'Century Gothic, sans-serif' => 'Century Gothic',
-
         ];
 
         echo '<select class="tnpf-font-family" id="options-', esc_attr($name), '" name="options[', esc_attr($name), ']">';
@@ -2158,7 +2210,6 @@ tnp_controls_init();
                 echo ' selected';
             }
             echo '>', esc_html($label), '</option>';
-
         }
         echo '</optgroup>';
 
@@ -2170,10 +2221,8 @@ tnp_controls_init();
                 echo ' selected';
             }
             echo '>', esc_html($label), '</option>';
-
         }
         echo '</optgroup>';
-
 
         echo '</select>';
     }

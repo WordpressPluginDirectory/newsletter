@@ -64,12 +64,29 @@ class NewsletterAddon {
                     add_filter('newsletter_menu_subscribers', [$this, 'subscribers_menu']);
                 }
             }
+            add_filter('newsletter_support_data', [$this, 'support_data'], 10, 1);
         }
     }
 
     function weekly_check() {
         $logger = $this->get_logger();
         $logger->info('Weekly check for ' . $this->name);
+    }
+
+    /**
+     * To be overridden.
+     *
+     * @return array
+     */
+    function get_support_data() {
+        return [];
+    }
+
+    function support_data($data = []) {
+        $d = $this->get_support_data();
+        $d = array_merge($d, ['version' => $this->version]);
+        $data[$this->name] = $d;
+        return $data;
     }
 
     function deactivate() {
@@ -649,6 +666,28 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
         return $notes;
     }
 
+    function hook_newsletter_autoresponder_sources($list, $id) {
+        $forms = $this->get_forms();
+        foreach ($forms as $form) {
+            $settings = $this->get_form_options($form->id);
+
+            if (empty($settings['autoresponders'])) {
+                continue;
+            }
+
+            if (in_array('' . $id, $settings['autoresponders'])) {
+                $s = new Newsletter\Source($form->title, $this->menu_title);
+                $s->action = 'on';
+                $list[] = $s;
+            } elseif (in_array('-' . $id, $settings['autoresponders'])) {
+                $s = new Newsletter\Source($form->title, $this->menu_title);
+                $s->action = 'off';
+                $list[] = $s;
+            }
+        }
+        return $list;
+    }
+
     function get_default_subscription($form_options) {
         $subscription = NewsletterSubscription::instance()->get_default_subscription();
         $subscription->floodcheck = false;
@@ -664,13 +703,10 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
             $subscription->optin = $form_options['status'];
         }
 
-        if (!empty($form_options['lists'])) {
-            $subscription->data->add_lists($form_options['lists']);
-        }
+        $subscription->data->add_lists($form_options['lists'] ?? []);
 
-        if (!empty($form_options['autoresponders'])) {
-            $subscription->autoresponders = $form_options['autoresponders'];
-        }
+        // The parser already removes the empty/non scalar values
+        $subscription->autoresponders = wp_parse_list($form_options['autoresponders'] ?? []);
 
         return $subscription;
     }
@@ -802,7 +838,9 @@ class NewsletterFormManagerAddon extends NewsletterAddon {
      * @param array $data
      */
     public function save_form_options($form_id, $data) {
+        $data['autoresponders'] = array_values(array_filter($data['autoresponders'] ?? []));
         update_option('newsletter_' . $this->name . '_' . $form_id, $data, false);
+        return $data;
     }
 
     /**
