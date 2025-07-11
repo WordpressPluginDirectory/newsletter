@@ -1,19 +1,29 @@
 <?php
 
-class NewsletterComposer {
+defined('ABSPATH') || exit;
+
+function tnp_register_block($dir) {
+    return NewsletterComposer::instance()->register_block($dir);
+}
+
+function tnp_register_template($dir) {
+    return NewsletterComposer::instance()->register_template($dir);
+}
+
+class NewsletterComposer extends NewsletterModule {
 
     static $instance;
-    var $logger;
+    static $block_dirs = [];
+    static $template_dirs = [];
     var $blocks = null;
     var $templates = null;
-    static $default_templates = ['zen', 'valentine', 'event', 'black-friday', 'black-friday-2', 'welcome-1', 'halloween', 'confirmation-1', 'welcome-2'];
-    static $old_default_templates = ['announcement', 'cta', 'invite', 'posts', 'product', 'sales', 'simple', 'tour'];
+    static $default_templates = ['blank', 'posts-1', 'posts-2', 'zen', 'valentine', 'event', 'invite-1', 'sale-1', 'black-friday', 'black-friday-2', 'welcome-1', 'halloween', 'confirmation-1', 'welcome-2'];
+//    static $old_default_templates = ['announcement', 'cta', 'invite', 'posts', 'product', 'simple', 'tour'];
 
     const OUTLOOK_START_IF = '<!--[if mso | IE]>';
     const OUTLOOK_END_IF = '<![endif]-->';
 
     /**
-     *
      * @return NewsletterComposer
      */
     static function instance() {
@@ -25,7 +35,55 @@ class NewsletterComposer {
     }
 
     function __construct() {
-        $this->logger = new NewsletterLogger('composer');
+        parent::__construct('composer');
+    }
+
+    /**
+     * Checks if a file exists on provided filder and return the normalized folder or WP_Error.
+     * Logs errors.
+     *
+     * @param string $dir
+     * @param string $file
+     * @return string|\WP_Error
+     */
+    static function check_dir($dir, $file) {
+        $dir = realpath($dir);
+        if (!$dir) {
+            $error = new WP_Error('1', 'Seems not a valid path: ' . $dir);
+            self::instance()->logger->error($error);
+            return $error;
+        }
+        $dir = wp_normalize_path($dir);
+        $dir = untrailingslashit($dir);
+        if (!file_exists($dir . '/' . $file)) {
+            $error = new WP_Error('1', $file . ' missing on folder ' . $dir);
+            self::instance()->logger->error($error);
+            return $error;
+        }
+
+        return $dir;
+    }
+
+    static function register_block($dir) {
+        //self::instance()->logger->info('Registering block ' . $dir);
+        $dir = self::check_dir($dir, 'block.php');
+        if (is_wp_error($dir)) {
+            return $dir;
+        } else {
+            self::$block_dirs[] = $dir;
+            return true;
+        }
+    }
+
+    static function register_template($dir) {
+        //self::instance()->logger->info('Registering template ' . $dir);
+        $dir = self::check_dir($dir, 'template.json');
+        if (is_wp_error($dir)) {
+            return $dir;
+        } else {
+            self::$template_dirs[] = $dir;
+            return true;
+        }
     }
 
     /**
@@ -73,51 +131,8 @@ class NewsletterComposer {
      * @return array
      */
     function get_block($id) {
-        switch ($id) {
-            case 'content-03-text.block':
-                $id = 'text';
-                break;
-            case 'footer-03-social.block':
-                $id = 'social';
-                break;
-            case 'footer-02-canspam.block':
-                $id = 'canspam';
-                break;
-            case 'content-05-image.block':
-                $id = 'image';
-                break;
-            case 'header-01-header.block':
-                $id = 'header';
-                break;
-            case 'footer-01-footer.block':
-                $id = 'footer';
-                break;
-            case 'content-02-heading.block':
-                $id = 'heading';
-                break;
-            case 'content-07-twocols.block':
-            case 'content-06-posts.block':
-                $id = 'posts';
-                break;
-            case 'content-04-cta.block':
-                $id = 'cta';
-                break;
-            case 'content-01-hero.block':
-                $id = 'hero';
-                break;
-//            case 'content-02-heading.block': $id = '/plugins/newsletter/emails/blocks/heading';
-//                break;
-        }
-
-        // Conversion for old full path ID
-        $id = sanitize_key(basename($id));
-
-        // TODO: Correct id for compatibility
         $blocks = $this->get_blocks();
-        if (!isset($blocks[$id])) {
-            return null;
-        }
-        return $blocks[$id];
+        return $blocks[$id] ?? null;
     }
 
     /**
@@ -151,7 +166,7 @@ class NewsletterComposer {
 
         do_action('newsletter_register_blocks');
 
-        foreach (TNP_Composer::$block_dirs as $dir) {
+        foreach (self::$block_dirs as $dir) {
             $block = $this->build_block($dir);
             if (is_wp_error($block)) {
                 $this->logger->error($block);
@@ -238,7 +253,7 @@ class NewsletterComposer {
      * @return type
      */
     function get_composer_css($attrs = []) {
-        $css = file_get_contents(NEWSLETTER_DIR . '/emails/tnp-composer/css/newsletter.css');
+        $css = file_get_contents(__DIR__ . '/css/newsletter.css');
 
         $css .= "/* Custom CSS */\n";
 
@@ -269,7 +284,7 @@ class NewsletterComposer {
     }
 
     function get_composer_backend_css($attrs = []) {
-        $css = file_get_contents(NEWSLETTER_DIR . '/emails/tnp-composer/css/backend.css');
+        $css = file_get_contents(__DIR__ . '/css/backend.css');
         $css .= "\n\n";
         $css .= $this->get_composer_css();
 
@@ -292,26 +307,23 @@ class NewsletterComposer {
      * @return Newsletter\Composer\Template|\WP_Error
      */
     function build_template($dir) {
-        $dir = realpath($dir);
-        $dir = wp_normalize_path($dir);
-        $dir = untrailingslashit($dir);
-        $full_file = $dir . '/template.json';
-        if (!is_file($full_file)) {
-            return new WP_Error('1', 'Missing template.json file in ' . $dir);
+        $dir = self::check_dir($dir, '/template.json');
+        if (is_wp_error($dir)) {
+            return $dir;
         }
 
         $wp_content_dir = wp_normalize_path(realpath(WP_CONTENT_DIR));
 
         $relative_dir = substr($dir, strlen($wp_content_dir));
 
-        $file = basename($dir);
-
         $template_url = content_url($relative_dir);
-        $json = file_get_contents($full_file);
+        $json = file_get_contents($dir . '/template.json');
         $json = str_replace("{template_url}", $template_url, $json);
         $data = json_decode($json);
         if (!$data) {
-            return new WP_Error('1', 'Unable to decode the template JSON in ' . $dir);
+            $error = new WP_Error('1', 'Unable to decode the template JSON in ' . $dir);
+            $this->logger->error($error);
+            return $error;
         }
         $data->dir = $dir;
         $data->icon = $template_url . "/icon.png?ver=2";
@@ -347,12 +359,11 @@ class NewsletterComposer {
             return NEWSLETTER_DIR . '/emails/templates/' . $item;
         }, self::$default_templates);
 
-        $dirs = array_merge(TNP_Composer::$template_dirs, $default_dirs);
+        $dirs = array_merge(self::$template_dirs, $default_dirs);
 
         foreach ($dirs as $dir) {
             $template = $this->build_template($dir);
             if (is_wp_error($template)) {
-                $this->logger->error($template);
                 continue;
             }
 
@@ -365,26 +376,26 @@ class NewsletterComposer {
         }
 
         // Old presets to be converted or deleted
-        foreach (self::$old_default_templates as $id) {
-
-            if (isset($this->templates[$id])) {
-                continue;
-            }
-            $file = NEWSLETTER_DIR . '/emails/presets/' . $id . '/preset.json';
-
-            $json = file_get_contents($file);
-            $json = str_replace("{placeholder_base_url}", plugins_url('newsletter') . '/emails/presets', $json);
-            $data = json_decode($json);
-            if (!$data) {
-                continue;
-            }
-
-            $data->id = $id;
-            $data->dir = NEWSLETTER_DIR . '/emails/presets/' . $id;
-            $data->icon = Newsletter::plugin_url() . "/emails/presets/$id/icon.png?ver=2";
-
-            $this->templates[$id] = $data;
-        }
+//        foreach (self::$old_default_templates as $id) {
+//
+//            if (isset($this->templates[$id])) {
+//                continue;
+//            }
+//            $file = NEWSLETTER_DIR . '/emails/presets/' . $id . '/preset.json';
+//
+//            $json = file_get_contents($file);
+//            $json = str_replace("{placeholder_base_url}", plugins_url('newsletter') . '/emails/presets', $json);
+//            $data = json_decode($json);
+//            if (!$data) {
+//                continue;
+//            }
+//
+//            $data->id = $id;
+//            $data->dir = NEWSLETTER_DIR . '/emails/presets/' . $id;
+//            $data->icon = Newsletter::plugin_url() . "/emails/presets/$id/icon.png?ver=2";
+//
+//            $this->templates[$id] = $data;
+//        }
 
         return $this->templates;
     }
@@ -477,8 +488,7 @@ class NewsletterComposer {
         $content = str_replace('{blog_title}', html_entity_decode(get_bloginfo('name')), $content);
         $content = str_replace('{blog_description}', get_option('blogdescription'), $content);
 
-        $email->message = TNP_Composer::get_html_open($email) . TNP_Composer::get_main_wrapper_open($email) .
-                $content . TNP_Composer::get_main_wrapper_close($email) . TNP_Composer::get_html_close($email);
+        self::update_email_message($email, $content);
 
         $email->subject = str_replace('{blog_title}', html_entity_decode(get_bloginfo('name')), $email->subject);
 
@@ -506,13 +516,10 @@ class NewsletterComposer {
             if ($wrapper) {
                 echo '<table border="0" cellpadding="0" cellspacing="0" align="center" width="100%" style="border-collapse: collapse; width: 100%;" class="tnpc-row tnpc-row-block" data-id="', esc_attr($block_id), '">';
                 echo '<tr>';
-                echo '<td data-options="" bgcolor="#ffffff" align="center" style="padding: 0; font-family: Helvetica, Arial, sans-serif; mso-line-height-rule: exactly;" class="edit-block">';
+                echo '<td bgcolor="#ffffff" align="center" style="padding: 0; font-family: Helvetica, Arial, sans-serif; mso-line-height-rule: exactly;" class="edit-block">';
             }
-            echo $this->get_outlook_wrapper_open($composer['width']);
 
             echo '<p>Ops, this block type is not avalable.</p>';
-
-            echo $this->get_outlook_wrapper_close();
 
             if ($wrapper) {
                 echo '</td></tr></table>';
@@ -524,6 +531,7 @@ class NewsletterComposer {
             $options = [];
         }
 
+        // Include the defaults.php block file that should define the $defaults array
         $defaults_file = $block['dir'] . '/defaults.php';
         if (file_exists($defaults_file)) {
             include $defaults_file;
@@ -536,10 +544,6 @@ class NewsletterComposer {
         // On block first creation we still do not have the defaults... this is a problem we need to address in a new
         // composer version
         $common_defaults = array(
-            //'block_padding_top' => 0,
-            //'block_padding_bottom' => 0,
-            //'block_padding_right' => 0,
-            //'block_padding_left' => 0,
             'block_background' => '',
             'block_background_2' => '',
             'block_width' => $composer['width'],
@@ -721,14 +725,31 @@ class NewsletterComposer {
      * Filter to enable the "display" attribute on CSS filterred by wp_kses_post_deep used
      * when rendering a block.
      *
+     * Used by render_block() and sanitize_html().
+     *
      * @param array $rules
      * @return string
      */
     static function hook_safe_style_css($rules) {
         $rules[] = 'display';
-        $rules[] = 'mso-padding-alt';
-        $rules[] = 'mso-line-height-rule';
+        $rules[] = 'mso-*';
         return $rules;
+    }
+
+    static function sanitize_html($html) {
+        if (Newsletter::instance()->is_html_allowed()) {
+            return $html;
+        }
+        
+        $html = str_replace([self::OUTLOOK_START_IF, self::OUTLOOK_END_IF], ['###OUTLOOK_START_IF###', '###OUTLOOK_END_IF###'], $html);
+
+        add_filter('safe_style_css', ['NewsletterComposer', 'hook_safe_style_css'], 9999);
+        $html = wp_kses_post($html);
+        remove_filter('safe_style_css', ['NewsletterComposer', 'hook_safe_style_css']);
+
+        $html = str_replace(['###OUTLOOK_START_IF###', '###OUTLOOK_END_IF###'], [self::OUTLOOK_START_IF, self::OUTLOOK_END_IF], $html);
+
+        return $html;
     }
 
     static function get_outlook_wrapper_open($width = 600) {
@@ -796,8 +817,8 @@ class NewsletterComposer {
             return false;
         }
 
-        $email->message = TNP_Composer::get_html_open($email) . TNP_Composer::get_main_wrapper_open($email) .
-                $result['content'] . TNP_Composer::get_main_wrapper_close($email) . TNP_Composer::get_html_close($email);
+        self::update_email_message($email, $result['content']);
+
 
         if ($context['type'] === 'automated') {
             if (!empty($result['subject'])) {
@@ -853,6 +874,7 @@ class NewsletterComposer {
             ob_start();
             $out = $this->render_block($options['block_id'], true, $options, $context, $composer);
             $block_html = ob_get_clean();
+
             if (is_array($out)) {
                 if ($out['return_empty_message'] || $out['stop']) {
                     $this->logger->debug('The block ' . $count . ' stopped the regeneration');
@@ -867,7 +889,7 @@ class NewsletterComposer {
                 }
                 if (empty($result['subject']) && !empty($out['subject'])) {
                     $this->logger->debug('The block suggested the subject: ' . $out['subject']);
-                    $result['subject'] = strip_tags($out['subject']);
+                    $result['subject'] = wp_strip_all_tags($out['subject']);
                 }
             }
 
@@ -877,6 +899,24 @@ class NewsletterComposer {
         $this->logger->debug('Blocks regeneration completed');
 
         return $result;
+    }
+
+    static function extract_body($email) {
+
+        // Deprecated, old messages without a marker
+        if (strpos($email->message, '<!-- tnp -->') === false) {
+            return $email->message;
+        }
+
+        $pattern = sprintf('/%s(.*?)%s/s', '<!-- tnp -->', '<!-- \\/tnp -->');
+
+        $matches = [];
+        preg_match($pattern, $email->message, $matches);
+
+        // Required since esc_html DOES NOT escape the HTML entities (apparently)
+        //$body = str_replace(['&', '"', '<', '>'], ['&amp;', '&quot;', '&lt;', '&gt;'], $matches[1]);
+
+        return $matches[1];
     }
 
     /**
@@ -893,7 +933,7 @@ class NewsletterComposer {
                 $controls->data['options_' . $name] = $value;
             }
 
-            $controls->data['message'] = TNP_Composer::unwrap_email($email->message);
+            $controls->data['message'] = self::extract_body($email);
             $controls->data['subject'] = $email->subject;
             $controls->data['updated'] = $email->updated;
         }
@@ -933,15 +973,101 @@ class NewsletterComposer {
         }
 
         $email->editor = NewsletterEmails::EDITOR_COMPOSER;
-        $message = str_replace([self::OUTLOOK_START_IF, self::OUTLOOK_END_IF], ['###OUTLOOK_START_IF###', '###OUTLOOK_END_IF###'], $controls->data['message']);
 
-        add_filter('safe_style_css', ['NewsletterComposer', 'hook_safe_style_css'], 9999);
-        $message = wp_kses_post($message);
-        remove_filter('safe_style_css', ['NewsletterComposer', 'hook_safe_style_css']);
+        $message = self::sanitize_html($controls->data['message']);
 
-        $message = str_replace(['###OUTLOOK_START_IF###', '###OUTLOOK_END_IF###'], [self::OUTLOOK_START_IF, self::OUTLOOK_END_IF], $message);
+        self::update_email_message($email, $message);
+    }
 
-        $email->message = TNP_Composer::get_html_open($email) . TNP_Composer::get_main_wrapper_open($email) .
-                $message . TNP_Composer::get_main_wrapper_close($email) . TNP_Composer::get_html_close($email);
+    /**
+     * Sources:
+     * - https://webdesign.tutsplus.com/tutorials/creating-a-future-proof-responsive-email-without-media-queries--cms-23919
+     *
+     * @param type $email
+     * @return type
+     */
+    static function get_html_open($email) {
+
+        $css_attrs = [
+            'body_padding_left' => ($email->options['composer_padding'] ?? '0') . 'px',
+            'body_padding_right' => ($email->options['composer_padding'] ?? '0') . 'px',
+            'body_padding_bottom' => ($email->options['composer_padding'] ?? '0') . 'px',
+            'body_padding_top' => ($email->options['composer_padding'] ?? '0') . 'px',
+        ];
+
+        $open = '<!DOCTYPE html>' . "\n";
+        $open .= '<html xmlns="https://www.w3.org/1999/xhtml" xmlns:o="urn:schemas-microsoft-com:office:office">' . "\n";
+        $open .= '<head>' . "\n";
+        $open .= '<title>{email_subject}</title>' . "\n";
+        $open .= '<meta charset="utf-8">' . "\n";
+        $open .= '<meta name="viewport" content="width=device-width, initial-scale=1">' . "\n";
+        $open .= '<meta http-equiv="X-UA-Compatible" content="IE=edge">' . "\n";
+        $open .= '<meta name="format-detection" content="address=no">' . "\n";
+        $open .= '<meta name="format-detection" content="telephone=no">' . "\n";
+        $open .= '<meta name="format-detection" content="email=no">' . "\n";
+        $open .= '<meta name="x-apple-disable-message-reformatting">' . "\n";
+        $open .= '<!--[if gte mso 9]><xml><o:OfficeDocumentSettings><o:AllowPNG/><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml><![endif]-->' . "\n";
+        $open .= '<style type="text/css">' . "\n";
+        $open .= NewsletterComposer::instance()->get_composer_css($css_attrs);
+        $open .= "\n</style>\n";
+        $open .= "</head>\n";
+
+        $open .= '<body style="margin: 0; padding: 0; line-height: normal; word-spacing: normal;" dir="' . (is_rtl() ? 'rtl' : 'ltr') . '">';
+        $open .= "\n";
+
+        $open .= self::get_html_preheader($email);
+
+        return $open;
+    }
+
+    /**
+     *
+     * @param TNP_Email $email
+     * @return string
+     */
+    static function get_main_wrapper_open($email) {
+        if (!isset($email->options['composer_background']) || $email->options['composer_background'] == 'inherit') {
+            $bgcolor = '';
+        } else {
+            $bgcolor = $email->options['composer_background'];
+        }
+
+        return "\n<table cellpadding='0' cellspacing='0' border='0' width='100%' role='presentation'>\n" .
+                "<tr>\n" .
+                "<td bgcolor='$bgcolor' valign='top' class='wrapper'><!-- tnp -->";
+    }
+
+    static private function get_html_preheader($email) {
+
+        if (empty($email->options['preheader'])) {
+            return "";
+        }
+
+        $preheader_text = esc_html($email->options['preheader']);
+        $html = "<div style=\"display:none;font-size:1px;color:#ffffff;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;\">$preheader_text</div>";
+        $html .= "\n";
+
+        return $html;
+    }
+
+    /**
+     *
+     * @param TNP_Email $email
+     * @return string
+     */
+    static function get_main_wrapper_close($email) {
+        return "\n<!-- /tnp -->\n" .
+                "</td>\n" .
+                "</tr>\n" .
+                "</table>\n\n";
+    }
+
+    static function get_html_close($email) {
+        return "</body>\n</html>";
+    }
+
+    static function update_email_message($email, $content) {
+        $email->message = self::get_html_open($email) . self::get_main_wrapper_open($email) .
+                $content . self::get_main_wrapper_close($email) . self::get_html_close($email);
     }
 }

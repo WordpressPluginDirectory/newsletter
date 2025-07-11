@@ -4,7 +4,7 @@
   Plugin Name: Newsletter
   Plugin URI: https://www.thenewsletterplugin.com
   Description: Newsletter is a cool plugin to create your own subscriber list, to send newsletters, to build your business. <strong>Before update give a look to <a href="https://www.thenewsletterplugin.com/category/release">this page</a> to know what's changed.</strong>
-  Version: 8.8.5
+  Version: 8.9.2
   Author: Stefano Lissa & The Newsletter Team
   Author URI: https://www.thenewsletterplugin.com
   Disclaimer: Use at your own risk. No warranty expressed or implied is provided.
@@ -30,7 +30,7 @@
 
  */
 
-define('NEWSLETTER_VERSION', '8.8.5');
+define('NEWSLETTER_VERSION', '8.9.2');
 
 global $wpdb, $newsletter;
 
@@ -59,8 +59,8 @@ if (!defined('NEWSLETTER_SENT_TABLE'))
 if (!defined('NEWSLETTER_LOGS_TABLE'))
     define('NEWSLETTER_LOGS_TABLE', $wpdb->prefix . 'newsletter_logs');
 
-if (!defined('NEWSLETTER_SEND_DELAY'))
-    define('NEWSLETTER_SEND_DELAY', 0);
+//if (!defined('NEWSLETTER_SEND_DELAY'))
+//    define('NEWSLETTER_SEND_DELAY', 0);
 
 if (!defined('NEWSLETTER_USE_POST_GALLERY'))
     define('NEWSLETTER_USE_POST_GALLERY', false);
@@ -91,18 +91,18 @@ if (!defined('NEWSLETTER_FORMS_MAX'))
     define('NEWSLETTER_FORMS_MAX', 10);
 
 spl_autoload_register(function ($class) {
-    static $prefix = 'Newsletter\\';
     static $dir = __DIR__ . '/classes/';
 
-    $len = strlen($prefix);
-    if (strncmp($prefix, $class, $len) !== 0) {
-        return;
-    }
+    if (strncmp('Newsletter', $class, 10) === 0) {
+        $file = $dir . str_replace('\\', '/', $class) . '.php';
 
-    $file = $dir . str_replace('\\', '/', $class) . '.php';
-
-    if (file_exists($file)) {
-        require $file;
+        if (file_exists($file)) {
+//            if (NEWSLETTER_DEBUG) {
+//                $memory = size_format(memory_get_usage(), 1);
+//                error_log($memory . ' - Loading ' . $class);
+//            }
+            require $file;
+        }
     }
 });
 
@@ -112,7 +112,6 @@ require_once NEWSLETTER_INCLUDES_DIR . '/module-base.php';
 require_once NEWSLETTER_INCLUDES_DIR . '/module.php';
 require_once NEWSLETTER_INCLUDES_DIR . '/TNP.php';
 require_once NEWSLETTER_INCLUDES_DIR . '/cron.php';
-require_once NEWSLETTER_INCLUDES_DIR . '/composer-class.php';
 
 class Newsletter extends NewsletterModule {
 
@@ -336,6 +335,10 @@ class Newsletter extends NewsletterModule {
      */
     function setup_language() {
 
+        if (defined('NEWSLETTER_MULTILANGUAGE') && !NEWSLETTER_MULTILANGUAGE) {
+            return;
+        }
+
         self::$is_multilanguage = apply_filters('newsletter_is_multilanguage', class_exists('SitePress') || function_exists('pll_default_language') || class_exists('TRP_Translate_Press'));
 
         if (self::$is_multilanguage) {
@@ -345,6 +348,10 @@ class Newsletter extends NewsletterModule {
     }
 
     static function _get_current_language() {
+
+        if (defined('NEWSLETTER_MULTILANGUAGE') && !NEWSLETTER_MULTILANGUAGE) {
+            return '';
+        }
 
         // WPML
         if (class_exists('SitePress')) {
@@ -532,8 +539,8 @@ class Newsletter extends NewsletterModule {
      * @return int Milliseconds
      */
     function get_send_delay() {
-        if (NEWSLETTER_SEND_DELAY) {
-            return NEWSLETTER_SEND_DELAY;
+        if (defined('NEWSLETTER_SEND_DELAY')) {
+            return (int)NEWSLETTER_SEND_DELAY;
         }
         $max = (float) $this->get_main_option('max_per_second');
         if ($max > 0) {
@@ -543,7 +550,27 @@ class Newsletter extends NewsletterModule {
     }
 
     function skip_this_run($email = null) {
-        return (boolean) apply_filters('newsletter_send_skip', false, $email);
+        $skip = false;
+
+        $schedule = $this->get_main_option('schedule');
+
+        $this->logger->debug('Schedule: ' . $schedule);
+
+        if ($schedule) {
+
+            $hour = gmdate('G') + get_option('gmt_offset');
+            $start = (int) $this->get_main_option('schedule_start');
+            $end = (int) $this->get_main_option('schedule_end');
+            $end--; // Stop at the starting of the hour
+
+            $this->logger->debug('Start: ' . $start);
+            $this->logger->debug('End: ' . $end);
+
+            $skip = $hour < $start || $hour > $end;
+            $this->logger->debug('Skip: ' . ($skip ? 'true' : 'false'));
+        }
+
+        return (bool) apply_filters('newsletter_send_skip', $skip, $email);
     }
 
     function get_runs_per_hour() {
@@ -620,6 +647,8 @@ class Newsletter extends NewsletterModule {
     function send($email, $users = null, $test = false) {
         global $wpdb;
 
+        $options = $this->get_main_options();
+
         if (is_array($email)) {
             $email = (object) $email;
         }
@@ -641,8 +670,10 @@ class Newsletter extends NewsletterModule {
 
         if (!$supplied_users) {
 
+
+
             if ($this->skip_this_run($email)) {
-                $this->logger->info(__METHOD__ . '> Asked to skip this run');
+                $this->logger->info(__METHOD__ . '> Out of the sending time window');
                 return true;
             }
 
@@ -1367,6 +1398,7 @@ class Newsletter extends NewsletterModule {
 $newsletter = Newsletter::instance();
 
 // Frontend modules
+require_once NEWSLETTER_DIR . '/composer/composer.php';
 require_once NEWSLETTER_DIR . '/users/users.php';
 require_once NEWSLETTER_DIR . '/subscription/subscription.php';
 require_once NEWSLETTER_DIR . '/emails/emails.php';

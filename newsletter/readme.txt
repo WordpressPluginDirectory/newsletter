@@ -1,7 +1,7 @@
 === Newsletter - Send awesome emails from WordPress ===
 Tags: newsletter, subscription, email marketing, welcome email, signup forms
 Tested up to: 6.8.1
-Stable tag: 8.8.5
+Stable tag: 8.9.2
 Contributors: satollo,webagile
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -129,9 +129,59 @@ Thank you, The Newsletter Team
 
 == Changelog ==
 
+= 8.9.2 =
+
+* Fixed wrong escape on sender name
+* Fixed notice when NEWSLETTER_SEND_DELAY is set
+* Fixed max emails per seconds option
+* Changed the sending window 
+
+= 8.9.1 =
+
+* Fixed max emails per second to be a decimal number less than 1
+* Fixed subscribers pagination when the database is empty
+* Improved "controls" for post selection
+* Added the NEWSLETTER_MULTILANGUAGE constant: when set to false the multilanguage features are disabled
+* Added the NEWSLETTER_SEND_DELAY constant (see our documentation)
+
+= 8.9.0 =
+
+* Fixed PHP admin warning
+
+= 8.8.9 =
+
+* Fixed the primary button alert
+
+= 8.8.8 =
+
+* Optimized the mailer addon code to be loaded only when needed
+* Added role and aria-level attribute to heading block
+* Style fix on admin panels
+* Fixed some PHP warnings
+
+= 8.8.7 =
+
+* Fixed link to the legacy themes
+
+= 8.8.6 =
+
+* Fixed hero block image alt attribute
+* Fixed the minimal widget
+* Composer code refactoring
+* Fixed composer modals on welcome email
+* Removed the old presets
+* Updated the composer templates
+* Added warning if the confirmation email is missing the correct URL
+* Added sending time window (see main settings)
+* Improved the Help/Delivery page
+* Removed HTML filter for users with unfiltered html capability to avoid custom block breaking
+
 = 8.8.5 =
 
 * Added more content filters to prevent XSS (write us if you have issues on saving options or editing content)
+* Fixed PHP warnings
+* Optimized composer code
+* Limited access to delivery addon to administrators
 
 = 8.8.4 =
 
@@ -140,6 +190,7 @@ Thank you, The Newsletter Team
 = 8.8.3 =
 
 * Fixed the S. Valentine template
+* Changed the main CSS configuration validation
 * Fixed button padding lost when saving a newsletter
 
 = 8.8.2 =
