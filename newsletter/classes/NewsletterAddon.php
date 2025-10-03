@@ -1,7 +1,7 @@
 <?php
 
 /**
- * User by add-ons as base-class.
+ * Base class for addons.
  */
 class NewsletterAddon {
 
@@ -13,6 +13,9 @@ class NewsletterAddon {
     var $labels;
     var $menu_priority = 100;
     var $weekly_check = true;
+    var $menu_title = null;
+    var $menu_slug = null;
+    var $dir = '';
 
     public function __construct($name, $version = '0.0.0', $dir = '') {
         $this->name = $name;
@@ -35,6 +38,7 @@ class NewsletterAddon {
         add_action('newsletter_addon_' . $this->name, [$this, 'weekly_check']);
 
         if ($dir) {
+            $this->dir = $dir;
             register_deactivation_hook($dir . '/' . $this->name . '.php', [$this, 'deactivate']);
         }
     }
@@ -157,6 +161,16 @@ class NewsletterAddon {
     }
 
     /**
+     * Wrapper for cleaner code.
+     *
+     * @param int $id
+     * @return TNP_Email Type specified only for the IDE, it's a stdClass
+     */
+    function get_email($id) {
+        return Newsletter::instance()->get_email($id);
+    }
+
+    /**
      * General logger for this add-on.
      *
      * @return NewsletterLogger
@@ -197,6 +211,12 @@ class NewsletterAddon {
         $this->options = $this->get_option_array('newsletter_' . $this->name, []);
     }
 
+    /**
+     * Returns a WP options granting it is an array.
+     *
+     * @param string $name
+     * @return array
+     */
     function get_option_array($name) {
         $opt = get_option($name, []);
         if (!is_array($opt)) {
@@ -301,6 +321,12 @@ class NewsletterAddon {
         return $r;
     }
 
+    /**
+     * Wrapper for cleaner code.
+     *
+     * @param int|string $id_or_email
+     * @return TNP_User Type specified only for the IDE, it's a stdClass
+     */
     function get_user($id_or_email) {
         return Newsletter::instance()->get_user($id_or_email);
     }
@@ -313,4 +339,3 @@ class NewsletterAddon {
         NewsletterEmailsAdmin::instance()->send_test_email($email, $controls);
     }
 }
-
