@@ -93,7 +93,7 @@ class NewsletterEngine {
         $this->send_setup();
 
         if ($this->max_emails <= 0) {
-            $this->logger->info('No more capacity');
+            $this->logger->error('No more capacity');
             return false;
         }
 
@@ -141,7 +141,7 @@ class NewsletterEngine {
         $mailer = Newsletter::instance()->get_mailer();
 
         $batch_size = $mailer->get_batch_size();
-        if (NEWSLETTER_DEBUG) $batch_size = 2;
+        //if (NEWSLETTER_DEBUG) $batch_size = 2;
 
         $this->logger->debug('Batch size ' . $batch_size);
 
@@ -159,9 +159,7 @@ class NewsletterEngine {
 
         $this->logger->debug(count($chunks) . ' chunks to process');
 
-
         foreach ($chunks as $index=>$chunk) {
-
 
             $this->logger->debug('Processing chunk #' . $index);
 
@@ -214,16 +212,17 @@ class NewsletterEngine {
             }
 
             if (!$supplied_users && !$test && $this->time_exceeded()) {
+                $this->logger->error('Time excedeed');
                 $result = false;
                 break;
             }
 
             if ($delay) {
-                usleep($delay * 1000);
+                usleep($delay * 1000 * count($messages));
             }
 
             unset($messages);
-            gc_collect_cycles();
+            //gc_collect_cycles();
         }
 
         $end_time = microtime(true);
@@ -387,7 +386,7 @@ class NewsletterEngine {
         if (empty($email->id)) {
             $email->id = '0'; // As string, it's ok, compatible with WP query results
         }
-        $email->options = maybe_unserialize($email->options);
+        $email->options = maybe_unserialize($email->options ?? []);
     }
 
     function skip_run($email = null) {
@@ -402,6 +401,8 @@ class NewsletterEngine {
             $hour = gmdate('G') + get_option('gmt_offset');
             $start = (int) $this->options['schedule_start'];
             $end = (int) $this->options['schedule_end'];
+            // When the end is seto to 00:00, $end becomes -1 and the current hour is always greater than the end so the
+            // end time does not applies as it must be (send without limits for all the day)
             $end--; // Stop at the starting of the hour
 
             $this->logger->debug('Start: ' . $start);
