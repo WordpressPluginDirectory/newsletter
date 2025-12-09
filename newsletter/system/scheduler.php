@@ -150,6 +150,9 @@ if (isset($_GET['debug']) || !defined('Crontrol\WP_CRONTROL_VERSION')) {
                                         case NewsletterSystemAdmin::JOB_SKIPPED:
                                             echo 'The job has been skipped! The scheduler is overloaded or a job has fatal error and blocks the scheduler: <a target="blank" href="https://www.thenewsletterplugin.com/documentation/troubleshooting/newsletter-delivery-engine/#job-skipped">external scheduler trigger</a>.';
                                             break;
+                                        case NewsletterSystemAdmin::JOB_FAR_FUTURE:
+                                            echo 'The job is planned too far into the future. Someone/something changed it! <a target="blank" href="https://www.thenewsletterplugin.com/documentation/troubleshooting/newsletter-delivery-engine/#job-far-future">Read here to fix</a>.';
+                                            break;
                                         case NewsletterSystemAdmin::JOB_OK:
                                             echo 'Everything seems fine!';
                                             break;
