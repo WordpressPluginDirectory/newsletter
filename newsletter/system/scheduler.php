@@ -1,8 +1,8 @@
 <?php
 /** @var NewsletterSystemAdmin $this */
 /** @var NewsletterControls $controls */
-/** @var wpfb $wpdb */
 
+/** @var wpfb $wpdb */
 use Newsletter\License;
 
 defined('ABSPATH') || exit;
@@ -283,7 +283,11 @@ if (isset($_GET['debug']) || !defined('Crontrol\WP_CRONTROL_VERSION')) {
                                                 if ($key == 'newsletter') {
                                                     echo '<li style="padding: 0; margin: 0; font-weight: bold">', esc_html($key . ' - ' . $data['interval']), ' seconds</li>';
                                                 } else {
-                                                    echo '<li style="padding: 0; margin: 0;">', esc_html($key . ' - ' . $data['interval']), ' seconds</li>';
+                                                    if (!is_numeric($data['interval'])) {
+                                                        echo '<li style="padding: 0; margin: 0; font-weight: bold; color: red;">', esc_html($key . ' - ' . $data['interval']), ' seconds (the interval is not a number!)</li>';
+                                                    } else {
+                                                        echo '<li style="padding: 0; margin: 0;">', esc_html($key . ' - ' . $data['interval']), ' seconds</li>';
+                                                    }
                                                 }
                                             }
                                         }
@@ -311,7 +315,7 @@ if (isset($_GET['debug']) || !defined('Crontrol\WP_CRONTROL_VERSION')) {
                                     WordPress scheduler auto trigger
                                 </td>
                                 <td class="status">
-                                    <?php //$this->condition_flag($condition)     ?>
+                                    <?php //$this->condition_flag($condition)      ?>
                                 </td>
                                 <td>
                                     <?php $controls->button_test() ?>
@@ -433,7 +437,7 @@ if (isset($_GET['debug']) || !defined('Crontrol\WP_CRONTROL_VERSION')) {
                             <tr>
                                 <td>Transient <code>doing_cron</code></td>
                                 <td class="status">
-                                    <?php //$this->condition_flag($condition)    ?>
+                                    <?php //$this->condition_flag($condition)     ?>
                                 </td>
                                 <td>
                                     <?php if ($transient) { ?>

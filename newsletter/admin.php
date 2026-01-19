@@ -46,6 +46,7 @@ class NewsletterAdmin extends NewsletterModuleAdmin {
             if (!$time) {
                 wp_schedule_event(time() + 30, 'newsletter', 'newsletter');
             } elseif ($time > time() + NEWSLETTER_CRON_INTERVAL * 2) {
+                // Someone played with the cron scheduling the event in the far future...
                 wp_clear_scheduled_hook('newsletter');
                 wp_schedule_event(time() + 30, 'newsletter', 'newsletter');
             }
