@@ -1,7 +1,7 @@
 === Newsletter - Send awesome emails from WordPress ===
 Tags: newsletter, subscription, email marketing, welcome email, signup forms
 Tested up to: 6.9.1
-Stable tag: 9.1.7
+Stable tag: 9.2.2
 Contributors: satollo,webagile
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -117,6 +117,8 @@ Each integration is provided with bounces and complaints management, and an effi
 * SendPulse (free)
 * SMTP.com (free)
 * Brevo (free)
+* MailerSend
+* Resend.com
 
 = Integration with Event Managers =
 
@@ -178,6 +180,33 @@ Thank you, The Newsletter Team
 
 == Changelog ==
 
+= 9.2.2 =
+
+* Added the NEWSLETTER_REAL_CRON_INTERVAL to avoid wrong custom values of NEWSLETTER_CRON_INTERVAL
+* Limited the cron interval custom setting between 60 and 900 seconds
+* Fixed template preview
+* Fixed possible multiple admin subscription notifications
+
+= 9.2.1 =
+
+* Fixed pid warning
+
+= 9.2.0 =
+
+* Fixed delay between email preset
+* Added PID on logs
+* Fixed Composer for 1 px height separator block
+* Fixed some button layouts with WP 7
+
+= 9.1.9 =
+
+* Fixed the reactivate configuration not saving
+* Added check on max value for email delay
+
+= 9.1.8 =
+
+* Fixed button background on new newsletters
+
 = 9.1.7 =
 
 * Removed a debug log ending on the php error log
@@ -192,7 +221,7 @@ Thank you, The Newsletter Team
 = 9.1.5 =
 
 * Fixed image "alt" attribute on composer
-* Fixed antibot erro with strict_type active
+* Fixed antibot error with strict_type active
 * Improved error diagnosis when an SMTP plugin is installed
 * Fixed defect in the composer (version 3) leaving empty div in the source
 
@@ -215,7 +244,7 @@ Thank you, The Newsletter Team
 
 = 9.1.1 =
 
-* Fixed buttons' width on composer blocks
+* Fixed buttons width on composer blocks
 * Added a check on registered schedules to show possible wrong interval settings
 * Fixed vulnerability (CVE-2026-1051)
 
