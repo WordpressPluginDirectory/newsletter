@@ -668,6 +668,8 @@ class NewsletterComposer extends NewsletterModule {
             $background_style .= 'background: linear-gradient(' . $angle . 'deg, ' . $block_background . ' 0%, ' . $options['block_background_2'] . '  100%);';
         }
 
+        $block_class = $options['block_class'] ?? '';
+
         $data = $this->options_encode($options);
         // First time block creation wrapper
         if ($wrapper) {
@@ -695,7 +697,7 @@ class NewsletterComposer extends NewsletterModule {
 
         echo "<tr>";
         //echo '<td align="', esc_attr($options['block_align']), '" style="', esc_attr($style), '" bgcolor="', esc_attr($block_background), '" width="100%">';
-        echo '<td align="', esc_attr($options['block_align']), '" style="', esc_attr($style), '" bgcolor="', esc_attr($block_background), '">';
+        echo '<td align="', esc_attr($options['block_align']), '" style="', esc_attr($style), '" bgcolor="', esc_attr($block_background), '" class="', esc_attr($block_class), '">';
 
         //echo "<!-- block generated content -->\n";
         echo trim($content);
@@ -940,13 +942,13 @@ class NewsletterComposer extends NewsletterModule {
         if (!empty($email->options['sender_email'])) {
             $controls->data['sender_email'] = $email->options['sender_email'];
         } else {
-            $controls->data['sender_email'] = Newsletter::instance()->get_sender_email();
+            $controls->data['sender_email'] = '';
         }
 
         if (!empty($email->options['sender_name'])) {
             $controls->data['sender_name'] = $email->options['sender_name'];
         } else {
-            $controls->data['sender_name'] = Newsletter::instance()->get_sender_name();
+            $controls->data['sender_name'] = '';
         }
 
         $controls->data = array_merge(TNP_Composer::get_global_style_defaults(), $controls->data);
