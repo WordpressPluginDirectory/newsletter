@@ -49,6 +49,10 @@ class NewsletterModuleBase {
         return self::$is_multilanguage;
     }
 
+    function is_ai_enabled() {
+        return true;
+    }
+
     static function plugin_url() {
         return self::$plugin_url;
     }
@@ -79,16 +83,21 @@ class NewsletterModuleBase {
     static function get_locale($language) {
         if (function_exists('pll_languages_list')) { // Polylang
             $languages = pll_languages_list(['fields' => '']);
-            foreach ($languages as $data) {
-                if ($data->slug === self::$language) {
-                    return $data->locale;
+            if ($languages && is_array($languages)) {
+                foreach ($languages as $data) {
+                    if ($data->slug === self::$language) {
+                        return $data->locale;
+                    }
                 }
             }
         } else if (class_exists('SitePress')) { // WPML
             $languages = apply_filters('wpml_active_languages', null, ['skip_missing' => 0]);
-            foreach ($languages as $code => $data) {
-                if ($code === self::$language) {
-                    return $data['default_locale'];
+            // A user reported this filter returning a nulla value (!?)
+            if ($languages && is_array($languages)) {
+                foreach ($languages as $code => $data) {
+                    if ($code === self::$language) {
+                        return $data['default_locale'];
+                    }
                 }
             }
         }
@@ -533,6 +542,14 @@ class NewsletterModuleBase {
         $user->token = $token;
     }
 
+    function set_email_status($email, $status) {
+        global $wpdb;
+
+        $this->logger->debug('Status change to ' . $status . ' of email ' . $email->id . ' from ' . $_SERVER['REQUEST_URI']);
+
+        $this->query($wpdb->prepare("update " . NEWSLETTER_EMAILS_TABLE . " set status=%s where id=%d limit 1", $status, $email->id));
+    }
+
     /**
      * @param string $language The language for the list labels (it does not affect the lists returned)
      * @return TNP_List[]
@@ -867,7 +884,7 @@ class NewsletterModuleBase {
         $posts = new WP_Query($filters);
 
         if ($language) {
-                do_action('wpml_switch_language', Newsletter::$language);
+            do_action('wpml_switch_language', Newsletter::$language);
         }
 
         return $posts;
@@ -944,15 +961,13 @@ class NewsletterModuleBase {
     }
 
     function get_action_base_url() {
-        if (NEWSLETTER_ACTION_TYPE === 'ajax') {
-            return admin_url('admin-ajax.php') . '?action=tnp';
+
+        // TODO: manage the "rest" option when implemented
+        $type = Newsletter::instance()->get_main_option('links');
+        if (empty($type)) {
+            return $this->get_home_url();
         } else {
-            $type = Newsletter::instance()->get_main_option('links');
-            if (empty($type)) {
-                return $this->get_home_url();
-            } else {
-                return admin_url('admin-ajax.php') . '?action=tnp';
-            }
+            return admin_url('admin-ajax.php') . '?action=tnp';
         }
     }
 

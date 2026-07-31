@@ -2557,17 +2557,27 @@ html {
     display: inline;
 }
 
+#tnp-body .tnpf-field button {
+    min-height: 32px;
+    height: 32px;
+}
+
 #tnp-body .tnpf-field select {
     padding-right: 25px;
 }
 
 #tnp-body .tnpf-field input[type=checkbox] {
     /*min-height: auto;*/
-    height: 16px;
-    width: 16px;
+    height: 16px !important;
+    width: 16px !important;
     /*max-height: auto;*/
-    padding-left: 0;
-    padding-right: 0;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    -webkit-appearance: checkbox !important;
+    margin: 0 5px 0 0 !important;
+    border: var(--tnp-input-border);
+    line-height: normal !important;
+    font-family: var(--tnp-font-family);
 }
 
 /* Color picker button */

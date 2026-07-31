@@ -1,7 +1,7 @@
 === Newsletter - Send awesome emails from WordPress ===
 Tags: newsletter, subscription, email marketing, welcome email, signup forms
 Tested up to: 7.0
-Stable tag: 9.2.6
+Stable tag: 9.3.2
 Contributors: satollo,webagile
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -179,6 +179,35 @@ Thank you, The Newsletter Team
 3. The Reports addon
 
 == Changelog ==
+
+= 9.3.2 =
+
+* Changed the sending allowed hours on main settings
+* Removed the obsolete send_skip filter
+
+= 9.3.1 =
+
+* Fixed warning with WPML and the active languages filter returning a null value
+* Added the autorecovery delay options on the main settings
+
+= 9.3.0 =
+
+* Added new link tracking method (see the main Settings)
+* Added stats reset button for draft newsletters
+* Removed the obsolete constant NEWSLETTER_ACTION_TYPE
+* Removed the obsolete constant NEWSLETTER_TRACKING_TYPE
+
+= 9.2.9 =
+
+* Integrated the AI feature of the AI addon (now using the WP connectors)
+
+= 9.2.8 =
+
+* Added autorecovery after a fatal error of the external delivery service
+
+= 9.2.7 =
+
+* Fixed checkbox appearance on block settings with WP 7
 
 = 9.2.6 =
 

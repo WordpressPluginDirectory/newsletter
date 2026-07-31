@@ -4,8 +4,8 @@
   Plugin Name: Newsletter
   Plugin URI: https://www.thenewsletterplugin.com
   Description: Newsletter is a cool plugin to create your own subscriber list, to send newsletters, to build your business. <strong>Before update give a look to <a href="https://www.thenewsletterplugin.com/category/release">this page</a> to know what's changed.</strong>
-  Version: 9.2.6
-  Author: Stefano Lissa & The Newsletter Team
+  Version: 9.3.2
+  Author: The Newsletter Team
   Author URI: https://www.thenewsletterplugin.com
   Disclaimer: Use at your own risk. No warranty expressed or implied is provided.
   Text Domain: newsletter
@@ -30,7 +30,7 @@
 
  */
 
-define('NEWSLETTER_VERSION', '9.2.6');
+define('NEWSLETTER_VERSION', '9.3.2');
 
 global $wpdb, $newsletter;
 
@@ -151,6 +151,8 @@ class Newsletter extends NewsletterModule {
 
         add_action('newsletter', [$this, 'hook_newsletter'], 1);
 
+        add_action('newsletter_send_error_recover', [$this, 'hook_newsletter_send_error_recover']);
+
         add_action('wp_ajax_tnp', [$this, 'ajax_action']);
         add_action('wp_ajax_nopriv_tnp', [$this, 'ajax_action']);
 
@@ -174,6 +176,20 @@ class Newsletter extends NewsletterModule {
         register_deactivation_hook(__FILE__, [$this, 'hook_deactivate']);
     }
 
+    function hook_newsletter_send_error_recover($id = null) {
+        $email = $this->get_email($id);
+        if (!$email) {
+            return;
+        }
+
+        if ($email->status !== TNP_Email::STATUS_ERROR) {
+            return;
+        }
+
+        $this->set_email_status($email, TNP_Email::STATUS_SENDING);
+        Newsletter\Logs::add('newsletter-' . $email->id, 'Auto recovery from error');
+    }
+
     /**
      * Action request via AJAX.
      */
@@ -193,7 +209,8 @@ class Newsletter extends NewsletterModule {
         // Used to load dependant modules
         do_action('newsletter_loaded', NEWSLETTER_VERSION);
 
-        $this->setup_language();
+        // WPML is not ready here
+        //$this->setup_language();
 
         if (function_exists('load_plugin_textdomain')) {
             load_plugin_textdomain('newsletter', false, plugin_basename(__DIR__) . '/languages');
