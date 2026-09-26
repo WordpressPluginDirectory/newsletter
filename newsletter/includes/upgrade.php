@@ -40,7 +40,7 @@ class NewsletterUpgrade {
     function run() {
         global $wpdb, $charset_collate;
 
-        $this->logger->info('Start upgrade from ' . $this->old_version);
+        $this->logger->info('Start upgrade from ' . $this->old_version . ' to ' . NEWSLETTER_VERSION);
 
         require_once NEWSLETTER_DIR . '/admin.php';
         // @phpstan-ignore-next-line
@@ -76,12 +76,14 @@ class NewsletterUpgrade {
             `message_text` longtext,
             `preferences` longtext,
             `send_on` int(11) NOT NULL DEFAULT '0',
-            `token` varchar(10) NOT NULL DEFAULT '',
+            `token` varchar(32) NOT NULL DEFAULT '',
             `options` longtext,
             `private` tinyint(1) NOT NULL DEFAULT '0',
             `click_count` int(10) unsigned NOT NULL DEFAULT '0',
+            `anon_click_count` int(10) unsigned NOT NULL DEFAULT '0',
             `version` varchar(10) NOT NULL DEFAULT '',
             `open_count` int(10) unsigned NOT NULL DEFAULT '0',
+            `anon_open_count` int(10) unsigned NOT NULL DEFAULT '0',
             `unsub_count` int(10) unsigned NOT NULL DEFAULT '0',
             `error_count` int(10) unsigned NOT NULL DEFAULT '0',
             `stats_time` int(10) unsigned NOT NULL DEFAULT '0',
@@ -122,6 +124,7 @@ class NewsletterUpgrade {
             `last_activity` int(11) NOT NULL DEFAULT '0',
             `surname` varchar(100) NOT NULL DEFAULT '',
             `sex` char(1) NOT NULL DEFAULT 'n',
+            `track` int(11) NOT NULL DEFAULT '1',
             `feed_time` bigint(20) NOT NULL DEFAULT '0',
             `feed` tinyint(4) NOT NULL DEFAULT '0',
             `referrer` varchar(50) NOT NULL DEFAULT '',
@@ -148,9 +151,13 @@ class NewsletterUpgrade {
 
 // Leave as last
         $sql .= "`test` tinyint(4) NOT NULL DEFAULT '0',\n";
-        $sql .= "PRIMARY KEY (`id`),\nUNIQUE KEY `email` (`email`),\nKEY `wp_user_id` (`wp_user_id`)\n) $charset_collate;";
+        $sql .= "PRIMARY KEY (`id`),\nKEY `emailidx` (`email`),\nKEY `wp_user_id` (`wp_user_id`)\n) $charset_collate;";
 
         $this->db_delta($sql);
+
+        // Old unique index
+        $this->upgrade_query("DROP INDEX email ON " . NEWSLETTER_USERS_TABLE);
+
 
         $sql = "CREATE TABLE `" . $wpdb->prefix . "newsletter_user_logs` (
             `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -185,18 +192,20 @@ class NewsletterUpgrade {
             `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
             `url` varchar(255) NOT NULL DEFAULT '',
             `user_id` int(11) NOT NULL DEFAULT '0',
-            `email_id` varchar(10) NOT NULL DEFAULT '0',
+            `email_id` int(11) NOT NULL DEFAULT '0',
+            `message_id` int(11) NOT NULL DEFAULT '0',
             `ip` varchar(100) NOT NULL DEFAULT '',
             PRIMARY KEY (`id`),
             KEY `email_id` (`email_id`),
-            KEY `user_id` (`user_id`)
+            KEY `user_id` (`user_id`),
+            KEY `message_id` (`message_id`)
             ) $charset_collate;";
 
         $this->db_delta($sql);
 
         $sql = "CREATE TABLE `" . $wpdb->prefix . "newsletter_logs` (
             `id` int(11) NOT NULL AUTO_INCREMENT,
-            `status` int NOT NULL DEFAULT 0,
+            `status` int(11) NOT NULL DEFAULT 0,
             `source` varchar(100) NOT NULL DEFAULT '',
             `description` varchar(255) NOT NULL DEFAULT '',
             `data` longtext,
@@ -249,10 +258,24 @@ class NewsletterUpgrade {
             update_option('newsletter_backup_' . $this->old_version, $backup, false);
         }
 
+        // New user token management
+        $new_token_time = (int)get_option('newsletter_new_token_time', 0);
+        if (!$new_token_time) {
+            update_option('newsletter_new_token_time', time(), false);
+        }
+
         $opt = $this->get_option_array('newsletter_statistics');
         if (empty($opt['key'])) {
-            $opt['key'] = md5(__DIR__ . rand(100000, 999999) . time());
+            $opt['key'] = wp_generate_password(32, false, false);
+            $opt['key_time'] = 0;
             update_option('newsletter_statistics', $opt, false);
+        } else {
+            if (!isset($opt['key_time'])) {
+                $opt['old_key'] = $opt['key'];
+                $opt['key_time'] = time();
+                $opt['key'] = wp_generate_password(32, false, false);
+                update_option('newsletter_statistics', $opt, false);
+            }
         }
 
         if ($this->old_version < '8.0.8') {

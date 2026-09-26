@@ -1,7 +1,7 @@
 === Newsletter - Send awesome emails from WordPress ===
 Tags: newsletter, subscription, email marketing, welcome email, signup forms
-Tested up to: 7.0
-Stable tag: 9.3.4
+Tested up to: 7.1
+Stable tag: 9.4.3
 Contributors: satollo,webagile
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -23,6 +23,7 @@ The newsletter plugin is a **real newsletter and email marketing system** for yo
 * **Detailed statistics**
 * **WordPress user registration integration** (with free addon)
 * **Subscription spam check** with domain black list, Akismet, captcha, ...
+* **Tracking consent** management for countries requiring it (France, Italy, ...)
 
 = Creating and sending newsletters =
 
@@ -180,9 +181,56 @@ Thank you, The Newsletter Team
 
 == Changelog ==
 
+= 9.4.3 =
+
+* Fixed invalid links on some installations (link from emails to external domains could remain affected)
+
+= 9.4.1 =
+
+* Fixed the new newsletter saving
+
+= 9.4.0 =
+
+* Added new compatibility code for WPML 5
+* Increased timeoout for license checking
+* Tracking and action links refactored
+* Fixed vulnerability with disclosure of the secret subscriber token (refactored)
+* Fixed vulnerability with invalid email
+* Added expire time to action links
+
+= 9.3.9 =
+
+* Fixed vulnerability when spam reason message is shown (reported by Yuto Hyakumoto)
+
+= 9.3.8 =
+
+* Changed the statistics signature key for improved security
+* Note: links NOT to the site where the plugin is installed, on newsletters already sent and older than 1 month won't work anymore
+
+= 9.3.7 =
+
+* Better signature key for tracking link (reported by Karthik Ramakrishnan)
+* Added panel to change the tracking key if needed (see Settings/Statistics)
+* Fixed open redirect issue (reported by Artus KG)
+* The "confirm_url" custom form parameter or the "ncu" form value can no more be used to redirect to external sites
+* Fixed the required tracking checkbox
+
+= 9.3.6 =
+
+* Added tracking consent management on open tracking pixel and click tracking links
+* Added tracking checkbox on subscription
+* Added tracking consent checkbox on profile page
+* Added tracking consent value on user logs
+* Added anonymous tracking
+
+= 9.3.5 =
+
+* Fixed PHP warning
+
 = 9.3.4 =
 
 * Patched XSS vulnerability (Patchstack)
+* Improved DB query error management
 
 = 9.3.3 =
 

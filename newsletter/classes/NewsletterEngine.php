@@ -169,7 +169,9 @@ class NewsletterEngine {
 
         foreach ($chunks as $index => $chunk) {
 
-            $this->update_lock();
+            if (!$supplied_users) {
+                $this->update_lock();
+            }
 
             $this->logger->debug('Processing chunk #' . $index);
 
@@ -216,6 +218,11 @@ class NewsletterEngine {
                     $this->save_sent_message($message);
                 }
             }
+
+
+//            if (NEWSLETTER_DEBUG) {
+//                $r = new WP_Error(NewsletterMailer::ERROR_FATAL, 'test fatal error');
+//            }
 
             // The batch went in error
             if (is_wp_error($r)) {
@@ -309,6 +316,10 @@ class NewsletterEngine {
             'X-Auto-Response-Suppress' => 'OOF, AutoReply'
         ];
 
+        if (NEWSLETTER_DEBUG) {
+            $message->headers['X-Newsletter-Message-Id'] = (string) $message->id;
+        }
+
         $message->headers = apply_filters('newsletter_message_headers', $message->headers, $email, $user);
 
         $message->body = Newsletter::instance()->replace_for_email($email->message, $user, $email);
@@ -317,8 +328,8 @@ class NewsletterEngine {
         $message->body_text = Newsletter::instance()->replace($email->message_text, $user, $email);
         $message->body_text = apply_filters('newsletter_message_text', $message->body_text, $email, $user);
 
-        if ($email->track == 1) {
-            $message->body = NewsletterStatistics::instance()->relink($message->body, $email->id, $user->id, $email->token);
+        if ($email->track) {
+            $message->body = NewsletterStatistics::instance()->relink($message->body, $email, $user, $message);
         }
 
         if (empty($email->subject)) {
@@ -423,7 +434,7 @@ class NewsletterEngine {
 
         $schedule = (int) $this->options['schedule'];
 
-        $this->logger->debug('Global schedule: ' . ($schedule ? 'yes' : 'no'));
+        $this->logger->debug('Global schedule active: ' . ($schedule ? 'yes' : 'no'));
 
         if ($schedule) {
             $hours = $this->options['schedule_hours'] ?? [];

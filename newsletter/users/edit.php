@@ -174,6 +174,14 @@ function percentValue($value, $total) {
                             </td>
                         </tr>
                         <tr>
+                            <th><?php esc_html_e('Tracking', 'newsletter'); ?></th>
+                            <td>
+                                <?php $controls->select('track', ['0'=> 'Disabled', '1'=> 'Enabled']); ?>
+
+                                <div class="description">EU specific settings</div>
+                            </td>
+                        </tr>
+                        <tr>
                             <th><?php esc_html_e('Language', 'newsletter'); ?></th>
                             <td>
                                 <?php $controls->language('language', __('None', 'newsletter')); ?>
@@ -295,6 +303,18 @@ function percentValue($value, $total) {
                             <th><?php esc_html_e('Secret token', 'newsletter'); ?></th>
                             <td>
                                 <?php $controls->text('token', 50); ?>
+                                <span class="description">
+                                    If changed, action links on sent newsletter won't work abnyore.
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Old token</th>
+                            <td>
+                                <?php echo esc_html($this->get_user_meta($user->id, 'old_token')); ?>
+                                <span class="description">
+                                    Will be removed as December 1, 2026.
+                                </span>
                             </td>
                         </tr>
                         <tr>
@@ -319,7 +339,7 @@ function percentValue($value, $total) {
                         <tr>
                             <th><?php esc_html_e('Resubscribe URL', 'newsletter'); ?></th>
                             <td>
-                                <?php $resubscribe_url = NewsletterUnsubscription::instance()->get_reactivate_url($user) ?>
+                                <?php $resubscribe_url = NewsletterUnsubscription::instance()->get_resubscribe_url($user) ?>
                                 <a href='<?php echo esc_attr($resubscribe_url) ?>' target="_blank"><?php echo esc_html($resubscribe_url) ?></a>
                             </td>
                         </tr>
